@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
-import fire from './fire';
+import fire from '../fire';
+import Chat from './Chat';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { messages: [] }; // <- set up react state
+    this.state = { 
+      messages: [],
+      username: 'anonymous monkey',
+    }; // <- set up react state
   }
 
   componentWillMount() {
@@ -20,23 +24,26 @@ class App extends Component {
 
   addMessage(e) {
     e.preventDefault(); // <- prevent form submit from reloading the page
-    /* Send the message to Firebase */
-    fire.database().ref('messages').push( this.inputEl.value );
-    this.inputEl.value = ''; // <- clear the input
+    fire.database().ref('messages').push({
+      username: this.state.username,
+      message: this.inputMessage.value
+    });
+    this.inputMessage.value = '';
+  }
+
+  changeUsername(e) {
+    e.preventDefault();
+    this.setState({ username: this.inputUsername.value });
+    this.inputUsername.placeholder = this.inputUsername.value;
+    this.inputUsername.value = '';
   }
 
   render() {
+    console.log(this.state.messages);
     return (
-      <form onSubmit={this.addMessage.bind(this)}>
-        <input type="text" ref={ el => this.inputEl = el }/>
-        <input type="submit"/>
-        List of messages
-        <ul>
-          { /* Render the list of messages */
-            this.state.messages.map( message => <li key={message.id}>{message.text}</li> )
-          }
-        </ul>
-      </form>
+      <div>
+        <Chat />
+      </div>
     );
   }
 }
