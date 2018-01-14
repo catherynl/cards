@@ -66,13 +66,16 @@ class Game extends Component {
         { 'Game id: ' + this.props.gameId }
         <ul>
           {
-            range(this.getNumPlayers()).map(
-              ind =>
-                <li key={ ind }>
-                  {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-                  <br />
-                  { gameState.hands ? <Hand cards={ gameState.hands[ind] }/> : null }
-                </li>
+            range(this.getNumPlayers()).map(ind =>
+              <li key={ ind }>
+                {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+                <br />
+                { gameState.hands
+                  ? <Hand
+                    cards={ gameState.hands[ind] }
+                    visible={ ind === this.props.playerIndex }/>
+                  : null }
+              </li>
             )
           }
         </ul>

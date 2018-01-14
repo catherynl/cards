@@ -19,14 +19,29 @@ const rankToSymbol = {
 class Card extends Component {
 
   constructor(props) {
-    super(props); // card: { suit, rank }
+    super(props); // card: { suit, rank}, visible
   }
 
-  render() {
+  renderVisibleCard() {
     const { card } = this.props;
     return (
       <div>
         { card.suit } { rankToSymbol[card.rank] }
+      </div>
+    );
+  }
+
+  renderHiddenCard() {
+    return (<div>Hidden</div>)
+  }
+
+  render() {
+    return (
+      <div>
+        { this.props.visible
+          ? this.renderVisibleCard()
+          : this.renderHiddenCard()
+        }
       </div>
     );
   }
