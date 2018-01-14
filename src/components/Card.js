@@ -26,7 +26,10 @@ class Card extends Component {
     const { card } = this.props;
     return (
       <div>
-        { card.suit } { rankToSymbol[card.rank] } { '(' + this.props.keyBinding + ')' } { this.props.selected ? 'selected!' : null }
+        { card.suit } &nbsp;
+        { rankToSymbol[card.rank] } &nbsp;
+        { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null } &nbsp;
+        { this.props.selected ? 'selected!' : null }
       </div>
     );
   }

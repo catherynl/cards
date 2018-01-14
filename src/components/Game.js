@@ -13,6 +13,7 @@ class Game extends Component {
         hands: [],
         players: [],
         recentlyPlayed: [] },
+      cardsSelected: [],  // booleans, one for each card in this player's hand
       minPlayers: 10000  // really big number
     };
   }
@@ -45,6 +46,12 @@ class Game extends Component {
     this.setState({ minPlayers: gameTypeSnapshot.val().minPlayers });
   }
 
+  onCardSelected(cardIndex) {
+    let { cardsSelected } = this.state;
+    cardsSelected[cardIndex] = !(cardsSelected[cardIndex]);
+    this.setState({ cardsSelected });
+  }
+
   shouldShowStartGameButton() {
     const minPlayersReached = (this._getNumPlayers() >= this.state.minPlayers);
     return minPlayersReached && !this.state.gameState.started;
@@ -70,15 +77,23 @@ class Game extends Component {
   startGameClicked() {
     const deck = new Deck();
     const hands = deck.deal(this._getNumPlayers());
+    const numCardsInMyHand = hands[this.props.playerIndex].length;
+    this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
   playCardsClicked() {
-    const hands = this.state.gameState.hands;
-    const indexSelected = Math.floor(Math.random() * hands[this.props.playerIndex].length);
-    const cardsSelected = hands[this.props.playerIndex].splice(indexSelected, 1);
+    const myHand = this.state.gameState.hands[this.props.playerIndex];
+    const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+    if (cardsSelected.length === 0) {
+      window.alert('must select at least one card to play.');
+      return;
+    }
     fire.database().ref(this._getFirePrefix() + '/recentlyPlayed/' + this.props.playerIndex).set(cardsSelected);
+    const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
+    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
+    fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex).set(remainingHand);
     const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
     fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
@@ -95,6 +110,27 @@ class Game extends Component {
         <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
       </div>
     );
+  }
+
+  renderPlayersHand(playerInd) {
+    const { gameState } = this.state;
+    if (playerInd === this.props.playerIndex) {
+      return (
+        <Hand
+          cards={ gameState.hands[playerInd] ? gameState.hands[playerInd] : [] }
+          isYours={ true }
+          visible={ true }
+          onSelect={ this.onCardSelected.bind(this) }
+          cardsSelected={ this.state.cardsSelected }
+        />);
+    } else {
+      return (
+        <Hand
+          cards={ gameState.hands[playerInd] ? gameState.hands[playerInd] : [] }
+          isYours={ false }
+          visible={ false }
+        />);
+    }
   }
 
   renderPlayersTurn() {
@@ -121,12 +157,7 @@ class Game extends Component {
               {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
               { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
               <br />
-              { gameState.hands
-                ? <Hand
-                  cards={ gameState.hands[ind] }
-                  isYours={ ind === this.props.playerIndex }
-                  visible={ ind === this.props.playerIndex } />
-                : null }
+              { gameState.hands ? this.renderPlayersHand(ind) : null }
               <br />Recently played<br />
               { gameState.recentlyPlayed[ind]
                 ? <Hand

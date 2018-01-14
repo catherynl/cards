@@ -14,9 +14,6 @@ class App extends Component {
     };
   }
 
-  componentWillMount() {
-  }
-
   changeUsername(e) {
     e.preventDefault();
     this.setState({ username: this.inputUsername.value });

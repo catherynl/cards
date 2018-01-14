@@ -10,34 +10,40 @@ const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's'
 class Hand extends Component {
 
   constructor(props) {
-    super(props); // cards [], isYours (boolean), visible (boolean)
-    this.state = {
-      cardsSelected: Array(this.props.cards.length).fill(false)
-    };
+    super(props); // cards [], cardsSelected, isYours (boolean), visible (boolean), onSelect (callback that takes cardIndex)
   }
 
-  _getKeyBinding(card_index) {
-    return KEYS[card_index];
+  _getKeyBinding(cardIndex) {
+    return KEYS[cardIndex];
   }
 
-  componentWillReceiveProps(newProps) {
-    const newLength = newProps.cards.length;
-    const oldLength = this.state.cardsSelected.length;
-    if (newLength !== oldLength) {
-      const cardsSelected = newLength > oldLength ?
-        this.state.cardsSelected.concat(Array(newLength - oldLength).fill(false)) :
-        this.state.cardsSelected.slice(0, newLength);
-
-      this.setState({cardsSelected});
-    }
+  _getCardSelected(cardIndex) {
+    return this.props.cardsSelected ? this.props.cardsSelected[cardIndex] : false;
   }
 
   recordKeyPress(keyValue) {
     const keyInd = KEYS.indexOf(keyValue);
     if (keyInd >= 0 && keyInd < this.props.cards.length) {
-      let { cardsSelected } = this.state;
-      cardsSelected[keyInd] = !(cardsSelected[keyInd]);
-      this.setState({ cardsSelected });
+      this.props.onSelect(keyInd);
+    }
+  }
+
+  renderCard(card, index) {
+    if (this.props.isYours) {
+      return (<Card
+        key={ index }
+        card={ card }
+        visible={ this.props.visible }
+        selected={this._getCardSelected(index)}
+        keyBinding={this._getKeyBinding(index)}/>
+      );
+    } else {
+      return (<Card
+        key={ index }
+        card={ card }
+        visible={ this.props.visible }
+        selected={this._getCardSelected(index)}/>
+      );
     }
   }
 
@@ -55,9 +61,7 @@ class Hand extends Component {
     return (
       <div>
         { this.props.isYours ? this.renderKeyListeners() : null }
-        { this.props.cards.map((card, index) =>
-          <Card key={ index } card={ card } visible={ this.props.visible } selected={this.state.cardsSelected[index]} keyBinding={this._getKeyBinding(index)}/> )
-        }
+        { this.props.cards.map((card, index) => this.renderCard(card, index)) }
       </div>
     );
   }
