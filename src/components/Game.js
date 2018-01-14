@@ -10,7 +10,6 @@ class Game extends Component {
     super(props); // playerIndex, gameId
     this.state = {
       gameState: { players: [], hands: [] },
-      isPlayersTurn: false,
       minPlayers: 10000  // really big number.
     };
   }
@@ -41,21 +40,34 @@ class Game extends Component {
     this.setState({ minPlayers: gameTypeSnapshot.val().minPlayers });
   }
 
-  shouldRenderStartGameButton() {
+  shouldShowStartGameButton() {
     const minPlayersReached = (this.getNumPlayers() >= this.state.minPlayers);
     return minPlayersReached && !this.state.gameState.started;
+  }
+
+  shouldShowPlayersTurn(ind) {
+    const { gameState } = this.state;
+    console.log(ind, gameState.playerToMove);
+    return (gameState.started) && (ind === gameState.playerToMove);
   }
 
   startGameClicked() {
     const deck = new Deck();
     const hands = deck.deal(this.getNumPlayers());
-    fire.database().ref('games/' + this.props.gameId + '/hands').set(hands);
-    fire.database().ref('games/' + this.props.gameId + '/started').set(true);
+    const prefix = 'games/' + this.props.gameId
+    fire.database().ref(prefix + '/hands').set(hands);
+    fire.database().ref(prefix + '/started').set(true);
   }
 
   renderStartGameButton() {
     return (
       <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
+    );
+  }
+
+  renderPlayersTurn() {
+    return (
+      <div>This player's turn!</div>
     );
   }
 
@@ -69,6 +81,7 @@ class Game extends Component {
             range(this.getNumPlayers()).map(ind =>
               <li key={ ind }>
                 {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+                { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
                 <br />
                 { gameState.hands
                   ? <Hand
@@ -79,7 +92,7 @@ class Game extends Component {
             )
           }
         </ul>
-        { this.shouldRenderStartGameButton() ? this.renderStartGameButton() : null }
+        { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
       </div>
     );
   }
