@@ -121,6 +121,7 @@ class Game extends Component {
           isYours={ true }
           visible={ true }
           onSelect={ this.onCardSelected.bind(this) }
+          onPlayCards= { this.playCardsClicked.bind(this) }
           cardsSelected={ this.state.cardsSelected }
         />);
     } else {
