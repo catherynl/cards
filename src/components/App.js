@@ -26,12 +26,14 @@ class App extends Component {
 
   newGameClicked() {
     const game = {
+      finishid: false,
       gameTypeId: 'test',
-      players: [this.state.username],
-      started: false,
-      playerToMove: 0,
       hands: 0,
-      table: 0
+      players: [this.state.username],
+      playerToMove: 0,
+      started: false,
+      table: 0,
+      winner: 0
     };
     const gameRef = fire.database().ref('games').push(game);
     this.setState({ gameId: gameRef.key });

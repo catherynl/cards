@@ -31,6 +31,7 @@ class Game extends Component {
     });
 
     gamesRef.on('child_added', snapshot => {
+      console.log('child added in firebase');
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     });
@@ -50,6 +51,18 @@ class Game extends Component {
     return (gameState.started) && (ind === gameState.playerToMove);
   }
 
+  shouldShowGameInPlay() {
+    return this.state.gameState.started && !this.state.gameState.finished;
+  }
+
+  shouldShowGameFinished() {
+    return this.state.gameState.finished;
+  }
+
+  shouldShowEndGameButton() {
+    return true; // TODO game logic
+  }
+
   startGameClicked() {
     const deck = new Deck();
     const hands = deck.deal(this.getNumPlayers());
@@ -62,9 +75,17 @@ class Game extends Component {
     fire.database().ref(this.firePrefix + '/playerToMove').set(newPlayerToMove);
   }
 
+  endGameClicked() {
+    const winner = Math.floor(Math.random() * this.getNumPlayers()) + 1;
+    fire.database().ref(this.firePrefix + '/winner').set(winner);
+    fire.database().ref(this.firePrefix + '/finished').set(true);
+  }
+
   renderStartGameButton() {
     return (
-      <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
+      <div>
+        <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
+      </div>
     );
   }
 
@@ -72,7 +93,9 @@ class Game extends Component {
     return (
       <div>
         { this.props.playerIndex === this.state.gameState.playerToMove
-          ? <div>Your turn!
+          ? <div>
+              Your turn!
+              <br />
               <button onClick={ this.playCardsClicked.bind(this) }>Play turn</button>
             </div>
           : <div>This player's turn!</div> }
@@ -80,28 +103,46 @@ class Game extends Component {
     );
   }
 
-  render() {
+  renderGameInPlay() {
     const { gameState } = this.state;
     return (
       <div>
-        { 'Game id: ' + this.props.gameId }
         <ul>
-          {
-            range(this.getNumPlayers()).map(ind =>
-              <li key={ ind }>
-                {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-                { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
-                <br />
-                { gameState.hands
-                  ? <Hand
-                    cards={ gameState.hands[ind] }
-                    visible={ ind === this.props.playerIndex }/>
-                  : null }
-              </li>
-            )
-          }
+          { range(this.getNumPlayers()).map(ind =>
+            <li key={ ind }>
+              {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+              { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
+              <br />
+              { gameState.hands
+                ? <Hand
+                  cards={ gameState.hands[ind] }
+                  visible={ ind === this.props.playerIndex }/>
+                : null }
+            </li>
+          )}
         </ul>
+        { this.shouldShowEndGameButton()
+          ? <button onClick={ this.endGameClicked.bind(this) }>End game</button>
+          : null }
+      </div>
+    );
+  }
+
+  renderGameFinished() {
+    return (
+      <div>
+        Game is finished! The winner is player { this.state.gameState.winner }!
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        { 'Game id: ' + this.props.gameId }
         { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
+        { this.shouldShowGameInPlay() ? this.renderGameInPlay() : null }
+        { this.shouldShowGameFinished() ? this.renderGameFinished() : null }
       </div>
     );
   }
