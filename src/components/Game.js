@@ -10,8 +10,9 @@ class Game extends Component {
     super(props); // playerIndex, gameId
     this.state = {
       gameState: { players: [], hands: [] },
-      minPlayers: 10000  // really big number.
+      minPlayers: 10000  // really big number
     };
+    this.firePrefix = 'games/' + this.props.gameId;
   }
 
   getNumPlayers() {
@@ -20,7 +21,7 @@ class Game extends Component {
 
   async componentWillMount() {
     const { gameState } = this.state;
-    const gamesRef = fire.database().ref('games/' + this.props.gameId);
+    const gamesRef = fire.database().ref(this.firePrefix);
     const currentState = await gamesRef.once('value');
     this.setState({ gameState: currentState.val() });
 
@@ -52,9 +53,13 @@ class Game extends Component {
   startGameClicked() {
     const deck = new Deck();
     const hands = deck.deal(this.getNumPlayers());
-    const prefix = 'games/' + this.props.gameId
-    fire.database().ref(prefix + '/hands').set(hands);
-    fire.database().ref(prefix + '/started').set(true);
+    fire.database().ref(this.firePrefix + '/hands').set(hands);
+    fire.database().ref(this.firePrefix + '/started').set(true);
+  }
+
+  playCardsClicked() {
+    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this.getNumPlayers();
+    fire.database().ref(this.firePrefix + '/playerToMove').set(newPlayerToMove);
   }
 
   renderStartGameButton() {
@@ -65,7 +70,13 @@ class Game extends Component {
 
   renderPlayersTurn() {
     return (
-      <div>This player's turn!</div>
+      <div>
+        { this.props.playerIndex === this.state.gameState.playerToMove
+          ? <div>Your turn!
+              <button onClick={ this.playCardsClicked.bind(this) }>Play turn</button>
+            </div>
+          : <div>This player's turn!</div> }
+      </div>
     );
   }
 

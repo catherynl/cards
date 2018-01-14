@@ -26,7 +26,7 @@ class App extends Component {
 
   newGameClicked() {
     const game = {
-      gameTypeId: '-L2lZUVmmtuzjlQW0xMx',
+      gameTypeId: 'test',
       players: [this.state.username],
       started: false,
       playerToMove: 0,
