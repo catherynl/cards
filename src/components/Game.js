@@ -9,32 +9,36 @@ class Game extends Component {
   constructor(props) {
     super(props); // playerIndex, gameId
     this.state = {
-      gameState: { players: [], hands: [] },
+      gameState: {
+        hands: [],
+        players: [],
+        recentlyPlayed: [] },
       minPlayers: 10000  // really big number
     };
-    this.firePrefix = 'games/' + this.props.gameId;
   }
 
-  getNumPlayers() {
+  _getFirePrefix() {
+    return 'games/' + this.props.gameId;
+  }
+
+  _getNumPlayers() {
     return this.state.gameState.players.length;
   }
 
   async componentWillMount() {
     const { gameState } = this.state;
-    const gamesRef = fire.database().ref(this.firePrefix);
+    const gamesRef = fire.database().ref(this._getFirePrefix());
     const currentState = await gamesRef.once('value');
     this.setState({ gameState: currentState.val() });
 
-    gamesRef.on('child_changed', snapshot => {
+    const listenerCallback = snapshot => {
+      const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
-    });
+    };
 
-    gamesRef.on('child_added', snapshot => {
-      console.log('child added in firebase');
-      gameState[snapshot.key] = snapshot.val();
-      this.setState({ gameState });
-    });
+    gamesRef.on('child_changed', listenerCallback);
+    gamesRef.on('child_added', listenerCallback);
 
     const gameTypeId = currentState.val().gameTypeId;
     const gameTypeSnapshot = await fire.database().ref('gameTypes/' + gameTypeId).once('value');
@@ -42,7 +46,7 @@ class Game extends Component {
   }
 
   shouldShowStartGameButton() {
-    const minPlayersReached = (this.getNumPlayers() >= this.state.minPlayers);
+    const minPlayersReached = (this._getNumPlayers() >= this.state.minPlayers);
     return minPlayersReached && !this.state.gameState.started;
   }
 
@@ -65,20 +69,24 @@ class Game extends Component {
 
   startGameClicked() {
     const deck = new Deck();
-    const hands = deck.deal(this.getNumPlayers());
-    fire.database().ref(this.firePrefix + '/hands').set(hands);
-    fire.database().ref(this.firePrefix + '/started').set(true);
+    const hands = deck.deal(this._getNumPlayers());
+    fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
+    fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
   playCardsClicked() {
-    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this.getNumPlayers();
-    fire.database().ref(this.firePrefix + '/playerToMove').set(newPlayerToMove);
+    const hands = this.state.gameState.hands;
+    const indexSelected = Math.floor(Math.random() * hands[this.props.playerIndex].length);
+    const cardsSelected = hands[this.props.playerIndex].splice(indexSelected, 1);
+    fire.database().ref(this._getFirePrefix() + '/recentlyPlayed/' + this.props.playerIndex).set(cardsSelected);
+    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
+    fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
   endGameClicked() {
-    const winner = Math.floor(Math.random() * this.getNumPlayers()) + 1;
-    fire.database().ref(this.firePrefix + '/winner').set(winner);
-    fire.database().ref(this.firePrefix + '/finished').set(true);
+    const winner = Math.floor(Math.random() * this._getNumPlayers()) + 1;
+    fire.database().ref(this._getFirePrefix() + '/winner').set(winner);
+    fire.database().ref(this._getFirePrefix() + '/finished').set(true);
   }
 
   renderStartGameButton() {
@@ -96,7 +104,7 @@ class Game extends Component {
           ? <div>
               Your turn!
               <br />
-              <button onClick={ this.playCardsClicked.bind(this) }>Play turn</button>
+              <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
             </div>
           : <div>This player's turn!</div> }
       </div>
@@ -108,7 +116,7 @@ class Game extends Component {
     return (
       <div>
         <ul>
-          { range(this.getNumPlayers()).map(ind =>
+          { range(this._getNumPlayers()).map(ind =>
             <li key={ ind }>
               {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
               { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
@@ -116,7 +124,13 @@ class Game extends Component {
               { gameState.hands
                 ? <Hand
                   cards={ gameState.hands[ind] }
-                  visible={ ind === this.props.playerIndex }/>
+                  visible={ ind === this.props.playerIndex } />
+                : null }
+              <br />Recently played<br />
+              { gameState.recentlyPlayed
+                ? <Hand
+                  cards={ gameState.recentlyPlayed[ind] }
+                  visible={true} />
                 : null }
             </li>
           )}

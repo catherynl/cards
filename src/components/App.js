@@ -26,9 +26,8 @@ class App extends Component {
 
   newGameClicked() {
     const game = {
-      finishid: false,
-      gameTypeId: 'test',
-      hands: 0,
+      finished: false,
+      gameTypeId: 'test_1_player',
       players: [this.state.username],
       playerToMove: 0,
       started: false,
@@ -45,23 +44,28 @@ class App extends Component {
       window.alert('Invalid game id');
       return;
     }
-    const snapshot = await fire.database().ref('games/' + gameId).once('value');
+
+    const firePrefix = 'games/' + gameId;
+    const snapshot = await fire.database().ref(firePrefix).once('value');
     const game = snapshot.val();
     if (!game) {
       window.alert('Invalid game id');
       return;
     }
+
     const gameTypeSnapshot = await fire.database().ref('gameTypes/' + game.gameTypeId).once('value');
     const maxPlayers = gameTypeSnapshot.val().maxPlayers;
-
     const numPlayers = game.players.length;
     if (game.started || maxPlayers <= numPlayers) {
       window.alert('Sorry, you cannot join the game right now');
       return;
     }
 
-    fire.database().ref('games/' + gameId + '/players/' + numPlayers).set(this.state.username);
-    const updatedPlayers = await fire.database().ref('games/' + gameId + '/players/' + numPlayers).once('value');
+    fire.database().ref(firePrefix + '/players/' + numPlayers).set(this.state.username);
+    fire.database().ref(firePrefix + '/recentlyPlayed/' + numPlayers).set(0);
+    fire.database().ref(firePrefix + '/hands/' + numPlayers).set(0);
+
+    const updatedPlayers = await fire.database().ref(firePrefix + '/players/' + numPlayers).once('value');
     if (updatedPlayers.val() === this.state.username) {
       this.setState({ gameId: gameId, playerIndex: numPlayers });
     } else {

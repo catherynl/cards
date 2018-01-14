@@ -19,7 +19,7 @@ const rankToSymbol = {
 class Card extends Component {
 
   constructor(props) {
-    super(props); // card: { suit, rank}, visible
+    super(props); // card: { suit, rank, selected }, visible
   }
 
   renderVisibleCard() {
