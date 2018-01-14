@@ -4,8 +4,8 @@ import { range } from 'lodash';
 
 import Card from './Card';
 
-const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f',
-                        'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm');
+const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd',
+                      'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm');
 
 class Hand extends Component {
 
@@ -56,7 +56,7 @@ class Hand extends Component {
       <div>
         { this.props.isYours ? this.renderKeyListeners() : null }
         { this.props.cards.map((card, index) =>
-          <Card key={ index } card={ card } visible={ this.props.visible } selected={this.state.cardsSelected[index]} keyBinding={this._getKeyBinding(index)}/> ) }
+          <Card key={ index } card={ card } visible={ this.props.visible } selected={this.state.cardsSelected[index]} keyBinding={this._getKeyBinding(index)}/> )
         }
       </div>
     );

@@ -28,7 +28,8 @@ class Game extends Component {
   async componentWillMount() {
     const gamesRef = fire.database().ref(this._getFirePrefix());
     const currentState = await gamesRef.once('value');
-    this.setState({ gameState: currentState.val() });
+    const newGameState = Object.assign(this.state.gameState, currentState.val());
+    this.setState({ gameState: newGameState });
 
     const listenerCallback = snapshot => {
       const { gameState } = this.state;
@@ -127,7 +128,7 @@ class Game extends Component {
                   visible={ ind === this.props.playerIndex } />
                 : null }
               <br />Recently played<br />
-              { gameState.recentlyPlayed
+              { gameState.recentlyPlayed[ind]
                 ? <Hand
                   cards={ gameState.recentlyPlayed[ind] }
                   isYours={ false }
