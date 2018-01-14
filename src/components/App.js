@@ -14,6 +14,10 @@ class App extends Component {
     };
   }
 
+  clearGameID() {
+    this.setState({ gameId: 0 });
+  }
+
   changeUsername(e) {
     e.preventDefault();
     this.setState({ username: this.inputUsername.value });
@@ -95,7 +99,7 @@ class App extends Component {
   }
 
   renderGame() {
-    return (<Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } />);
+    return (<Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } leaveGame={ this.clearGameID.bind(this) } />);
   }
 
   renderGoToGame() {

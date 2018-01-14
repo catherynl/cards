@@ -7,9 +7,11 @@ import Hand from './Hand';
 class Game extends Component {
 
   constructor(props) {
-    super(props); // playerIndex, gameId
+    super(props); // playerIndex, gameId, leaveGame (callback)
     this.state = {
       gameState: {
+        started: false,
+        finished: false,
         hands: [],
         players: [],
         recentlyPlayed: [] },
@@ -115,6 +117,10 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/finished').set(true);
   }
 
+  leaveGameClicked() {
+    this.props.leaveGame();
+  }
+
   renderStartGameButton() {
     return (
       <div>
@@ -190,7 +196,8 @@ class Game extends Component {
   renderGameFinished() {
     return (
       <div>
-        Game is finished! The winner is player { this.state.gameState.winner }!
+        <p>Game is finished! The winner is player { this.state.gameState.winner }!</p>
+        <button onClick={ this.leaveGameClicked.bind(this) }>Back to Home</button>
       </div>
     );
   }
