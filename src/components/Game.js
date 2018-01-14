@@ -19,18 +19,17 @@ class Game extends Component {
   }
 
   async componentWillMount() {
+    const { gameState } = this.state;
     const gamesRef = fire.database().ref('games/' + this.props.gameId);
     const currentState = await gamesRef.once('value');
     this.setState({ gameState: currentState.val() });
 
     gamesRef.on('child_changed', snapshot => {
-      const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     });
 
     gamesRef.on('child_added', snapshot => {
-      const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     });
