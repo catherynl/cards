@@ -1,13 +1,7 @@
 import React, { Component } from 'react';
 import Card from './Card';
 import { range } from 'lodash';
-
-const SuitEnum = {
-  SPADE: 0,
-  HEART: 1,
-  CLUB: 2,
-  DIAMOND: 3
-};
+import { Suits } from '../utils/card';
 
 const RANKS = 13;
 
@@ -24,7 +18,7 @@ class Deck extends Component {
 
   initializeCards() {
     range(RANKS).forEach(rank => {
-      Object.keys(SuitEnum).forEach(suit => {
+      Object.keys(Suits).forEach(suit => {
         let card = {
           rank: rank + 1,
           suit: suit

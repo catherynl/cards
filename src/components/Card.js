@@ -1,19 +1,11 @@
 import React, { Component } from 'react';
+import { Suits, rankToSymbol } from '../utils/card';
 
-const rankToSymbol = {
-  1: 'A',
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 7,
-  8: 8,
-  9: 9,
-  10: 10,
-  11: 'J',
-  12: 'Q',
-  13: 'K'
+const imageUrls = {
+  'spade': require('./../images/spade.png'),
+  'heart': require('./../images/heart.png'),
+  'club': require('./../images/club.png'),
+  'diamond': require('./../images/diamond.png')
 }
 
 class Card extends Component {
@@ -24,11 +16,20 @@ class Card extends Component {
 
   renderVisibleCard() {
     const { card } = this.props;
+    const suit = Suits[card.suit];
+    console.log(suit.imageUrl);
     return (
       <div>
-        { card.suit } &nbsp;
-        { rankToSymbol[card.rank] } &nbsp;
-        { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null } &nbsp;
+        { rankToSymbol[card.rank] }
+        &nbsp;
+        <img src={ imageUrls[suit.name] } 
+             alt={ suit.name } 
+             style={ {'width': '15px', 
+                      'height': '15px', 
+                      'margin-bottom': '-1px'} } />
+        &nbsp;
+        { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
+        &nbsp;
         { this.props.selected ? 'selected!' : null }
       </div>
     );
