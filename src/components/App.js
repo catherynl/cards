@@ -39,6 +39,10 @@ class App extends Component {
 
   async enterGameClicked() {
     const gameId = this.inputGameId.value;
+    if (!gameId) {
+      window.alert('Invalid game id');
+      return;
+    }
     const snapshot = await fire.database().ref('games/' + gameId).once('value');
     const game = snapshot.val();
     if (!game) {

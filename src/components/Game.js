@@ -8,7 +8,8 @@ class Game extends Component {
     super(props); // playerIndex, gameId
     this.state = {
       gameState: { players: [] },
-      isPlayersTurn: false
+      isPlayersTurn: false,
+      minPlayers: 10000  // really big number.
     };
   }
 
@@ -21,7 +22,27 @@ class Game extends Component {
       let gameState = this.state.gameState;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
-    })
+    });
+
+    const gameTypeId = currentState.val().gameTypeId;
+    const gameTypeSnapshot = await fire.database().ref('gameTypes/' + gameTypeId).once('value');
+    this.setState({ minPlayers: gameTypeSnapshot.val().minPlayers });
+  }
+
+  shouldRenderStartGameButton() {
+    const minPlayersReached = (this.state.gameState.players.length >= this.state.minPlayers);
+    return minPlayersReached && !this.state.gameState.started;
+  }
+
+  startGameClicked() {
+    // TODO: shuffle deck and populate hands
+    fire.database().ref('games/' + this.props.gameId + '/started').set(true);
+  }
+
+  renderStartGameButton() {
+    return (
+      <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
+    );
   }
 
   render() {
@@ -38,6 +59,7 @@ class Game extends Component {
             )
           }
         </ul>
+        { this.shouldRenderStartGameButton() ? this.renderStartGameButton() : null }
       </div>
     );
   }
