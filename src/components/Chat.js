@@ -4,11 +4,10 @@ import fire from '../fire';
 class Chat extends Component {
 
   constructor(props) {
-    super(props);
+    super(props); // username
     this.state = { 
-      messages: [],
-      username: 'anonymous monkey',
-    }; // <- set up react state
+      messages: []
+    };
   }
 
   componentWillMount() {
@@ -24,27 +23,15 @@ class Chat extends Component {
   addMessage(e) {
     e.preventDefault(); // <- prevent form submit from reloading the page
     fire.database().ref('messages').push({
-      username: this.state.username,
+      username: this.props.username,
       message: this.inputMessage.value
     });
     this.inputMessage.value = '';
   }
 
-  changeUsername(e) {
-    e.preventDefault();
-    this.setState({ username: this.inputUsername.value });
-    this.inputUsername.placeholder = this.inputUsername.value;
-    this.inputUsername.value = '';
-  }
-
   render() {
-    console.log(this.state.messages);
     return (
       <div>
-        <form onSubmit={this.changeUsername.bind(this)}>
-          <input type="text" ref={ el => this.inputUsername = el } placeholder={ this.state.username } />
-          <input type="submit" value="Change username"/>
-        </form>
 
         <form onSubmit={this.addMessage.bind(this)}>
           <input type="text" ref={ el => this.inputMessage = el } />

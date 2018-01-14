@@ -1,34 +1,19 @@
 import React, { Component } from 'react';
 import fire from '../fire';
 import Chat from './Chat';
+import Game from './Game';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { 
-      messages: [],
+    this.state = {
       username: 'anonymous monkey',
-    }; // <- set up react state
+      gameId: 0,
+    };
   }
 
   componentWillMount() {
-    /* Create reference to messages in Firebase Database */
-    let messagesRef = fire.database().ref('messages').orderByKey().limitToLast(100);
-    messagesRef.on('child_added', snapshot => {
-      /* Update React state when message is added at Firebase Database */
-      let message = { text: snapshot.val(), id: snapshot.key };
-      this.setState({ messages: [message].concat(this.state.messages) });
-    })
-  }
-
-  addMessage(e) {
-    e.preventDefault(); // <- prevent form submit from reloading the page
-    fire.database().ref('messages').push({
-      username: this.state.username,
-      message: this.inputMessage.value
-    });
-    this.inputMessage.value = '';
   }
 
   changeUsername(e) {
@@ -38,11 +23,51 @@ class App extends Component {
     this.inputUsername.value = '';
   }
 
-  render() {
-    console.log(this.state.messages);
+  newGameClicked() {
+    
+  }
+
+  renderChangeUsername() {
+    return (
+      <form onSubmit={this.changeUsername.bind(this)}>
+        <input type="text" ref={ el => this.inputUsername = el } placeholder={ this.state.username } />
+        <input type="submit" value="Change username"/>
+      </form>
+    );
+  }
+
+  renderNewGame() {
+    return (
+      <button onClick={this.newGameClicked}>New game</button>
+    );
+  }
+
+  renderEnterGame() {
+    return (
+      <form onSubmit={this.enterGameClicked}>
+        <input type="text" ref={ el => this.inputGameId = el } placeholder={ 'game id' } />
+        <input type="submit" value="Enter game"/>
+      </form>
+    );
+  }
+
+  renderGoToGame() {
     return (
       <div>
-        <Chat />
+        { this.renderNewGame() }
+        { this.renderEnterGame() }
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        { this.renderChangeUsername() }
+        { this.state.gameId 
+          ? <Game username={this.state.username} gameId={this.state.gameId} />
+          : this.renderGoToGame() }
+        <Chat username={this.state.username} />
       </div>
     );
   }
