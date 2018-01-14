@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import fire from '../fire';
 import Chat from './Chat';
 import Game from './Game';
+import Deck from './Deck';
 
 class App extends Component {
 
@@ -108,6 +109,8 @@ class App extends Component {
           ? <Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } />
           : this.renderGoToGame() }
         <Chat username={ this.state.username } />
+        <br />
+        <Deck />
       </div>
     );
   }
