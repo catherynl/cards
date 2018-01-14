@@ -6,6 +6,8 @@ class Game extends Component {
   constructor(props) {
     super(props); // username, gameId
     this.state = {
+      playerIndex = 0,
+      isPlayersTurn = false
     };
   }
 
