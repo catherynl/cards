@@ -9,6 +9,7 @@ class App extends Component {
     super(props);
     this.state = {
       username: 'anonymous monkey',
+      playerIndex: 0,
       gameId: 0,
     };
   }
@@ -27,7 +28,10 @@ class App extends Component {
     const game = {
       gameTypeId: '-L2lZUVmmtuzjlQW0xMx',
       players: [this.state.username],
-      playStarted: false,
+      started: false,
+      playerToMove: 0,
+      hands: 0,
+      table: 0
     };
     const gameRef = fire.database().ref('games').push(game);
     this.setState({ gameId: gameRef.key });
@@ -53,7 +57,7 @@ class App extends Component {
     fire.database().ref('games/' + gameId + '/players/' + numPlayers).set(this.state.username);
     const updatedPlayers = await fire.database().ref('games/' + gameId + '/players/' + numPlayers).once('value');
     if (updatedPlayers.val() === this.state.username) {
-      this.setState({ gameId: gameId });
+      this.setState({ gameId: gameId, playerIndex: numPlayers });
     } else {
       window.alert('Race condition! Please try again :)');
     }
@@ -97,7 +101,7 @@ class App extends Component {
       <div>
         { this.renderChangeUsername() }
         { this.state.gameId 
-          ? <Game username={ this.state.username } gameId={ this.state.gameId } />
+          ? <Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } />
           : this.renderGoToGame() }
         <Chat username={ this.state.username } />
       </div>
