@@ -31,7 +31,6 @@ class App extends Component {
     };
     const gameRef = fire.database().ref('games').push(game);
     this.setState({ gameId: gameRef.key });
-    console.log(this.state);
   }
 
   async enterGameClicked() {
@@ -46,7 +45,6 @@ class App extends Component {
     const maxPlayers = gameTypeSnapshot.val().maxPlayers;
 
     const numPlayers = game.players.length;
-    console.log('numplayers', numPlayers)
     if (game.started || maxPlayers <= numPlayers) {
       window.alert('Sorry, you cannot join the game right now');
       return;

@@ -12,10 +12,10 @@ class Chat extends Component {
 
   componentWillMount() {
     /* Create reference to messages in Firebase Database */
-    let messagesRef = fire.database().ref('messages').orderByKey().limitToLast(100);
+    const messagesRef = fire.database().ref('messages').orderByKey().limitToLast(100);
     messagesRef.on('child_added', snapshot => {
       /* Update React state when message is added at Firebase Database */
-      let message = { text: snapshot.val(), id: snapshot.key };
+      const message = { text: snapshot.val(), id: snapshot.key };
       this.setState({ messages: [message].concat(this.state.messages) });
     })
   }
@@ -34,7 +34,7 @@ class Chat extends Component {
       <div>
 
         Chat box
-        
+
         <form onSubmit={this.addMessage.bind(this)}>
           <input type="text" ref={ el => this.inputMessage = el } />
           <input type="submit"/>
