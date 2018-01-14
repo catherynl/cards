@@ -19,18 +19,18 @@ class Game extends Component {
   }
 
   async componentWillMount() {
-    let gamesRef = fire.database().ref('games/' + this.props.gameId);
+    const gamesRef = fire.database().ref('games/' + this.props.gameId);
     const currentState = await gamesRef.once('value');
     this.setState({ gameState: currentState.val() });
 
     gamesRef.on('child_changed', snapshot => {
-      let gameState = this.state.gameState;
+      const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     });
 
     gamesRef.on('child_added', snapshot => {
-      let gameState = this.state.gameState;
+      const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     });
@@ -47,7 +47,6 @@ class Game extends Component {
 
   shouldShowPlayersTurn(ind) {
     const { gameState } = this.state;
-    console.log(ind, gameState.playerToMove);
     return (gameState.started) && (ind === gameState.playerToMove);
   }
 
