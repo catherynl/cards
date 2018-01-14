@@ -42,12 +42,21 @@ class Deck extends Component {
     }
   }
 
+  // TODO: generalize this to allow other sorting orders
+  cardComparison(card1, card2) {
+    return this.cardValue(card1) - this.cardValue(card2);
+  }
+  cardValue(card) {
+    return card.suit * 100 + card.rank;
+  }
+
   deal(numPlayers) {
     const { cards } = this.state;
-    const hands = range(numPlayers).map(i => []);
+    let hands = range(numPlayers).map(i => []);
     range(cards.length).forEach(i => {
       hands[i % numPlayers].push(cards[i]);
     });
+    hands.forEach(hand => {hand.sort(this.cardComparison.bind(this))});
     return hands;
   }
 
