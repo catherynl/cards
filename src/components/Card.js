@@ -17,16 +17,15 @@ class Card extends Component {
   renderVisibleCard() {
     const { card } = this.props;
     const suit = Suits[card.suit];
-    console.log(suit.imageUrl);
     return (
-      <div>
-        { rankToSymbol[card.rank] }
-        &nbsp;
+      <div className="card">
         <img src={ imageUrls[suit.name] } 
              alt={ suit.name } 
              style={ {'width': '15px', 
                       'height': '15px', 
-                      'margin-bottom': '-1px'} } />
+                      'margin-bottom': '-2px'} } />
+        &nbsp;
+        { rankToSymbol[card.rank] }
         &nbsp;
         { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
         &nbsp;

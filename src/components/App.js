@@ -114,7 +114,9 @@ class App extends Component {
   render() {
     return (
       <div>
-        { this.renderChangeUsername() }
+        { this.state.gameId
+          ? null
+          : this.renderChangeUsername() }
         { this.state.gameId 
           ? this.renderGame()
           : this.renderGoToGame() }
