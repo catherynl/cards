@@ -48,6 +48,15 @@ class Deck extends Component {
     }
   }
 
+  deal(numPlayers) {
+    const { cards } = this.state;
+    const hands = range(numPlayers).map(i => []);
+    range(cards.length).forEach(i => {
+      hands[i % numPlayers].push(cards[i]);
+    });
+    return hands;
+  }
+
   render() {
     return (
       <div>

@@ -1,16 +1,22 @@
 import React, { Component } from 'react';
 import fire from '../fire';
 import { range } from 'lodash';
+import Deck from './Deck';
+import Hand from './Hand';
 
 class Game extends Component {
 
   constructor(props) {
     super(props); // playerIndex, gameId
     this.state = {
-      gameState: { players: [] },
+      gameState: { players: [], hands: [] },
       isPlayersTurn: false,
       minPlayers: 10000  // really big number.
     };
+  }
+
+  getNumPlayers() {
+    return this.state.gameState.players.length;
   }
 
   async componentWillMount() {
@@ -24,18 +30,26 @@ class Game extends Component {
       this.setState({ gameState });
     });
 
+    gamesRef.on('child_added', snapshot => {
+      let gameState = this.state.gameState;
+      gameState[snapshot.key] = snapshot.val();
+      this.setState({ gameState });
+    });
+
     const gameTypeId = currentState.val().gameTypeId;
     const gameTypeSnapshot = await fire.database().ref('gameTypes/' + gameTypeId).once('value');
     this.setState({ minPlayers: gameTypeSnapshot.val().minPlayers });
   }
 
   shouldRenderStartGameButton() {
-    const minPlayersReached = (this.state.gameState.players.length >= this.state.minPlayers);
+    const minPlayersReached = (this.getNumPlayers() >= this.state.minPlayers);
     return minPlayersReached && !this.state.gameState.started;
   }
 
   startGameClicked() {
-    // TODO: shuffle deck and populate hands
+    const deck = new Deck();
+    const hands = deck.deal(this.getNumPlayers());
+    fire.database().ref('games/' + this.props.gameId + '/hands').set(hands);
     fire.database().ref('games/' + this.props.gameId + '/started').set(true);
   }
 
@@ -46,15 +60,18 @@ class Game extends Component {
   }
 
   render() {
+    const { gameState } = this.state;
     return (
       <div>
         { 'Game id: ' + this.props.gameId }
         <ul>
           {
-            range(this.state.gameState.players.length).map(
+            range(this.getNumPlayers()).map(
               ind =>
                 <li key={ ind }>
-                  {'Player ' + (ind + 1) + ': ' + this.state.gameState.players[ind]}
+                  {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+                  <br />
+                  { gameState.hands ? <Hand cards={ gameState.hands[ind] }/> : null }
                 </li>
             )
           }

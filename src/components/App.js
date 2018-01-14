@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import fire from '../fire';
 import Chat from './Chat';
 import Game from './Game';
-import Deck from './Deck';
 
 class App extends Component {
 
@@ -92,6 +91,10 @@ class App extends Component {
     );
   }
 
+  renderGame() {
+    return (<Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } />);
+  }
+
   renderGoToGame() {
     return (
       <div>
@@ -106,11 +109,10 @@ class App extends Component {
       <div>
         { this.renderChangeUsername() }
         { this.state.gameId 
-          ? <Game playerIndex={ this.state.playerIndex } gameId={ this.state.gameId } />
+          ? this.renderGame()
           : this.renderGoToGame() }
         <Chat username={ this.state.username } />
         <br />
-        <Deck />
       </div>
     );
   }

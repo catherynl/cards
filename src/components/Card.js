@@ -26,7 +26,7 @@ class Card extends Component {
     const { card } = this.props;
     return (
       <div>
-        Suit: { card.suit } Rank: { rankToSymbol[card.rank] }
+        { card.suit } { rankToSymbol[card.rank] }
       </div>
     );
   }
