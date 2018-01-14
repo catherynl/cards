@@ -33,12 +33,13 @@ class Chat extends Component {
     return (
       <div>
 
+        Chat box
+        
         <form onSubmit={this.addMessage.bind(this)}>
           <input type="text" ref={ el => this.inputMessage = el } />
           <input type="submit"/>
         </form>
 
-        List of messages
         <ul>
           {
             /* Render the list of messages */

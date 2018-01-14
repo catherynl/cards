@@ -24,7 +24,41 @@ class App extends Component {
   }
 
   newGameClicked() {
-    
+    const game = {
+      gameTypeId: '-L2lZUVmmtuzjlQW0xMx',
+      players: [this.state.username],
+      playStarted: false,
+    };
+    const gameRef = fire.database().ref('games').push(game);
+    this.setState({ gameId: gameRef.key });
+    console.log(this.state);
+  }
+
+  async enterGameClicked() {
+    const gameId = this.inputGameId.value;
+    const snapshot = await fire.database().ref('games/' + gameId).once('value');
+    const game = snapshot.val();
+    if (!game) {
+      window.alert('Invalid game id');
+      return;
+    }
+    const gameTypeSnapshot = await fire.database().ref('gameTypes/' + game.gameTypeId).once('value');
+    const maxPlayers = gameTypeSnapshot.val().maxPlayers;
+
+    const numPlayers = game.players.length;
+    console.log('numplayers', numPlayers)
+    if (game.started || maxPlayers <= numPlayers) {
+      window.alert('Sorry, you cannot join the game right now');
+      return;
+    }
+
+    fire.database().ref('games/' + gameId + '/players/' + numPlayers).set(this.state.username);
+    const updatedPlayers = await fire.database().ref('games/' + gameId + '/players/' + numPlayers).once('value');
+    if (updatedPlayers.val() === this.state.username) {
+      this.setState({ gameId: gameId });
+    } else {
+      window.alert('Race condition! Please try again :)');
+    }
   }
 
   renderChangeUsername() {
@@ -38,16 +72,16 @@ class App extends Component {
 
   renderNewGame() {
     return (
-      <button onClick={ this.newGameClicked }>New game</button>
+      <button onClick={ this.newGameClicked.bind(this) }>New game</button>
     );
   }
 
   renderEnterGame() {
     return (
-      <form onSubmit={ this.enterGameClicked }>
+      <div>
         <input type="text" ref={ el => this.inputGameId = el } placeholder={ 'game id' } />
-        <input type="submit" value="Enter game"/>
-      </form>
+        <button onClick={ this.enterGameClicked.bind(this) }>Enter game</button>
+      </div>
     );
   }
 
