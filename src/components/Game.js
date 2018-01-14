@@ -37,9 +37,20 @@ class Game extends Component {
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
     };
+    const removalListenerCallback = snapshot => {
+      if (snapshot.key === 'hands') {
+        const { gameState } = this.state;
+        gameState.hands = gameState.hands.map((el) => []);
+        this.setState({ gameState });
+      } else {
+        console.log('WARNING: a field other than "hands" has been removed from the game state database:', snapshot.key);
+        window.alert('WARNING: a field other than "hands" has been removed from the game state database:', snapshot.key);
+      }
+    };
 
     gamesRef.on('child_changed', listenerCallback);
     gamesRef.on('child_added', listenerCallback);
+    gamesRef.on('child_removed', removalListenerCallback);
 
     const gameTypeId = currentState.val().gameTypeId;
     const gameTypeSnapshot = await fire.database().ref('gameTypes/' + gameTypeId).once('value');
