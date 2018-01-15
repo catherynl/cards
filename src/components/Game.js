@@ -5,6 +5,7 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
+import { actionMap } from '../utils/stage';
 
 class Game extends Component {
 
@@ -30,6 +31,10 @@ class Game extends Component {
 
   _getNumPlayers() {
     return this.state.gameState.players.length;
+  }
+
+  _getCurrentStage() {
+    return this.state.gameState.currentStage;
   }
 
   async componentWillMount() {
@@ -96,7 +101,7 @@ class Game extends Component {
   }
 
   shouldShowNextStageButton() {
-    return this.state.gameState.currentStage + 1 < this.gameType.getNumStages();
+    return this._getCurrentStage() + 1 < this.gameType.getNumStages();
   }
 
   shouldShowEndGameButton() {
@@ -140,11 +145,12 @@ class Game extends Component {
   }
 
   dealCardsClicked() {
-    return;
+    // TODO: actually deal cards
+    this.nextStageClicked()
   }
 
   nextStageClicked() {
-    const nextStage = this.state.gameState.currentStage + 1;
+    const nextStage = this._getCurrentStage() + 1;
     fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
   }
 
@@ -217,49 +223,18 @@ class Game extends Component {
   renderPlayerActions() {
     return (
       <div className='player-actions'>
-        { this.gameType.getActionInStage(this.state.gameState.currentStage, 0)
-          ? <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
-          : null
-        }
-        { this.gameType.getActionInStage(this.state.gameState.currentStage, 1)
-          ? <button onClick={ this.drawCardsClicked.bind(this) }>Draw card</button>
-          : null
-        }
-        { this.gameType.getActionInStage(this.state.gameState.currentStage, 2)
-          ? <button onClick={ this.passCardsClicked.bind(this) }>Pass cards</button>
-          : null
-        }
-        { this.gameType.getActionInStage(this.state.gameState.currentStage, 3)
-          ? <button onClick={ this.endTurnClicked.bind(this) }>End turn</button>
-          : null
-        }
-        { this.gameType.getActionInStage(this.state.gameState.currentStage, 4)
-          ? <button onClick={ this.dealCardsClicked.bind(this) }>Deal cards</button>
-          : null
+        {
+          Object.keys(actionMap)
+            .filter(i => this.gameType.getActionInStage(this._getCurrentStage(), i))
+            .map(i => {
+              const action = actionMap[i];
+              const {name, displayName} = action;
+              const onClick = this[name + 'Clicked'].bind(this);
+              return <button key={i} onClick={onClick}>{displayName}</button>;
+            })
         }
       </div>
     );
-  }
-
-  renderDealStage() {
-
-  }
-
-  renderPlayStage() {
-
-  }
-
-  renderStage() {
-    const { gameState } = this.state;
-    switch(this.gameType.getStage(gameState.currentStage).type) {
-      case 'deal':
-        return this.renderDealStage();
-      case 'play':
-        return this.renderPlayStage();
-      default:
-        console.log('not recognized stage');
-        return null;
-    }
   }
 
   renderGameInPlay() {
@@ -268,7 +243,6 @@ class Game extends Component {
         { range(this._getNumPlayers()).map(ind =>
           this.renderPlayer(ind)
         )}
-        { this.renderStage() }
         { this.shouldShowNextStageButton()
           ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
           : null }
