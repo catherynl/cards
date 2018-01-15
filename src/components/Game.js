@@ -59,7 +59,7 @@ class Game extends Component {
         gameState.hands = gameState.hands.map((el) => []);
         this.setState({ gameState });
       } else {
-        window.alert('WARNING: a field other than "hands" has been removed from the game state database:', snapshot.key);
+        window.alert('WARNING: a field other than "hands" has been removed from the game state database: ' + snapshot.key);
       }
     };
 
@@ -204,7 +204,7 @@ class Game extends Component {
           isYours={ true }
           visible={ true }
           onSelect={ this.onCardSelected.bind(this) }
-          onPlayCards= { this.playCardsClicked.bind(this) }
+          onPlayCards={ this.playCardsClicked.bind(this) }
           cardsSelected={ this.state.cardsSelected }
         />);
     } else {

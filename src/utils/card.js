@@ -20,8 +20,14 @@ export const Suits = {
     'name': 'diamond',
     'displayName': 'D',
     'imageUrl': './../images/diamond.png'
+  },
+  4: {
+    'name': 'custom',
+    'displayName': 'custom',
+    'imageUrl': ''    // TODO: FIX
   }
 };
+export const CUSTOM_SUIT = 4;
 
 export const rankToSymbol = {
   1: 'A',
