@@ -198,7 +198,7 @@ class Game extends Component {
   renderGameFinished() {
     return (
       <div>
-        <p>Game is finished! The winner is player { this.state.gameState.winner }!</p>
+        <p>Game is finished! The winner is <span className='player-name'>player { this.state.gameState.winner }!</span></p>
         <button onClick={ this.leaveGameClicked.bind(this) }>Back to Home</button>
       </div>
     );

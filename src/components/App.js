@@ -124,7 +124,7 @@ class App extends Component {
     return (
       <div>
         Hello <span className='username'>{ this.state.username }</span>!
-        Welcome to Cards, VC's website for playing arbitrary card games :)
+        Welcome to Cards, V&C's website for playing arbitrary card games :)
         <br />
         { this.renderChangeUsername() }
         { this.renderGoToGame() }
