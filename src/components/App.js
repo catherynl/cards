@@ -3,7 +3,6 @@ import fire from '../fire';
 
 import Chat from './Chat';
 import Game from './Game';
-import TestHearts from '../utils/game_types/Hearts';
 import CreateGameType from './create_game_type/CreateGameType';
 
 class App extends Component {
@@ -136,7 +135,6 @@ class App extends Component {
   }
 
   render() {
-    console.log(TestHearts);
     return (
       <div className='page'>
         <div className='game-section'>
