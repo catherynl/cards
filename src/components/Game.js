@@ -83,11 +83,6 @@ class Game extends Component {
     return minPlayersReached && !this.state.gameState.started;
   }
 
-  shouldShowPlayersTurn(ind) {
-    const { gameState } = this.state;
-    return !this.isYourTurn() && (ind === gameState.playerToMove);
-  }
-
   shouldShowPlayerActions() {
     return this.isYourTurn();
   }
@@ -171,6 +166,11 @@ class Game extends Component {
     );
   }
 
+  renderPlayersTurnIndicator() {
+    const text = this.isYourTurn() ? '(Your turn)' : '(This player\'s turn)';
+    return <span className='your-turn'>{ text }</span>;
+  }
+
   renderPlayer(ind) {
     const { gameState } = this.state;
     return (
@@ -178,11 +178,9 @@ class Game extends Component {
         <div className='player-name'>
           {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
           &nbsp;
-          { this.props.playerIndex === this.state.gameState.playerToMove 
-            ? <span className='your-turn'>(Your turn)</span>
+          { ind === this.state.gameState.playerToMove
+            ? this.renderPlayersTurnIndicator()
             : null }
-          { this.shouldShowPlayersTurn(ind) ? <span className='your-turn'>(This player's turn)</span> : null }
-          { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         </div>
         { gameState.hands ? this.renderPlayersHand(ind) : null }
         Recently played
@@ -239,6 +237,7 @@ class Game extends Component {
   renderGameInPlay() {
     return (
       <div>
+        { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { range(this._getNumPlayers()).map(ind =>
           this.renderPlayer(ind)
         )}
