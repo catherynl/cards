@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { range } from 'lodash';
-import { Suits, CUSTOM_SUIT } from '../../utils/card';
+import { Suits, CUSTOM_SUIT, RANK_ORDERS, HAND_SORT_ORDERS } from '../../utils/card';
 
 import Hand from '../Hand';
 
 class CreateDeck extends Component {
 
   constructor(props) {
-    super(props);   // onFinish (callback, takes the deck as an argument)
+    super(props);   // rankOrder, handSortOrder, onFinish (callback, takes the deck as an argument)
+                    // onRankOrderChange (callback), onHandSortOrderChange (callback)
     this.state = {
       rankIncluded: Array(13).fill(true),
       customCards: []
@@ -80,11 +81,9 @@ class CreateDeck extends Component {
     this.props.onFinish(this._getCards(numSuits, numDecks));
   }
 
-  render() {
+  renderNonCustomCardsInterface() {
     return (
       <div>
-        First, create the deck.
-        <br />
         <input type="text" ref={ el => this.inputNumSuits = el } placeholder="4" /> suits
         <br />
         Ranks to include:
@@ -97,34 +96,97 @@ class CreateDeck extends Component {
           cardsSelected={ this.state.rankIncluded } />
         Number of decks: &nbsp;
         <input type="text" ref={ el => this.inputNumDecks = el } placeholder="1" />
-        <br />
-        <div>
-          Custom cards:
-          <ul>
-            <li>
-              Custom card name (to be displayed on the card): &nbsp;
-              <input type="text" ref={ el => this.inputCustomCardName = el } />
-            </li>
-            <li>
-              Custom card value (for purposes of organizing hands only): &nbsp;
-              <input type="text" ref={ el => this.inputCustomCardRank = el } />
-            </li>
-            <li>
-              <button onClick={ this.addCustomCardClicked.bind(this) }>Add custom card</button>
-            </li>
-          </ul>
-          { this.state.customCards.length } custom card(s) added so far:
-          <ul>
-            {
-              this.state.customCards.map(
-                (card, ind) =>
-                  <li key={ ind }>
-                    { card.name + ' (' + card.rank + ')' }
-                  </li>
+      </div>
+    );
+  }
+
+  renderCustomCardsInterface() {
+    return (
+      <div>
+        Custom cards:
+        <ul>
+          <li>
+            Custom card name (to be displayed on the card): &nbsp;
+            <input type="text" ref={ el => this.inputCustomCardName = el } />
+          </li>
+          <li>
+            Custom card value (for purposes of organizing hands only): &nbsp;
+            <input type="text" ref={ el => this.inputCustomCardRank = el } />
+          </li>
+          <li>
+            <button onClick={ this.addCustomCardClicked.bind(this) }>Add custom card</button>
+          </li>
+        </ul>
+        { this.state.customCards.length } custom card(s) added so far:
+        <ul>
+          {
+            this.state.customCards.map(
+              (card, ind) =>
+                <li key={ ind }>
+                  { card.name + ' (' + card.rank + ')' }
+                </li>
+            )
+          }
+        </ul>
+      </div>
+    );
+  }
+
+  renderRankOrderInterface() {
+    return (
+      <div>
+        Rank order: &nbsp;
+          { RANK_ORDERS.map(
+            (rankOrder, ind) => {
+              return (
+                <div key={ ind }>
+                  <input
+                    type="radio"
+                    value={ rankOrder }
+                    checked={ this.props.rankOrder === rankOrder }
+                    onChange={ this.props.onRankOrderChange.bind(this) }
+                  />{ rankOrder } &nbsp;
+                </div>
               )
             }
-          </ul>
-        </div>
+          )
+        }
+      </div>
+    );
+  }
+
+  renderHandSortOrderInterface() {
+    return (
+      <div>
+        Hand sort order: &nbsp;
+          { HAND_SORT_ORDERS.map(
+            (sortOrder, ind) => {
+              return (
+                <div key={ ind }>
+                  <input
+                    type="radio"
+                    value={ sortOrder }
+                    checked={ this.props.handSortOrder === sortOrder }
+                    onChange={ this.props.onHandSortOrderChange.bind(this) }
+                  />{ sortOrder } &nbsp;
+                </div>
+              )
+            }
+          )
+        }
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        First, create the deck.
+        <br />
+        { this.renderNonCustomCardsInterface() }
+        { this.renderCustomCardsInterface() }
+        { this.renderRankOrderInterface() }
+        { this.renderHandSortOrderInterface() }
         <button onClick={ this.finishClicked.bind(this) }>Deck looks good!</button>
       </div>
     );

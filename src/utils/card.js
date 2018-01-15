@@ -29,6 +29,9 @@ export const Suits = {
 };
 export const CUSTOM_SUIT = 4;
 
+export const RANK_ORDERS = ['K-high', 'A-high', '2-high'];
+export const HAND_SORT_ORDERS = ['suitFirst', 'rankFirst'];
+
 export const rankToSymbol = {
   1: 'A',
   2: 2,

@@ -9,12 +9,24 @@ class CreateGameType extends Component {
     super(props);  // backToHome (callback)
     this.state = {
       gameTypeId: 'test_hearts',
-      stage: 0   // 0: createDeck, 1: finished
+      stage: 0,   // 0: createDeck, 1: finished
+
+      // props for CreateDeck
+      rankOrder: 'A-high',
+      handSortOrder: 'suitFirst'
     };
   }
 
   _getFirePrefix() {
     return 'gameTypes/' + this.state.gameTypeId;
+  }
+
+  rankOrderChanged(e) {
+    this.setState({ rankOrder: e.target.value });
+  }
+
+  handSortOrderChanged(e) {
+    this.setState({ handSortOrder: e.target.value });
   }
 
   setDeck(deck) {
@@ -35,7 +47,12 @@ class CreateGameType extends Component {
 
   renderCreateDeck() {
     return (
-      <CreateDeck onFinish={ this.setDeck.bind(this) } />
+      <CreateDeck
+        onFinish={ this.setDeck.bind(this) }
+        rankOrder={ this.state.rankOrder }
+        handSortOrder={ this.state.handSortOrder }
+        onRankOrderChange={ this.rankOrderChanged.bind(this) }
+        onHandSortOrderChange={ this.handSortOrderChanged.bind(this) } />
     );
   }
 
