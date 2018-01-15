@@ -43,6 +43,7 @@ class App extends Component {
       players: [this.state.username],
       playerToMove: 0,
       started: false,
+      currentStage: 0,
       table: 0,
       winner: 0
     };

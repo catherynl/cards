@@ -41,6 +41,14 @@ class GameType {
     return this.stages;
   }
 
+  getStage(index) {
+    return this.stages[index];
+  }
+
+  getNumStages() {
+    return this.stages.length;
+  }
+
   // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
   _getCompareFunction() {
     let getCardComparisonRank;

@@ -14,11 +14,12 @@ class Game extends Component {
       gameState: {
         started: false,
         finished: false,
+        currentStage: 0,
         hands: [],
         players: [],
         recentlyPlayed: [] },
       cardsSelected: [],  // booleans, one for each card in this player's hand
-      minPlayers: 10000  // prevents "Start Game" from being shown too early
+      minPlayers: 10000,  // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
   }
@@ -86,6 +87,10 @@ class Game extends Component {
     return this.state.gameState.finished;
   }
 
+  shouldShowNextStageButton() {
+    return this.state.gameState.currentStage + 1 < this.gameType.getNumStages();
+  }
+
   shouldShowEndGameButton() {
     return true; // TODO game logic
   }
@@ -115,6 +120,11 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
+  nextStageClicked() {
+    const nextStage = this.state.gameState.currentStage + 1;
+    fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
+  }
+
   endGameClicked() {
     const winner = Math.floor(Math.random() * this._getNumPlayers()) + 1;
     fire.database().ref(this._getFirePrefix() + '/winner').set(winner);
@@ -129,6 +139,32 @@ class Game extends Component {
     return (
       <div>
         <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
+      </div>
+    );
+  }
+
+  renderPlayer(ind) {
+    const { gameState } = this.state;
+    return (
+      <div className='player' key={ ind }>
+        <div className='player-name'>
+          {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+          &nbsp;
+          { this.props.playerIndex === this.state.gameState.playerToMove 
+            ? <span className='your-turn'>(Your turn)</span>
+            : null }
+          { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
+        </div>
+        { gameState.hands ? this.renderPlayersHand(ind) : null }
+        <br />
+        Recently played
+        <br /><br />
+        { gameState.recentlyPlayed[ind]
+          ? <Hand
+            cards={ gameState.recentlyPlayed[ind] }
+            isYours={ false }
+            visible={ true } />
+          : null }
       </div>
     );
   }
@@ -165,32 +201,39 @@ class Game extends Component {
     );
   }
 
-  renderGameInPlay() {
+  renderDealStage() {
+
+  }
+
+  renderPlayStage() {
+
+  }
+
+  renderStage() {
     const { gameState } = this.state;
+    switch(this.gameType.getStage(gameState.currentStage).type) {
+      case 'deal':
+        console.log('deal stage');
+        return this.renderDealStage();
+      case 'play':
+        console.log('play stage');
+        return this.renderPlayStage();
+      default:
+        console.log('not recognized stage');
+        return null;
+    }
+  }
+
+  renderGameInPlay() {
     return (
       <div>
         { range(this._getNumPlayers()).map(ind =>
-          <div className='player'>
-            <div className='player-name'>
-              {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-              &nbsp;
-              { this.props.playerIndex === this.state.gameState.playerToMove 
-                ? <span className='your-turn'>(Your turn)</span>
-                : null }
-              { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
-            </div>
-            { gameState.hands ? this.renderPlayersHand(ind) : null }
-            <br />
-            Recently played
-            <br /><br />
-            { gameState.recentlyPlayed[ind]
-              ? <Hand
-                cards={ gameState.recentlyPlayed[ind] }
-                isYours={ false }
-                visible={ true } />
-              : null }
-          </div>
+          this.renderPlayer(ind)
         )}
+        { this.renderStage() }
+        { this.shouldShowNextStageButton()
+          ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
+          : null }
         { this.shouldShowEndGameButton()
           ? <button onClick={ this.endGameClicked.bind(this) }>End game</button>
           : null }

@@ -24,7 +24,7 @@ class Card extends Component {
                alt={ suit.name } 
                style={ {'width': '15px', 
                         'height': '15px', 
-                        'margin-bottom': '-2px'} } />
+                        'marginBottom': '-2px'} } />
           &nbsp;
           { rankToSymbol[card.rank] }
         </div>

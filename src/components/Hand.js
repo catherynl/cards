@@ -70,7 +70,9 @@ class Hand extends Component {
       <div>
         { this.props.isYours ? this.renderKeyListeners() : null }
         <div className="cards">
-          { this.props.cards.map((card, index) => this.renderCard(card, index)) }
+          { this.props.cards.length > 0
+            ? this.props.cards.map((card, index) => this.renderCard(card, index))
+            : <p>(Your hand is empty)</p> }
         </div>
       </div>
     );
