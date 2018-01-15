@@ -113,15 +113,19 @@ class App extends Component {
 
   render() {
     return (
-      <div>
-        { this.state.gameId
-          ? null
-          : this.renderChangeUsername() }
-        { this.state.gameId 
-          ? this.renderGame()
-          : this.renderGoToGame() }
-        <Chat username={ this.state.username } />
-        <br />
+      <div class='page'>
+        <div class='game-section'>
+          { this.state.gameId
+            ? null
+            : this.renderChangeUsername() }
+          { this.state.gameId 
+            ? this.renderGame()
+            : this.renderGoToGame() }
+        </div>
+        <div class='chat-section'>
+          <Chat username={ this.state.username } />
+          <br />
+        </div>
       </div>
     );
   }

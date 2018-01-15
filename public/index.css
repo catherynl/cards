@@ -12,7 +12,7 @@ button, .button {
 
 input, form input {
     margin-right: 5px;
-    height: 26px;
+    height: 24px;
     padding: 2px 2px 2px 2px;
 }
 
@@ -45,6 +45,26 @@ input, form input {
 
 .chat {
     border: solid 1px lightgray;
+    margin-top: 10px;
     padding: 10px 10px 10px 10px;
-    margin-top: 20px;
+}
+
+.chat ul {
+    margin-left: -15px;
+    width: 200px;
+}
+
+.chat-section {
+    display: inline-block;
+}
+
+.game-section {
+    float: left;
+    height: 2000px;
+    width: 700px;
+}
+
+.game-id {
+    font-size: 15px;
+    color: blue;
 }

@@ -202,8 +202,10 @@ class Game extends Component {
 
   render() {
     return (
-      <div>
-        { 'Game id: ' + this.props.gameId }
+      <div class='game'>
+        <div class='game-id'>
+          { 'Game id: ' + this.props.gameId }
+        </div>
         { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
         { this.shouldShowGameInPlay() ? this.renderGameInPlay() : null }
         { this.shouldShowGameFinished() ? this.renderGameFinished() : null }
