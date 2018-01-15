@@ -22,11 +22,19 @@ class CreateGameType extends Component {
     window.alert('submitted to database!');
   }
 
-  render() {
+  renderCreateInterface() {
     return (
       <div>
         { this.createDeck.render() }
         <button onClick={ this.submitClicked.bind(this) }>Submit Game Type</button>
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        { this.renderCreateInterface() }
       </div>
     );
   }

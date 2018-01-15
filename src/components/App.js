@@ -13,6 +13,7 @@ class App extends Component {
       username: 'anonymous monkey',
       playerIndex: 0,
       gameId: 0,
+      creatingGame: false,
     };
   }
 
@@ -85,6 +86,10 @@ class App extends Component {
     }
   }
 
+  newTypeClicked() {
+    this.setState({ creatingGame: true });
+  }
+
   renderChangeUsername() {
     return (
       <form onSubmit={ this.changeUsername.bind(this) }>
@@ -122,7 +127,15 @@ class App extends Component {
     );
   }
 
-  renderNotInGame() {
+  renderCreateGame() {
+    return (
+      <div className='create-game-type'>
+        <CreateGameType />
+      </div>
+    );
+  }
+
+  renderHome() {
     return (
       <div>
         Hello <span className='username'>{ this.state.username }</span>!
@@ -130,6 +143,7 @@ class App extends Component {
         <br />
         { this.renderChangeUsername() }
         { this.renderGoToGame() }
+        <button onClick={ this.newTypeClicked.bind(this) }>Create new game type</button>
       </div>
     );
   }
@@ -140,11 +154,10 @@ class App extends Component {
         <div className='game-section'>
           { this.state.gameId 
             ? this.renderGame()
-            : this.renderNotInGame()
+            : this.state.creatingGame
+            ? this.renderCreateGame()
+            : this.renderHome()
           }
-          <div className='create-game-type'>
-            <CreateGameType />
-          </div>
         </div>
         <div className='chat-section'>
           <Chat username={ this.state.username } />
