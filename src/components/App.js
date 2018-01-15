@@ -120,16 +120,26 @@ class App extends Component {
     );
   }
 
+  renderNotInGame() {
+    return (
+      <div>
+        Hello <span class='username'>{ this.state.username }</span>!
+        Welcome to Cards, VC's website for playing arbitrary card games :)
+        <br />
+        { this.renderChangeUsername() }
+        { this.renderGoToGame() }
+      </div>
+    );
+  }
+
   render() {
     return (
       <div class='page'>
         <div class='game-section'>
-          { this.state.gameId
-            ? null
-            : this.renderChangeUsername() }
           { this.state.gameId 
             ? this.renderGame()
-            : this.renderGoToGame() }
+            : this.renderNotInGame()
+          }
         </div>
         <div class='chat-section'>
           <Chat username={ this.state.username } />
