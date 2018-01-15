@@ -14,15 +14,26 @@ class App extends Component {
       playerIndex: 0,
       gameId: 0,
       creatingGame: false,
+      availableGameTypes: [],  // array of objects (with name, id fields)
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     window.addEventListener('keydown', function(e) {
       if(e.keyCode === 32 && e.target === document.body) {
         e.preventDefault();
       }
     });
+
+    const gameTypesRef = await fire.database().ref('gameTypes').once('value');
+    const availableGameTypesObj = gameTypesRef.val();
+    const availableGameTypes = [];
+    for (const key in availableGameTypesObj) {
+      if (availableGameTypesObj.hasOwnProperty(key)) {
+        availableGameTypes.push({ name: availableGameTypesObj[key].name, id: key });
+      }
+    }
+    this.setState({ availableGameTypes });
   }
 
   clearGameID() {
@@ -36,10 +47,10 @@ class App extends Component {
     this.inputUsername.value = '';
   }
 
-  newGameClicked() {
+  newGameClicked(gameTypeId) {
     const game = {
       finished: false,
-      gameTypeId: 'test_hearts',
+      gameTypeId: gameTypeId,
       players: [this.state.username],
       playerToMove: 0,
       started: false,
@@ -106,7 +117,21 @@ class App extends Component {
 
   renderNewGame() {
     return (
-      <button onClick={ this.newGameClicked.bind(this) }>New game</button>
+      <div>
+        Start new game:
+        <ul>
+        {
+          this.state.availableGameTypes.map(
+            (gameType, ind) => {
+              return (
+                <li key={ ind }>
+                  <button onClick={ () => this.newGameClicked(gameType.id) }>{ gameType.name + ' (' + gameType.id + ') ' }</button>
+                </li>
+              );}
+          )
+        }
+        </ul>
+      </div>
     );
   }
 
@@ -126,8 +151,8 @@ class App extends Component {
   renderGoToGame() {
     return (
       <div>
-        { this.renderNewGame() }
         { this.renderEnterGame() }
+        { this.renderNewGame() }
       </div>
     );
   }
