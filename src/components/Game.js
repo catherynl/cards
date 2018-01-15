@@ -169,23 +169,21 @@ class Game extends Component {
     const { gameState } = this.state;
     return (
       <div>
-        <ul>
-          { range(this._getNumPlayers()).map(ind =>
-            <li key={ ind }>
-              {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-              { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
-              <br />
-              { gameState.hands ? this.renderPlayersHand(ind) : null }
-              <br />Recently played<br />
-              { gameState.recentlyPlayed[ind]
-                ? <Hand
-                  cards={ gameState.recentlyPlayed[ind] }
-                  isYours={ false }
-                  visible={ true } />
-                : null }
-            </li>
-          )}
-        </ul>
+        { range(this._getNumPlayers()).map(ind =>
+          <div className='player'>
+            {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+            { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
+            <br />
+            { gameState.hands ? this.renderPlayersHand(ind) : null }
+            <br />Recently played<br />
+            { gameState.recentlyPlayed[ind]
+              ? <Hand
+                cards={ gameState.recentlyPlayed[ind] }
+                isYours={ false }
+                visible={ true } />
+              : null }
+          </div>
+        )}
         { this.shouldShowEndGameButton()
           ? <button onClick={ this.endGameClicked.bind(this) }>End game</button>
           : null }

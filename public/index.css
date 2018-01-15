@@ -1,9 +1,50 @@
+body {
+    margin: 20px 20px 20px 20px;
+    font-family: Helvetica;
+    font-size: 13px;
+}
+
+button, .button {
+    height: 30px;
+    margin: 10px 0px 10px 0px;
+    padding: 2px 20px 2px 20px;
+}
+
+input, form input {
+    margin-right: 5px;
+    height: 26px;
+    padding: 2px 2px 2px 2px;
+}
+
+.cards {
+    display: inline-block;
+    width: 70%;
+}
+
+.card-outer {
+    float: left;
+    margin-bottom: 15px;
+}
+
 .card {
-    height: 40px;
+    padding-top: 10px;
+    margin-right: 2px;
+    height: 30px;
     width: 40px;
     border: solid 1px gray;
+    text-align: center;
 }
 
 .card.selected {
     border-color: green;
+}
+
+.card-key-binding {
+    text-align: center;
+}
+
+.chat {
+    border: solid 1px lightgray;
+    padding: 10px 10px 10px 10px;
+    margin-top: 20px;
 }

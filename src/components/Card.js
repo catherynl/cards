@@ -18,17 +18,19 @@ class Card extends Component {
     const { card } = this.props;
     const suit = Suits[card.suit];
     return (
-      <div className="card">
-        <img src={ imageUrls[suit.name] } 
-             alt={ suit.name } 
-             style={ {'width': '15px', 
-                      'height': '15px', 
-                      'margin-bottom': '-2px'} } />
-        &nbsp;
-        { rankToSymbol[card.rank] }
-        &nbsp;
-        { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
-        &nbsp;
+      <div className='card-outer'>
+        <div className='card'>
+          <img src={ imageUrls[suit.name] } 
+               alt={ suit.name } 
+               style={ {'width': '15px', 
+                        'height': '15px', 
+                        'margin-bottom': '-2px'} } />
+          &nbsp;
+          { rankToSymbol[card.rank] }
+        </div>
+        <div className='card-key-binding'>
+          { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
+        </div>
         { this.props.selected ? 'selected!' : null }
       </div>
     );

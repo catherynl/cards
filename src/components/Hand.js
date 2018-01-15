@@ -67,7 +67,9 @@ class Hand extends Component {
     return (
       <div>
         { this.props.isYours ? this.renderKeyListeners() : null }
-        { this.props.cards.map((card, index) => this.renderCard(card, index)) }
+        <div className="cards">
+          { this.props.cards.map((card, index) => this.renderCard(card, index)) }
+        </div>
       </div>
     );
   }

@@ -78,7 +78,7 @@ class App extends Component {
     return (
       <form onSubmit={ this.changeUsername.bind(this) }>
         <input type="text" ref={ el => this.inputUsername = el } placeholder={ this.state.username } />
-        <input type="submit" value="Change username"/>
+        <input type="submit" class="button" value="Change username"/>
       </form>
     );
   }
