@@ -11,10 +11,9 @@ const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's'
 
 class Hand extends Component {
 
-  constructor(props) {
-    super(props); // cards [], cardsSelected, isYours (boolean), visible (boolean),
-                  // onSelect (callback that takes cardIndex), onPlayCards (callback)
-  }
+    // props:
+    // cards [], cardsSelected, isYours (boolean), visible (boolean),
+    // onSelect (callback that takes cardIndex), onPlayCards (callback)
 
   _getKeyBinding(cardIndex) {
     return KEYS[cardIndex];

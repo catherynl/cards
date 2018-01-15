@@ -10,9 +10,7 @@ const imageUrls = {
 
 class Card extends Component {
 
-  constructor(props) {
-    super(props); // card: { suit, rank}, visible, selected, keyBinding
-  }
+  // props: card: { suit, rank}, visible, selected, keyBinding
 
   renderVisibleCard() {
     const { card } = this.props;

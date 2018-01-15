@@ -4,9 +4,7 @@ import { range } from 'lodash';
 
 class Deck extends Component {
 
-  constructor(props) {
-    super(props);  // cards (array of cards)
-  }
+  // props: cards (array of cards)
 
   getCards() {
     return this.props.cards;

@@ -213,10 +213,8 @@ class Game extends Component {
     const { gameState } = this.state;
     switch(this.gameType.getStage(gameState.currentStage).type) {
       case 'deal':
-        console.log('deal stage');
         return this.renderDealStage();
       case 'play':
-        console.log('play stage');
         return this.renderPlayStage();
       default:
         console.log('not recognized stage');
