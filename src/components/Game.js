@@ -39,7 +39,8 @@ class Game extends Component {
 
     const gameTypeRef = fire.database().ref('gameTypes/' + newGameState.gameTypeId);
     const gameType = await gameTypeRef.once('value');
-    this.gameType = new GameType(gameType.val())
+    this.gameType = new GameType(gameType.val());
+    this.setState({ minPlayers: this.gameType.getMinPlayers() });
 
     const listenerCallback = snapshot => {
       const { gameState } = this.state;
@@ -60,10 +61,6 @@ class Game extends Component {
     gamesRef.on('child_changed', listenerCallback);
     gamesRef.on('child_added', listenerCallback);
     gamesRef.on('child_removed', removalListenerCallback);
-
-    const gameTypeId = currentState.val().gameTypeId;
-    const gameTypeSnapshot = await fire.database().ref('gameTypes/' + gameTypeId).once('value');
-    this.setState({ minPlayers: gameTypeSnapshot.val().minPlayers });
   }
 
   onCardSelected(cardIndex) {
@@ -95,7 +92,7 @@ class Game extends Component {
   }
 
   startGameClicked() {
-    const deck = new Deck();
+    const deck = new Deck({ cards: this.gameType.getDeck() });
     const hands = deck.deal(this._getNumPlayers());
     const numCardsInMyHand = hands[this.props.playerIndex].length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });

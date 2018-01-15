@@ -8,38 +8,22 @@ const RANKS = 13;
 class Deck extends Component {
 
   constructor(props) {
-    super(props);
-    this.state = {
-      cards: []
-    };
-    this.initializeCards();
-    this.shuffle();
-  }
-
-  initializeCards() {
-    range(RANKS).forEach(rank => {
-      Object.keys(Suits).forEach(suit => {
-        let card = {
-          rank: rank + 1,
-          suit: suit
-        }
-        this.state.cards.push(card);
-      });
-    });
+    super(props);  // cards (array of cards)
   }
 
   getCards() {
-    return this.state.cards;
+    return this.props.cards;
   }
 
   shuffle() {
-    const { cards } = this.state;
+    const { cards } = this.props;
     for (var i = cards.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var temp = cards[i];
       cards[i] = cards[j];
       cards[j] = temp;
     }
+    return cards;
   }
 
   // TODO: generalize this to allow other sorting orders
@@ -49,21 +33,22 @@ class Deck extends Component {
   cardValue(card) {
     return card.suit * 100 + card.rank;
   }
+  // hands.forEach(hand => {hand.sort(this.cardComparison.bind(this))});
 
+  // deal out all cards into <numPlayers> unsorted hands.
   deal(numPlayers) {
-    const { cards } = this.state;
-    let hands = range(numPlayers).map(i => []);
+    const { cards } = this.props;
+    const hands = range(numPlayers).map(i => []);
     range(cards.length).forEach(i => {
       hands[i % numPlayers].push(cards[i]);
     });
-    hands.forEach(hand => {hand.sort(this.cardComparison.bind(this))});
     return hands;
   }
 
   render() {
     return (
       <div>
-        { this.state.cards.map((card, index) => <Card key={ index } card={ card } /> ) }
+        { this.props.cards.map((card, index) => <Card key={ index } card={ card } /> ) }
       </div>
     );
   }
