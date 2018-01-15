@@ -69,6 +69,10 @@ class Game extends Component {
     this.setState({ cardsSelected });
   }
 
+  isYourTurn() {
+    return this.props.playerIndex === this.state.gameState.playerToMove;
+  }
+
   shouldShowStartGameButton() {
     const minPlayersReached = (this._getNumPlayers() >= this.state.minPlayers);
     return minPlayersReached && !this.state.gameState.started;
@@ -76,7 +80,11 @@ class Game extends Component {
 
   shouldShowPlayersTurn(ind) {
     const { gameState } = this.state;
-    return (gameState.started) && (ind === gameState.playerToMove);
+    return !this.isYourTurn() && (ind === gameState.playerToMove);
+  }
+
+  shouldShowPlayerActions() {
+    return this.isYourTurn();
   }
 
   shouldShowGameInPlay() {
@@ -105,6 +113,10 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
+  dealCardsClicked() {
+    console.log('deal cards clicked');
+  }
+
   playCardsClicked() {
     const myHand = this.state.gameState.hands[this.props.playerIndex];
     const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
@@ -116,13 +128,16 @@ class Game extends Component {
     const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
     this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
     fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex).set(remainingHand);
-    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
-    fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
   nextStageClicked() {
     const nextStage = this.state.gameState.currentStage + 1;
     fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
+  }
+
+  endTurnClicked() {
+    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
+    fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
   endGameClicked() {
@@ -153,7 +168,8 @@ class Game extends Component {
           { this.props.playerIndex === this.state.gameState.playerToMove 
             ? <span className='your-turn'>(Your turn)</span>
             : null }
-          { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
+          { this.shouldShowPlayersTurn(ind) ? <span className='your-turn'>(This player's turn)</span> : null }
+          { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         </div>
         { gameState.hands ? this.renderPlayersHand(ind) : null }
         <br />
@@ -191,12 +207,21 @@ class Game extends Component {
     }
   }
 
-  renderPlayersTurn() {
+  renderPlayerActions() {
     return (
-      <div>
-        { this.props.playerIndex === this.state.gameState.playerToMove
+      <div className='player-actions'>
+        { true
+          ? <button onClick={ this.dealCardsClicked.bind(this) }>Deal card</button>
+          : null
+        }
+        { true
           ? <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
-          : <div>(This player's turn)</div> }
+          : null
+        }
+        { true
+          ? <button onClick={ this.endTurnClicked.bind(this) }>End turn</button>
+          : null
+        }
       </div>
     );
   }
