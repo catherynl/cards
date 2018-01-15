@@ -17,7 +17,7 @@ class Game extends Component {
         players: [],
         recentlyPlayed: [] },
       cardsSelected: [],  // booleans, one for each card in this player's hand
-      minPlayers: 10000  // really big number
+      minPlayers: 10000  // prevents "Start Game" from being shown too early
     };
   }
 

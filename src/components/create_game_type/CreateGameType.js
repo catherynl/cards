@@ -8,7 +8,7 @@ class CreateGameType extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      gameTypeId: '-L2lZUVmmtuzjlQW0xMx'
+      gameTypeId: 'test_hearts'
     };
     this.createDeck = new CreateDeck();
   }

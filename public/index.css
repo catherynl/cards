@@ -15,7 +15,7 @@ button, .button {
 input, form input {
     margin-right: 5px;
     height: 24px;
-    padding: 2px 2px 2px 2px;
+    padding: 2px 2px 2px 5px;
 }
 
 .cards {
@@ -90,10 +90,10 @@ input, form input {
     display: inline;
 }
 
-.your-turn {
-    color: red;
-}
-
 .username {
     color: blue;
+}
+
+.your-turn {
+    color: red;
 }
