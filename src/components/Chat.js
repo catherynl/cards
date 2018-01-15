@@ -12,7 +12,7 @@ class Chat extends Component {
 
   componentWillMount() {
     /* Create reference to messages in Firebase Database */
-    const messagesRef = fire.database().ref('messages').orderByKey().limitToLast(100);
+    const messagesRef = fire.database().ref('messages').orderByKey().limitToLast(20);
     messagesRef.on('child_added', snapshot => {
       /* Update React state when message is added at Firebase Database */
       const message = { text: snapshot.val(), id: snapshot.key };
@@ -48,7 +48,7 @@ class Chat extends Component {
                 <li key={ messageObject.id }>
                   {messageObject.text.username + ': ' + messageObject.text.message}
                 </li>
-            ).reverse()
+            )
           }
         </ul>
       </div>

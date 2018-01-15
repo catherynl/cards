@@ -2,6 +2,7 @@ body {
     margin: 20px 20px 20px 20px;
     font-family: Helvetica;
     font-size: 13px;
+    line-height: 1.5;
 }
 
 button, .button {
@@ -67,4 +68,8 @@ input, form input {
 .game-id {
     font-size: 15px;
     color: blue;
+}
+
+.player {
+    margin-top: 10px;
 }
