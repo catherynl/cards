@@ -9,6 +9,8 @@ class GameType {
     this.minPlayers = gameType.minPlayers;
     this.maxPlayers = gameType.maxPlayers;
     this.stages = gameType.stages;
+
+    this.cardCompareFunction = this._getCompareFunction();
   }
 
   getName() {
@@ -39,8 +41,42 @@ class GameType {
     return this.stages;
   }
 
-  sampleFunction() {
-    return;
+  // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
+  _getCompareFunction() {
+    let getCardComparisonRank;
+    switch (this.rankOrder) {
+      case 'K-high':
+        getCardComparisonRank = (card) => card.rank;
+        break;
+      case 'A-high':
+        getCardComparisonRank = (card) => card.rank === 1 ? 13 : card.rank - 1;
+        break;
+      case '2-high':
+        getCardComparisonRank = (card) => card.rank < 3 ? card.rank + 11 : card.rank - 2;
+        break;
+      default:
+        console.log('ERROR: invalid rankOrder encountered:', this.rankOrder);
+        return;
+    }
+    let getCardValue;
+    switch (this.handSortOrder) {
+      case 'suitFirst':
+        getCardValue = (card) => card.suit * 100 + getCardComparisonRank(card);   // assumes card rank will never exceed 100
+        break;
+      case 'rankFirst':
+        getCardValue = (card) => getCardComparisonRank(card) * 10 + card.suit;    // assumes there will never be more than 10 suits
+        break;
+      default:
+        console.log('ERROR: invalid handSortOrder encountered:', this.handSortOrder);
+        return;
+    }
+    const cardCompareFunction = (card1, card2) => getCardValue(card1) - getCardValue(card2);
+    return cardCompareFunction;
+  }
+
+  // hand: array of cards
+  sortHand(hand) {
+    return hand.sort(this.cardCompareFunction);
   }
 }
 

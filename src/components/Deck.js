@@ -12,7 +12,7 @@ class Deck extends Component {
     return this.props.cards;
   }
 
-  shuffle() {
+  _shuffle() {
     const { cards } = this.props;
     for (var i = cards.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -23,18 +23,9 @@ class Deck extends Component {
     return cards;
   }
 
-  // TODO: generalize this to allow other sorting orders
-  cardComparison(card1, card2) {
-    return this.cardValue(card1) - this.cardValue(card2);
-  }
-  cardValue(card) {
-    return card.suit * 100 + card.rank;
-  }
-  // hands.forEach(hand => {hand.sort(this.cardComparison.bind(this))});
-
   // deal out all cards into <numPlayers> unsorted hands.
   deal(numPlayers) {
-    const { cards } = this.props;
+    const cards = this._shuffle();
     const hands = range(numPlayers).map(i => []);
     range(cards.length).forEach(i => {
       hands[i % numPlayers].push(cards[i]);

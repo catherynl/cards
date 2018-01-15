@@ -93,6 +93,7 @@ class Game extends Component {
   startGameClicked() {
     const deck = new Deck({ cards: this.gameType.getDeck() });
     const hands = deck.deal(this._getNumPlayers());
+    hands.forEach(hand => this.gameType.sortHand(hand));
     const numCardsInMyHand = hands[this.props.playerIndex].length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
