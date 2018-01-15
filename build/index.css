@@ -7,19 +7,19 @@ body {
 
 button, .button {
     height: 30px;
-    margin-bottom: 20px;
-    margin-top: 5px;
+    margin: 5px 20px 5px 0px;
     padding: 2px 20px 2px 20px;
 }
 
 input, form input {
     margin-right: 5px;
     height: 24px;
-    padding: 2px 2px 2px 2px;
+    padding: 2px 2px 2px 5px;
 }
 
 .cards {
     display: inline-block;
+    margin-top: 5px;
     width: 90%;
 }
 
@@ -61,7 +61,6 @@ input, form input {
 
 .chat ul {
     margin-left: -15px;
-    margin-top: -10px;
     width: 200px;
     line-height: 1.5;
 }
@@ -90,10 +89,14 @@ input, form input {
     display: inline;
 }
 
-.your-turn {
-    color: red;
+.player-actions {
+    margin-bottom: 10px;
 }
 
 .username {
     color: blue;
+}
+
+.your-turn {
+    color: red;
 }
