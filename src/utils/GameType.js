@@ -29,7 +29,7 @@ class GameType {
   getMaxPlayers() {
     return this.maxPlayers;
   }
-  getStage() {
+  getStages() {
     return this.stages;
   }
 
