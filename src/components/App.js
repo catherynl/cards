@@ -87,7 +87,7 @@ class App extends Component {
     return (
       <form onSubmit={ this.changeUsername.bind(this) }>
         <input type="text" ref={ el => this.inputUsername = el } placeholder={ this.state.username } />
-        <input type="submit" class="button" value="Change username"/>
+        <input type="submit" className="button" value="Change username"/>
       </form>
     );
   }
@@ -102,7 +102,7 @@ class App extends Component {
     return (
       <form onSubmit={ this.enterGameClicked.bind(this) }>
         <input type="text" ref={ el => this.inputGameId = el } placeholder={ 'game id' } />
-        <input type="submit" class="button" value="Enter game"/>
+        <input type="submit" className="button" value="Enter game"/>
       </form>
     );
   }
@@ -122,8 +122,8 @@ class App extends Component {
 
   render() {
     return (
-      <div class='page'>
-        <div class='game-section'>
+      <div className='page'>
+        <div className='game-section'>
           { this.state.gameId
             ? null
             : this.renderChangeUsername() }
@@ -131,7 +131,7 @@ class App extends Component {
             ? this.renderGame()
             : this.renderGoToGame() }
         </div>
-        <div class='chat-section'>
+        <div className='chat-section'>
           <Chat username={ this.state.username } />
           <br />
         </div>

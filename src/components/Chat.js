@@ -42,7 +42,7 @@ class Chat extends Component {
 
         <form onSubmit={ this.addMessage.bind(this) }>
           <input type="text" ref={ el => this.inputMessage = el } />
-          <input type="submit" class="button" value="Send message"/>
+          <input type="submit" className="button" value="Send message"/>
         </form>
 
         <ul>
