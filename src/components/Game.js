@@ -156,12 +156,8 @@ class Game extends Component {
     return (
       <div>
         { this.props.playerIndex === this.state.gameState.playerToMove
-          ? <div>
-              Your turn!
-              <br />
-              <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
-            </div>
-          : <div>This player's turn!</div> }
+          ? <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
+          : <div>(This player's turn)</div> }
       </div>
     );
   }
@@ -171,12 +167,18 @@ class Game extends Component {
     return (
       <div>
         { range(this._getNumPlayers()).map(ind =>
-          <div className='player'>
-            {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-            { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
-            <br />
+          <div class='player'>
+            <div class='player-name'>
+              {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+              { this.props.playerIndex === this.state.gameState.playerToMove 
+                ? <div>(Your turn)</div>
+                : null }
+              { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
+            </div>
             { gameState.hands ? this.renderPlayersHand(ind) : null }
-            <br />Recently played<br />
+            <br />
+            Recently played
+            <br /><br />
             { gameState.recentlyPlayed[ind]
               ? <Hand
                 cards={ gameState.recentlyPlayed[ind] }

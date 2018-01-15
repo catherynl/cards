@@ -1,5 +1,5 @@
 body {
-    margin: 20px 20px 20px 20px;
+    margin: 30px 30px 30px 30px;
     font-family: Helvetica;
     font-size: 13px;
     line-height: 1.5;
@@ -7,7 +7,7 @@ body {
 
 button, .button {
     height: 30px;
-    margin: 10px 0px 10px 0px;
+    margin: 15px 0px 15px 0px;
     padding: 2px 20px 2px 20px;
 }
 
@@ -19,7 +19,7 @@ input, form input {
 
 .cards {
     display: inline-block;
-    width: 70%;
+    width: 90%;
 }
 
 .card-outer {
@@ -36,8 +36,14 @@ input, form input {
     text-align: center;
 }
 
+.card.hidden {
+    background-color: lightgray;
+    float: left;
+    margin-bottom: 10px;
+}
+
 .card.selected {
-    border-color: green;
+    border-color: #00dddd;
 }
 
 .card-key-binding {
@@ -62,7 +68,7 @@ input, form input {
 .game-section {
     float: left;
     height: 2000px;
-    width: 700px;
+    width: 70%;
 }
 
 .game-id {
@@ -72,4 +78,8 @@ input, form input {
 
 .player {
     margin-top: 10px;
+}
+
+.player-name {
+    display: inline;
 }

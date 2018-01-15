@@ -19,7 +19,7 @@ class Card extends Component {
     const suit = Suits[card.suit];
     return (
       <div className='card-outer'>
-        <div className='card'>
+        <div className={this.props.selected ? 'card selected' : 'card'}>
           <img src={ imageUrls[suit.name] } 
                alt={ suit.name } 
                style={ {'width': '15px', 
@@ -31,13 +31,12 @@ class Card extends Component {
         <div className='card-key-binding'>
           { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
         </div>
-        { this.props.selected ? 'selected!' : null }
       </div>
     );
   }
 
   renderHiddenCard() {
-    return (<div>Hidden</div>)
+    return (<div className='card hidden'>?</div>)
   }
 
   render() {
