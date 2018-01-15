@@ -6,7 +6,7 @@ import CreateDeck from './CreateDeck';
 class CreateGameType extends Component {
 
   constructor(props) {
-    super(props);
+    super(props);  // backToHome (callback)
     this.state = {
       gameTypeId: 'test_hearts'
     };
@@ -20,6 +20,11 @@ class CreateGameType extends Component {
   submitClicked() {
     fire.database().ref(this._getFirePrefix() + '/deck').set(this.createDeck.getCards());
     window.alert('submitted to database!');
+    this.props.backToHome();
+  }
+
+  cancelClicked() {
+    this.props.backToHome();
   }
 
   renderCreateInterface() {
@@ -27,6 +32,7 @@ class CreateGameType extends Component {
       <div>
         { this.createDeck.render() }
         <button onClick={ this.submitClicked.bind(this) }>Submit Game Type</button>
+        <button onClick={ this.cancelClicked.bind(this) }>Cancel</button>
       </div>
     );
   }

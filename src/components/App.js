@@ -91,6 +91,10 @@ class App extends Component {
     this.setState({ creatingGame: true });
   }
 
+  doneCreatingType() {
+    this.setState({ creatingGame: false });
+  }
+
   renderChangeUsername() {
     return (
       <form onSubmit={ this.changeUsername.bind(this) }>
@@ -131,7 +135,7 @@ class App extends Component {
   renderCreateGame() {
     return (
       <div className='create-game-type'>
-        <CreateGameType />
+        <CreateGameType backToHome={ this.doneCreatingType.bind(this) } />
       </div>
     );
   }
