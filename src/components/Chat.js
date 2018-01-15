@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import fire from '../fire';
+import KeyHandler from 'react-key-handler';
 
 class Chat extends Component {
 
@@ -21,12 +22,16 @@ class Chat extends Component {
   }
 
   addMessage(e) {
-    e.preventDefault(); // <- prevent form submit from reloading the page
+    e.preventDefault();
     fire.database().ref('messages').push({
       username: this.props.username,
       message: this.inputMessage.value
     });
     this.inputMessage.value = '';
+  }
+
+  focusOnChat() {
+    this.inputMessage.focus();
   }
 
   render() {
@@ -35,9 +40,9 @@ class Chat extends Component {
 
         Chat box
 
-        <form onSubmit={this.addMessage.bind(this)}>
+        <form onSubmit={ this.addMessage.bind(this) }>
           <input type="text" ref={ el => this.inputMessage = el } />
-          <input type="submit" class="button"/>
+          <input type="submit" class="button" value="Send message"/>
         </form>
 
         <ul>
@@ -51,6 +56,8 @@ class Chat extends Component {
             )
           }
         </ul>
+
+        <KeyHandler keyEventName="keyup" keyValue=" " onKeyHandle={() => this.focusOnChat()} />
       </div>
     );
   }

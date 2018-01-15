@@ -14,6 +14,14 @@ class App extends Component {
     };
   }
 
+  componentWillMount() {
+    window.addEventListener('keydown', function(e) {
+      if(e.keyCode == 32 && e.target == document.body) {
+        e.preventDefault();
+      }
+    });
+  }
+
   clearGameID() {
     this.setState({ gameId: 0 });
   }
@@ -39,7 +47,8 @@ class App extends Component {
     this.setState({ gameId: gameRef.key });
   }
 
-  async enterGameClicked() {
+  async enterGameClicked(e) {
+    e.preventDefault();
     const gameId = this.inputGameId.value;
     if (!gameId) {
       window.alert('Invalid game id');
@@ -91,10 +100,10 @@ class App extends Component {
 
   renderEnterGame() {
     return (
-      <div>
+      <form onSubmit={ this.enterGameClicked.bind(this) }>
         <input type="text" ref={ el => this.inputGameId = el } placeholder={ 'game id' } />
-        <button onClick={ this.enterGameClicked.bind(this) }>Enter game</button>
-      </div>
+        <input type="submit" class="button" value="Enter game"/>
+      </form>
     );
   }
 
