@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import fire from '../fire';
+
 import Chat from './Chat';
 import Game from './Game';
+import CreateGameType from './create_game_type/CreateGameType';
 
 class App extends Component {
 
@@ -16,7 +18,7 @@ class App extends Component {
 
   componentWillMount() {
     window.addEventListener('keydown', function(e) {
-      if(e.keyCode == 32 && e.target == document.body) {
+      if(e.keyCode === 32 && e.target === document.body) {
         e.preventDefault();
       }
     });
@@ -135,6 +137,9 @@ class App extends Component {
   render() {
     return (
       <div className='page'>
+        <div>
+          <CreateGameType />
+        </div>
         <div className='game-section'>
           { this.state.gameId 
             ? this.renderGame()
