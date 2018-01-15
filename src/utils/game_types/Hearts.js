@@ -13,13 +13,14 @@ const TestHearts = {
             name: 'Deal Stage',
             type: 'deal',
             dealCountPerPlayer: 13,
-            handleRemaining: 'keepInDeck'
+            handleRemaining: 'keepInDeck',
+            availableActions: [false, false, false, false, true]
         },
         {
             name: 'Play Stage',
             type: 'play',
             nextPlayerRules: 'trickTaking',
-            availableActions: [true, false, false, true]
+            availableActions: [true, false, false, true, false]
         }
     ]
 };

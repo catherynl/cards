@@ -113,10 +113,6 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
-  dealCardsClicked() {
-    console.log('deal cards clicked');
-  }
-
   playCardsClicked() {
     const myHand = this.state.gameState.hands[this.props.playerIndex];
     const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
@@ -130,14 +126,26 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex).set(remainingHand);
   }
 
-  nextStageClicked() {
-    const nextStage = this.state.gameState.currentStage + 1;
-    fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
+  drawCardsClicked() {
+    console.log('deal cards clicked');
+  }
+
+  passCardsClicked() {
+    return;
   }
 
   endTurnClicked() {
     const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
     fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
+  }
+
+  dealCardsClicked() {
+    return;
+  }
+
+  nextStageClicked() {
+    const nextStage = this.state.gameState.currentStage + 1;
+    fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
   }
 
   endGameClicked() {
@@ -172,9 +180,8 @@ class Game extends Component {
           { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         </div>
         { gameState.hands ? this.renderPlayersHand(ind) : null }
-        <br />
         Recently played
-        <br /><br />
+        <br />
         { gameState.recentlyPlayed[ind]
           ? <Hand
             cards={ gameState.recentlyPlayed[ind] }
@@ -210,16 +217,24 @@ class Game extends Component {
   renderPlayerActions() {
     return (
       <div className='player-actions'>
-        { true
-          ? <button onClick={ this.dealCardsClicked.bind(this) }>Deal card</button>
-          : null
-        }
-        { true
+        { this.gameType.getActionInStage(this.state.gameState.currentStage, 0)
           ? <button onClick={ this.playCardsClicked.bind(this) }>Play card</button>
           : null
         }
-        { true
+        { this.gameType.getActionInStage(this.state.gameState.currentStage, 1)
+          ? <button onClick={ this.drawCardsClicked.bind(this) }>Draw card</button>
+          : null
+        }
+        { this.gameType.getActionInStage(this.state.gameState.currentStage, 2)
+          ? <button onClick={ this.passCardsClicked.bind(this) }>Pass cards</button>
+          : null
+        }
+        { this.gameType.getActionInStage(this.state.gameState.currentStage, 3)
           ? <button onClick={ this.endTurnClicked.bind(this) }>End turn</button>
+          : null
+        }
+        { this.gameType.getActionInStage(this.state.gameState.currentStage, 4)
+          ? <button onClick={ this.dealCardsClicked.bind(this) }>Deal cards</button>
           : null
         }
       </div>

@@ -1,7 +1,6 @@
 class GameType {
 
   constructor(gameType) {
-    console.log(gameType);
     this.name = gameType.name;
     this.deck = gameType.deck;
     this.rankOrder = gameType.rankOrder;
@@ -47,6 +46,10 @@ class GameType {
 
   getNumStages() {
     return this.stages.length;
+  }
+
+  getActionInStage(stageIndex, actionIndex) {
+    return this.stages[stageIndex].availableActions[actionIndex];
   }
 
   // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
