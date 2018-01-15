@@ -1,0 +1,99 @@
+body {
+    margin: 30px 30px 30px 30px;
+    font-family: Helvetica;
+    font-size: 13px;
+    line-height: 2.5;
+}
+
+button, .button {
+    height: 30px;
+    margin-bottom: 20px;
+    margin-top: 5px;
+    padding: 2px 20px 2px 20px;
+}
+
+input, form input {
+    margin-right: 5px;
+    height: 24px;
+    padding: 2px 2px 2px 2px;
+}
+
+.cards {
+    display: inline-block;
+    width: 90%;
+}
+
+.card-outer {
+    float: left;
+    margin-bottom: 15px;
+}
+
+.card {
+    box-sizing: border-box;
+    padding-top: 5px;
+    margin-right: 2px;
+    height: 40px;
+    width: 40px;
+    border: solid 1px gray;
+    text-align: center;
+}
+
+.card.hidden {
+    background-color: lightgray;
+    float: left;
+    margin-bottom: 10px;
+}
+
+.card.selected {
+    border-color: #00dddd;
+    border-width: 2px;
+}
+
+.card-key-binding {
+    text-align: center;
+}
+
+.chat {
+    border: solid 1px lightgray;
+    margin-top: 10px;
+    padding: 10px 10px 10px 10px;
+}
+
+.chat ul {
+    margin-left: -15px;
+    margin-top: -10px;
+    width: 200px;
+    line-height: 1.5;
+}
+
+.chat-section {
+    display: inline-block;
+}
+
+.game-section {
+    float: left;
+    height: 2000px;
+    width: 70%;
+}
+
+.game-id {
+    font-size: 15px;
+    color: blue;
+}
+
+.player {
+    margin-top: 10px;
+}
+
+.player-name {
+    color: green;
+    display: inline;
+}
+
+.your-turn {
+    color: red;
+}
+
+.username {
+    color: blue;
+}

@@ -170,8 +170,9 @@ class Game extends Component {
           <div className='player'>
             <div className='player-name'>
               {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
+              &nbsp;
               { this.props.playerIndex === this.state.gameState.playerToMove 
-                ? <div>(Your turn)</div>
+                ? <span className='your-turn'>(Your turn)</span>
                 : null }
               { this.shouldShowPlayersTurn(ind) ? this.renderPlayersTurn() : null }
             </div>
@@ -207,8 +208,9 @@ class Game extends Component {
     return (
       <div className='game'>
         <div className='game-id'>
-          { 'Game id: ' + this.props.gameId }
+          Game ID: {this.props.gameId }
         </div>
+        Give this id to your friends so they can join your game!
         { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
         { this.shouldShowGameInPlay() ? this.renderGameInPlay() : null }
         { this.shouldShowGameFinished() ? this.renderGameFinished() : null }
