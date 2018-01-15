@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import fire from '../../fire';
 
+import CreateGameBasics from './CreateGameBasics';
 import CreateDeck from './CreateDeck';
 
 class CreateGameType extends Component {
@@ -8,17 +9,13 @@ class CreateGameType extends Component {
   constructor(props) {
     super(props);  // backToHome (callback)
     this.state = {
-      gameTypeId: 'test_hearts',
-      stage: 0,   // 0: createDeck, 1: finished
+      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: finished
 
       // props for CreateDeck
       rankOrder: 'A-high',
       handSortOrder: 'suitFirst'
     };
-  }
-
-  _getFirePrefix() {
-    return 'gameTypes/' + this.state.gameTypeId;
+    // other fields: deck, name, minPlayers, maxPlayers
   }
 
   rankOrderChanged(e) {
@@ -29,20 +26,43 @@ class CreateGameType extends Component {
     this.setState({ handSortOrder: e.target.value });
   }
 
-  setDeck(deck) {
-    this.deck = deck;
+  _incrementStage() {
     const { stage } = this.state;
     this.setState({ stage: stage + 1 });
   }
 
+  setBasics(name, minPlayers, maxPlayers) {
+    this.name = name;
+    this.minPlayers = minPlayers;
+    this.maxPlayers = maxPlayers;
+    this._incrementStage();
+  }
+
+  setDeck(deck) {
+    this.deck = deck;
+    this._incrementStage();
+  }
+
   submitClicked() {
-    fire.database().ref(this._getFirePrefix() + '/deck').set(this.deck);
-    window.alert('submitted to database!');
+    const gameType = { name: this.name,
+                       minPlayers: this.minPlayers,
+                       maxPlayers: this.maxPlayers,
+                       deck: this.deck,
+                       rankOrder: this.state.rankOrder,
+                       handSortOrder: this.state.handSortOrder };
+    const gameTypeRef = fire.database().ref('/gameTypes').push(gameType);
+    window.alert('Submitted "' + this.name + ' (' + gameTypeRef.key + ')" to database!');
     this.props.backToHome();
   }
 
   cancelClicked() {
     this.props.backToHome();
+  }
+
+  renderCreateBasics() {
+    return (
+      <CreateGameBasics onFinish={ this.setBasics.bind(this) } />
+    );
   }
 
   renderCreateDeck() {
@@ -58,19 +78,42 @@ class CreateGameType extends Component {
 
   renderSubmit() {
     return (
-      <div>
-        Created a deck containing { this.deck.length } cards!
-        <br />
-        <button onClick={ this.submitClicked.bind(this) }>Submit Game Type</button>
-      </div>
+      <button onClick={ this.submitClicked.bind(this) }>Submit Game Type</button>
     );
+  }
+
+  renderMessage() {
+    switch (this.state.stage) {
+      case 0:
+        return (
+          <p>Let's create a new type of game...</p>
+        );
+      case 1:
+        return (
+          <p>
+            Great, you've named your game { this.name }!
+            It supports at least { this.minPlayers } player(s) and at most { this.maxPlayers }.
+          </p>
+        );
+      case 2:
+        return (
+          <p>
+            Created a deck containing { this.deck.length } cards!
+            Cards are ranked according to { this.state.rankOrder }, and hands will be sorted { this.state.handSortOrder }.
+          </p>
+        );
+      default:
+        console.log('ERROR. invalid create game stage:', this.state.stage);
+    }
   }
 
   renderCreateInterface() {
     switch (this.state.stage) {
       case 0:
-        return this.renderCreateDeck();
+        return this.renderCreateBasics();
       case 1:
+        return this.renderCreateDeck();
+      case 2:
         return this.renderSubmit();
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
@@ -80,8 +123,9 @@ class CreateGameType extends Component {
   render() {
     return (
       <div>
-        <p>Let's create a new type of game...</p>
+        { this.renderMessage() }
         { this.renderCreateInterface() }
+        <br />
         <button onClick={ this.cancelClicked.bind(this) }>Cancel</button>
       </div>
     );

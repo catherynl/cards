@@ -181,7 +181,7 @@ class CreateDeck extends Component {
   render() {
     return (
       <div>
-        First, create the deck.
+        Next, create the deck.
         <br />
         { this.renderNonCustomCardsInterface() }
         { this.renderCustomCardsInterface() }
