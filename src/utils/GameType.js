@@ -1,11 +1,11 @@
 class GameType {
 
-  constructor() {
-    super();
+  constructor(gameType) {
+    console.log(gameType);
   }
 
   sampleFunction() {
-    return (<div className='card hidden'>?</div>)
+    return;
   }
 }
 

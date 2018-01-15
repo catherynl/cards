@@ -4,6 +4,7 @@ import { range } from 'lodash';
 
 import Deck from './Deck';
 import Hand from './Hand';
+import GameType from '../utils/GameType';
 
 class Game extends Component {
 
@@ -19,6 +20,7 @@ class Game extends Component {
       cardsSelected: [],  // booleans, one for each card in this player's hand
       minPlayers: 10000  // prevents "Start Game" from being shown too early
     };
+    this.gameType = 0;
   }
 
   _getFirePrefix() {
@@ -34,6 +36,10 @@ class Game extends Component {
     const currentState = await gamesRef.once('value');
     const newGameState = Object.assign(this.state.gameState, currentState.val());
     this.setState({ gameState: newGameState });
+
+    const gameTypeRef = fire.database().ref('gameTypes/' + newGameState.gameTypeId);
+    const gameType = await gameTypeRef.once('value');
+    this.gameType = new GameType(gameType.val())
 
     const listenerCallback = snapshot => {
       const { gameState } = this.state;
