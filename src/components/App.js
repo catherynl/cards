@@ -3,6 +3,7 @@ import fire from '../fire';
 
 import Chat from './Chat';
 import Game from './Game';
+import TestHearts from '../utils/game_types/Hearts';
 import CreateGameType from './create_game_type/CreateGameType';
 
 class App extends Component {
@@ -135,16 +136,17 @@ class App extends Component {
   }
 
   render() {
+    console.log(TestHearts);
     return (
       <div className='page'>
-        <div>
-          <CreateGameType />
-        </div>
         <div className='game-section'>
           { this.state.gameId 
             ? this.renderGame()
             : this.renderNotInGame()
           }
+          <div className='create-game-type'>
+            <CreateGameType />
+          </div>
         </div>
         <div className='chat-section'>
           <Chat username={ this.state.username } />

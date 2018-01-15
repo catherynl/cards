@@ -53,7 +53,6 @@ class Game extends Component {
         gameState.hands = gameState.hands.map((el) => []);
         this.setState({ gameState });
       } else {
-        console.log('WARNING: a field other than "hands" has been removed from the game state database:', snapshot.key);
         window.alert('WARNING: a field other than "hands" has been removed from the game state database:', snapshot.key);
       }
     };

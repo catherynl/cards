@@ -14,21 +14,27 @@ class GameType {
   getName() {
     return this.name;
   }
+
   getDeck() {
     return this.deck;
   }
+
   getRankOrder() {
     return this.rankOrder;
   }
+
   getHandSortOrder() {
     return this.handSortOrder;
   }
+
   getMinPlayers() {
     return this.minPlayers;
   }
+
   getMaxPlayers() {
     return this.maxPlayers;
   }
+
   getStages() {
     return this.stages;
   }

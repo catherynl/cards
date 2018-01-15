@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import Card from './Card';
 import { range } from 'lodash';
-import { Suits } from '../utils/card';
-
-const RANKS = 13;
 
 class Deck extends Component {
 
