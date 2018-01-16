@@ -16,7 +16,7 @@ class Game extends Component {
         started: false,
         finished: false,
         currentStage: 0,
-        hands: [],
+        hands: {},
         players: [],
         recentlyPlayed: [],
         tradeConfirmed: [],
@@ -65,8 +65,9 @@ class Game extends Component {
     const removalListenerCallback = snapshot => {
       if (snapshot.key === 'hands') {
         const { gameState } = this.state;
-        gameState.hands = gameState.hands.map((el) => []);
-        this.setState({ gameState });
+        this.gameType.getHandIndices().forEach(i => {
+          gameState.hands[i] = {};
+        });
       } else {
         window.alert('WARNING: a field other than "hands" has been removed from the game state database: ' + snapshot.key);
       }
@@ -122,7 +123,7 @@ class Game extends Component {
   }
 
   playCardsClicked() {
-    const myHand = this.state.gameState.hands[this.props.playerIndex];
+    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
     const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
     if (cardsSelected.length === 0) {
       window.alert('must select at least one card to play.');
@@ -131,7 +132,8 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/recentlyPlayed/' + this.props.playerIndex).set(cardsSelected);
     const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
     this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
-    fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex).set(remainingHand);
+    fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+      .set(remainingHand);
   }
 
   drawCardsClicked() {
@@ -153,10 +155,14 @@ class Game extends Component {
 
   dealCardsClicked() {
     const deck = new Deck({ cards: this.gameType.getDeck() });
-    const hands = deck.deal(this._getNumPlayers());
-    hands.forEach(hand => this.gameType.sortHand(hand));
-    const numCardsInMyHand = hands[this.props.playerIndex].length;
+    const handCards = deck.deal(this._getNumPlayers()); // gives back [[cards], [cards]]
+    handCards.forEach(hand => this.gameType.sortHand(hand));
+    const numCardsInMyHand = handCards[this.props.playerIndex].length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
+    const hands = {}
+    range(this._getNumPlayers()).forEach(i => {
+      hands[i] = { cards: handCards[i] };
+    });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
     this.enterNextStage();
   }
@@ -213,11 +219,15 @@ class Game extends Component {
   }
 
   renderPlayersHand(playerInd) {
-    const { gameState } = this.state;
+    const hand = this.state.gameState.hands[playerInd];
+    if (!hand) {
+      return <div></div>; // to allow correct spacing
+    }
+    const cards = hand.cards;
     if (playerInd === this.props.playerIndex) {
       return (
         <Hand
-          cards={ gameState.hands[playerInd] ? gameState.hands[playerInd] : [] }
+          cards={ cards ? cards : [] }
           isYours={ true }
           visible={ true }
           onSelect={ this.onCardSelected.bind(this) }
@@ -227,7 +237,7 @@ class Game extends Component {
     } else {
       return (
         <Hand
-          cards={ gameState.hands[playerInd] ? gameState.hands[playerInd] : [] }
+          cards={ cards ? cards : [] }
           isYours={ false }
           visible={ false }
         />);

@@ -1,3 +1,5 @@
+import { range } from 'lodash';
+
 class GameType {
 
   constructor(gameType) {
@@ -50,6 +52,10 @@ class GameType {
 
   getActionInStage(stageIndex, actionIndex) {
     return this.stages[stageIndex].availableActions[actionIndex];
+  }
+
+  getHandIndices() {
+    return range(this.maxPlayers).concat([21]); // TODO fix for more decks
   }
 
   // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
