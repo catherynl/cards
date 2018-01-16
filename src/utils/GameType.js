@@ -54,6 +54,14 @@ class GameType {
     return this.stages[stageIndex].availableActions[actionIndex];
   }
 
+  getHandleRemainingInStage(stageIndex) {
+    return this.stages[stageIndex].handleRemaining;
+  }
+
+  getDealCountPerPlayerInStage(stageIndex) {
+    return this.stages[stageIndex].dealCountPerPlayer;
+  }
+
   getHandIndices() {
     return range(this.maxPlayers).concat([21]); // TODO fix for more decks
   }

@@ -22,12 +22,41 @@ class Deck extends Component {
   }
 
   // deal out all cards into <numPlayers> unsorted hands.
-  deal(numPlayers) {
-    const cards = this._shuffle();
-    const hands = range(numPlayers).map(i => []);
-    range(cards.length).forEach(i => {
-      hands[i % numPlayers].push(cards[i]);
+  deal(numPlayers, dealCountPerPlayer, handleRemaining) {
+    const usedCards = numPlayers * dealCountPerPlayer;
+    const deckCards = this._shuffle();
+    const hands = {}
+    range(numPlayers).forEach(i => {
+      hands[i] = {
+        cards: [],
+        displayMode: 'fan',
+        visibility: range(numPlayers).map(j => i === j)
+      };
     });
+    range(usedCards).forEach(i => {
+      hands[i % numPlayers].cards.push(deckCards[i]);
+    });
+
+    // if there are remaining cards
+    if (usedCards < deckCards.length) {
+      switch (handleRemaining) {
+        case 'keepInDeck':
+          const deck = {
+            cards: deckCards.slice(usedCards),
+            displayMode: 'single',
+            visibility: Array(numPlayers).fill(false)
+          };
+          hands[20] = deck; // TODO fix magic number
+          break;
+        case 'dealOut':
+          range(usedCards, deckCards.length).forEach(i => {
+            hands[i % numPlayers].cards.push(deckCards[i]);
+          });
+          break;
+        default:
+          console.log('unrecognized handleRemaining option');
+      }
+    }
     return hands;
   }
 

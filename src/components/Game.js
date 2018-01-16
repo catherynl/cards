@@ -155,14 +155,13 @@ class Game extends Component {
 
   dealCardsClicked() {
     const deck = new Deck({ cards: this.gameType.getDeck() });
-    const handCards = deck.deal(this._getNumPlayers()); // gives back [[cards], [cards]]
-    handCards.forEach(hand => this.gameType.sortHand(hand));
-    const numCardsInMyHand = handCards[this.props.playerIndex].length;
+    const hands = deck.deal(
+      this._getNumPlayers(),
+      this.gameType.getDealCountPerPlayerInStage(this._getCurrentStage()),
+      this.gameType.getHandleRemainingInStage(this._getCurrentStage()));
+    Object.keys(hands).forEach(i => this.gameType.sortHand(hands[i].cards));
+    const numCardsInMyHand = hands[this.props.playerIndex].cards.length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
-    const hands = {}
-    range(this._getNumPlayers()).forEach(i => {
-      hands[i] = { cards: handCards[i] };
-    });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
     this.enterNextStage();
   }
