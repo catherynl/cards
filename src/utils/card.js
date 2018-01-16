@@ -22,12 +22,22 @@ export const Suits = {
     'imageUrl': './../images/diamond.png'
   },
   4: {
+    'name': 'star',
+    'displayName': 'T',
+    'imageUrl': './../images/star.png'
+  },
+  5: {
+    'name': 'moon',
+    'displayName': 'M',
+    'imageUrl': './../images/moon.png'
+  },
+  6: {
     'name': 'custom',
     'displayName': 'custom',
-    'imageUrl': ''    // TODO: FIX
+    'imageUrl': ''
   }
 };
-export const CUSTOM_SUIT = 4;
+export const CUSTOM_SUIT = 6;
 
 export const RANK_ORDERS = ['K-high', 'A-high', '2-high'];
 export const HAND_SORT_ORDERS = ['suitFirst', 'rankFirst'];

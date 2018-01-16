@@ -5,15 +5,19 @@ import KeyHandler from 'react-key-handler';
 class Chat extends Component {
 
   constructor(props) {
-    super(props); // username
+    super(props); // username, gameId (0 means homepage)
     this.state = { 
       messages: []
     };
   }
 
-  componentWillMount() {
+  _getFirePrefix() {
+    return 'messages/' + this.props.gameId;
+  }
+
+  componentWillReceiveProps() {
     /* Create reference to messages in Firebase Database */
-    const messagesRef = fire.database().ref('messages').orderByKey().limitToLast(20);
+    const messagesRef = fire.database().ref(this._getFirePrefix()).orderByKey().limitToLast(20);
     messagesRef.on('child_added', snapshot => {
       /* Update React state when message is added at Firebase Database */
       const message = { text: snapshot.val(), id: snapshot.key };
@@ -23,7 +27,7 @@ class Chat extends Component {
 
   addMessage(e) {
     e.preventDefault();
-    fire.database().ref('messages').push({
+    fire.database().ref(this._getFirePrefix()).push({
       username: this.props.username,
       message: this.inputMessage.value
     });

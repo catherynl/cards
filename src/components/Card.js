@@ -5,7 +5,9 @@ const imageUrls = {
   'spade': require('./../images/spade.png'),
   'heart': require('./../images/heart.png'),
   'club': require('./../images/club.png'),
-  'diamond': require('./../images/diamond.png')
+  'diamond': require('./../images/diamond.png'),
+  'star': require('./../images/star.png'),
+  'moon': require('./../images/moon.png')
 };
 
 class Card extends Component {
