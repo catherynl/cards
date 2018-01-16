@@ -234,9 +234,17 @@ class Game extends Component {
     );
   }
 
+  renderStageName() {
+    const stageIndex = this._getCurrentStage();
+    return (
+      <div>Stage {stageIndex + 1}: {this.gameType.getStage(stageIndex).name}</div>
+    );
+  }
+
   renderGameInPlay() {
     return (
       <div>
+        { this.renderStageName() }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { range(this._getNumPlayers()).map(ind =>
           this.renderPlayer(ind)
@@ -266,7 +274,9 @@ class Game extends Component {
         <div className='game-id'>
           Game ID: {this.props.gameId }
         </div>
-        Give this id to your friends so they can join your game!
+        { !this.state.gameState.started
+          ? <span>Give this id to your friends so they can join your game!</span>
+          : null }
         { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
         { this.shouldShowGameInPlay() ? this.renderGameInPlay() : null }
         { this.shouldShowGameFinished() ? this.renderGameFinished() : null }
