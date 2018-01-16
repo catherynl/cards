@@ -33,7 +33,8 @@ export const STAGES = {
   0: {
     name: 'deal',
     displayName: 'Deal stage',
-    defaultActions: [false, false, false, false, true, false, false]
+    defaultActions: [false, false, false, false, true, false, false],
+    availableActions: false
   },
   1: {
     name: 'play',

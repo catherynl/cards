@@ -7,32 +7,37 @@ class CreateStages extends Component {
   constructor(props) {
     super(props);   // onFinish (callback, takes stages as an argument)
     this.state = {
-      stageTypes: [],
+      stageTypes: [],  // stage names, or false (indicating a stage that has been deleted)
+      stageNames: {},
       availableActions: {},
       handleRemainingFromDeal: {},
+      dealCounts: {},
       nextPlayerDuringPlay: {}
     };
-    this.inputStageName = {}
-    this.inputDealCount = {}
   }
 
-  _getStageType(stageInd) {
-    return this.state.stageTypes[stageInd];
+  _getValidStageTypesWithInds() {
+    const stageTypesWithInds = this.state.stageTypes.map(
+                                  (stageType, ind) => {return { stageType: stageType, stageInd: ind }});
+    return stageTypesWithInds.filter((val) => val.stageType !== false);
   }
 
   addStageClicked(stageType) {
     const stageInd = this.state.stageTypes.length;
 
-    const { availableActions, stageTypes } = this.state;
+    const { availableActions, stageTypes, stageNames } = this.state;
     availableActions[stageInd] = Array.from(STAGES[stageType].defaultActions);
     stageTypes.push(stageType);
-    let updatedState = { stageTypes, availableActions };
+    stageNames[stageInd] = '';
+    let updatedState = { stageTypes, availableActions, stageNames };
 
     switch (stageType) {
       case 0:
-        const { handleRemainingFromDeal } = this.state;
+        const { handleRemainingFromDeal, dealCounts } = this.state;
         handleRemainingFromDeal[stageInd] = HANDLE_REMAINING[0];
         updatedState['handleRemainingFromDeal'] = handleRemainingFromDeal;
+        dealCounts[stageInd] = '';
+        updatedState['dealCounts'] = dealCounts;
         break;
       case 1:
         const { nextPlayerDuringPlay } = this.state;
@@ -46,10 +51,28 @@ class CreateStages extends Component {
     this.setState(updatedState);
   }
 
+  deleteStageClicked(stageInd) {
+    const { stageTypes } = this.state;
+    stageTypes[stageInd] = false;
+    this.setState({ stageTypes });
+  }
+
   toggleAvailableAction(stageInd, actionKey) {
     const { availableActions } = this.state;
     availableActions[stageInd][actionKey] = !(availableActions[stageInd][actionKey]);
     this.setState({ availableActions });
+  }
+
+  stageNameChanged(stageInd, e) {
+    const { stageNames } = this.state;
+    stageNames[stageInd] = e.target.value;
+    this.setState({ stageNames });
+  }
+
+  dealCountsChanged(stageInd, e) {
+    const { dealCounts } = this.state;
+    dealCounts[stageInd] = e.target.value;
+    this.setState({ dealCounts });
   }
 
   handleRemainingChanged(stageInd, e) {
@@ -65,26 +88,28 @@ class CreateStages extends Component {
   }
 
   finishClicked() {
-    const numStages = this.state.stageTypes.length;
+    const stageTypesWithInds = this._getValidStageTypesWithInds();
+    const numStages = stageTypesWithInds.length;
     if (numStages === 0) {
       window.alert('must create at least one stage!');
       return;
     }
 
     let stages = [];
-    for (let stageInd = 0; stageInd < numStages; stageInd++) {
-      const stageType = this.state.stageTypes[stageInd];
+    for (let displayInd = 0; displayInd < numStages; displayInd++) {
+      const stageInd = stageTypesWithInds[displayInd].stageInd;
+      const stageType = stageTypesWithInds[displayInd].stageType;
       let stage = {
-                    name: this.inputStageName[stageInd].value,
+                    name: this.state.stageNames[stageInd],
                     type: STAGES[stageType].name,
                     availableActions: this.state.availableActions[stageInd]
                   };
       switch (stageType) {
         case 0:
-          const dealCountPerPlayer = parseInt(this.inputDealCount[stageInd].value, 10);
+          const dealCountPerPlayer = parseInt(this.state.dealCounts[stageInd], 10);
           if (Number.isNaN(dealCountPerPlayer) || dealCountPerPlayer <= 0) {
-            window.alert('invalid deal count per player in stage ' + (stageInd + 1) +
-                           ': ' + this.inputDealCount[stageInd].value);
+            window.alert('invalid deal count per player in stage ' + (displayInd + 1) +
+                           ': ' + this.state.dealCounts[stageInd]);
             return;
           }
           stage['dealCountPerPlayer'] = dealCountPerPlayer;
@@ -102,30 +127,37 @@ class CreateStages extends Component {
     this.props.onFinish(stages);
   }
 
-  renderAvailableActions(stageInd) {
-    return (
-      <div>
-        Available actions:
-        {
-          STAGES[this._getStageType(stageInd)].availableActions.map( (key) =>
-            <div key={ key }>
-              <input
-                type="checkbox"
-                value={ actionMap[key].displayName }
-                checked={ this.state.availableActions[stageInd][key] }
-                onChange={ () => this.toggleAvailableAction(stageInd, key) } />
-              { actionMap[key].displayName }
-            </div>
-          )
-        }
-      </div>
-    );
+  renderAvailableActions(stageType, stageInd) {
+    if (STAGES[stageType].availableActions) {
+      return (
+        <div>
+          Available actions:
+          {
+            STAGES[stageType].availableActions.map( (key) =>
+              <div key={ key }>
+                <input
+                  type="checkbox"
+                  value={ actionMap[key].displayName }
+                  checked={ this.state.availableActions[stageInd][key] }
+                  onChange={ () => this.toggleAvailableAction(stageInd, key) } />
+                { actionMap[key].displayName }
+              </div>
+            )
+          }
+        </div>
+      );
+    }
   }
 
   renderDealStageInterface(stageInd) {
     return (
       <div>
-        Deal counter per player: &nbsp; <input type="text" ref={ el => this.inputDealCount[stageInd] = el } />
+        Each player should be dealt &nbsp;
+        <input
+          type="text"
+          onChange={ (e) => this.dealCountsChanged(stageInd, e) }
+          value={ this.state.dealCounts[stageInd] } />
+        cards
         <br />
         What should be done with any leftover cards?
         { HANDLE_REMAINING.map(
@@ -149,7 +181,6 @@ class CreateStages extends Component {
   renderPlayStageInterface(stageInd) {
     return (
       <div>
-        { this.renderAvailableActions(stageInd) }
         What rules determine whose turn comes next?
         { NEXT_PLAYER.map(
           (option, ind) => {
@@ -180,12 +211,18 @@ class CreateStages extends Component {
     }
   }
 
-  renderStageInterface(stageType, stageInd) {
+  renderStageInterface(stageType, stageInd, displayInd) {
     return (
       <div>
-        Stage { stageInd + 1 } ({ STAGES[stageType].displayName })
+        Stage { displayInd } ({ STAGES[stageType].displayName }) &nbsp;
+        <button onClick={ () => this.deleteStageClicked(stageInd) }>Delete stage</button> 
         <br />
-        Stage name: &nbsp; <input type="text" ref={ el => this.inputStageName[stageInd] = el } />
+        Stage name: &nbsp;
+        <input
+          type="text"
+          onChange={ (e) => this.stageNameChanged(stageInd, e) }
+          value={ this.state.stageNames[stageInd] } />
+        { this.renderAvailableActions(stageType, stageInd) }
         { this.renderSpecificStageInterface(stageType, stageInd) }
       </div>
     );
@@ -199,10 +236,10 @@ class CreateStages extends Component {
         Current stages:
         <ul>
           {
-            this.state.stageTypes.map(
-              (stageType, ind) =>
+            this._getValidStageTypesWithInds().map(
+              (val, ind) =>
                 <li key={ ind }>
-                  { this.renderStageInterface(stageType, ind) }
+                  { this.renderStageInterface(val.stageType, val.stageInd, ind + 1) }
                 </li>
             )
           }
