@@ -136,21 +136,20 @@ class CreateDeck extends Component {
     return (
       <div>
         Rank order: &nbsp;
-          { RANK_ORDERS.map(
-            (rankOrder, ind) => {
-              return (
-                <div key={ ind }>
-                  <input
-                    type="radio"
-                    value={ rankOrder }
-                    checked={ this.props.rankOrder === rankOrder }
-                    onChange={ this.props.onRankOrderChange.bind(this) }
-                  />{ rankOrder } &nbsp;
-                </div>
-              )
-            }
-          )
-        }
+        { RANK_ORDERS.map(
+          (rankOrder, ind) => {
+            return (
+              <div key={ ind }>
+                <input
+                  type="radio"
+                  value={ rankOrder }
+                  checked={ this.props.rankOrder === rankOrder }
+                  onChange={ this.props.onRankOrderChange.bind(this) }
+                />{ rankOrder } &nbsp;
+              </div>
+            )
+          }
+        )}
       </div>
     );
   }
@@ -159,21 +158,20 @@ class CreateDeck extends Component {
     return (
       <div>
         Hand sort order: &nbsp;
-          { HAND_SORT_ORDERS.map(
-            (sortOrder, ind) => {
-              return (
-                <div key={ ind }>
-                  <input
-                    type="radio"
-                    value={ sortOrder }
-                    checked={ this.props.handSortOrder === sortOrder }
-                    onChange={ this.props.onHandSortOrderChange.bind(this) }
-                  />{ sortOrder } &nbsp;
-                </div>
-              )
-            }
-          )
-        }
+        { HAND_SORT_ORDERS.map(
+          (sortOrder, ind) => {
+            return (
+              <div key={ ind }>
+                <input
+                  type="radio"
+                  value={ sortOrder }
+                  checked={ this.props.handSortOrder === sortOrder }
+                  onChange={ this.props.onHandSortOrderChange.bind(this) }
+                />{ sortOrder } &nbsp;
+              </div>
+            )
+          }
+        )}
       </div>
     );
   }

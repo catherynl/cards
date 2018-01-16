@@ -28,3 +28,23 @@ export const actionMap = {
     displayName: 'Reveal cards'
   }
 };
+
+export const STAGES = {
+  0: {
+    name: 'deal',
+    displayName: 'Deal stage',
+    defaultActions: [false, false, false, false, true, false, false]
+  },
+  1: {
+    name: 'play',
+    displayName: 'Play stage',
+    defaultActions: [true, false, false, true, false, false, false]
+  }
+};
+
+// during a deal stage, after dealing a fixed number of cards to each player
+// options for handling the remaining cards
+export const HANDLE_REMAINING = ['keepInDeck', 'dealOut'];
+
+// during a play stage, options for determining whose turn is next
+export const NEXT_PLAYER = ['cycle', 'trickTaking'];

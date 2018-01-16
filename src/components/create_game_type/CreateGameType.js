@@ -3,20 +3,20 @@ import fire from '../../fire';
 
 import CreateGameBasics from './CreateGameBasics';
 import CreateDeck from './CreateDeck';
-import { TestHearts } from '../../utils/game_types/Hearts';
+import CreateStages from './CreateStages';
 
 class CreateGameType extends Component {
 
   constructor(props) {
     super(props);  // backToHome (callback)
     this.state = {
-      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: finished
+      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: createStages, 3: finished
 
       // props for CreateDeck
       rankOrder: 'A-high',
       handSortOrder: 'suitFirst'
     };
-    // other fields: deck, name, minPlayers, maxPlayers
+    // other fields: name, minPlayers, maxPlayers, deck, stages
   }
 
   rankOrderChanged(e) {
@@ -44,6 +44,11 @@ class CreateGameType extends Component {
     this._incrementStage();
   }
 
+  setStages(stages) {
+    this.stages = stages;
+    this._incrementStage();
+  }
+
   submitClicked() {
     const gameType = { name: this.name,
                        minPlayers: this.minPlayers,
@@ -51,7 +56,7 @@ class CreateGameType extends Component {
                        deck: this.deck,
                        rankOrder: this.state.rankOrder,
                        handSortOrder: this.state.handSortOrder,
-                       stages: TestHearts.stages
+                       stages: this.stages
                      };
     const gameTypeRef = fire.database().ref('/gameTypes').push(gameType);
     window.alert('Submitted "' + this.name + ' (' + gameTypeRef.key + ')" to database!');
@@ -76,6 +81,12 @@ class CreateGameType extends Component {
         handSortOrder={ this.state.handSortOrder }
         onRankOrderChange={ this.rankOrderChanged.bind(this) }
         onHandSortOrderChange={ this.handSortOrderChanged.bind(this) } />
+    );
+  }
+
+  renderCreateStages() {
+    return (
+      <CreateStages onFinish={ this.setStages.bind(this) } />
     );
   }
 
@@ -105,6 +116,10 @@ class CreateGameType extends Component {
             Cards are ranked according to { this.state.rankOrder }, and hands will be sorted { this.state.handSortOrder }.
           </p>
         );
+      case 3:
+        return (
+          <p>Created a game with { this.stages.length } stages! Ready to submit...</p>
+        );
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
     }
@@ -117,6 +132,8 @@ class CreateGameType extends Component {
       case 1:
         return this.renderCreateDeck();
       case 2:
+        return this.renderCreateStages();
+      case 3:
         return this.renderSubmit();
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
