@@ -25,8 +25,9 @@ class App extends Component {
       }
     });
 
-    const gameTypesRef = await fire.database().ref('gameTypes').once('value');
-    const availableGameTypesObj = gameTypesRef.val();
+    const gameTypesRef = fire.database().ref('gameTypes');
+    const gameTypeValue = await gameTypesRef.once('value');
+    const availableGameTypesObj = gameTypeValue.val();
     const availableGameTypes = [];
     for (const key in availableGameTypesObj) {
       if (availableGameTypesObj.hasOwnProperty(key)) {
@@ -34,6 +35,12 @@ class App extends Component {
       }
     }
     this.setState({ availableGameTypes });
+
+    gameTypesRef.on('child_added', snapshot => {
+      const { availableGameTypes } = this.state;
+      availableGameTypes.push({ name: snapshot.val().name, id: snapshot.key });
+      this.setState({ availableGameTypes });
+    });
   }
 
   clearGameID() {
