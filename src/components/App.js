@@ -122,7 +122,7 @@ class App extends Component {
             (gameType, ind) => {
               return (
                 <li key={ ind }>
-                  <button onClick={ () => this.newGameClicked(gameType.id) }>{ gameType.name + ' (' + gameType.id + ') ' }</button>
+                  <button onClick={ () => this.newGameClicked(gameType.id) }>{ gameType.name }</button>
                 </li>
               );}
           )
@@ -172,7 +172,7 @@ class App extends Component {
         { this.renderGoToGame() }
         Or create your own game!
         <br />
-        <button onClick={ this.newTypeClicked.bind(this) }>Create new game type</button>
+        <button onClick={ this.newTypeClicked.bind(this) }>New game type</button>
       </div>
     );
   }

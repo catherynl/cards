@@ -7,7 +7,7 @@ body {
 
 button, .button {
     height: 30px;
-    width: 200px;
+    width: 150px;
     margin: 5px 20px 5px 0px;
     padding: 2px 20px 2px 20px;
 }
@@ -71,6 +71,10 @@ ul {
     line-height: 1.5;
 }
 
+.chat > form > input {
+    width: 150px;
+}
+
 .chat-section {
     display: inline-block;
 }
@@ -82,13 +86,13 @@ ul {
 }
 
 .game-types-ul {
-    column-count: 2;
+    column-count: 3;
     list-style: none;
     margin-left: -40px;
 }
 
 .game-types-ul > li > button {
-    width: 250px;
+    width: 150px;
 }
 
 .game-id {
