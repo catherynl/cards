@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Suits, rankToSymbol } from '../utils/card';
+import { Suits, rankToSymbol, CUSTOM_SUIT } from '../utils/card';
 
 const imageUrls = {
   'spade': require('./../images/spade.png'),
@@ -30,7 +30,7 @@ class Card extends Component {
                 &nbsp;
               </span>
             : null }
-          { rankToSymbol[card.rank] }
+          { card.suit === CUSTOM_SUIT ? card.name : rankToSymbol[card.rank] }
         </div>
         <div className='card-key-binding'>
           { this.props.keyBinding ? '(' + this.props.keyBinding + ')' : null }
