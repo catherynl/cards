@@ -3,7 +3,7 @@ import fire from '../../fire';
 
 import CreateGameBasics from './CreateGameBasics';
 import CreateDeck from './CreateDeck';
-import TestHearts from '../../utils/game_types/Hearts';
+import { TestHearts } from '../../utils/game_types/Hearts';
 
 class CreateGameType extends Component {
 

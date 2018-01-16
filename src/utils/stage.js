@@ -20,6 +20,10 @@ export const actionMap = {
     displayName: 'Deal cards'
   },
   5: {
+    name: 'confirmTrade',
+    displayName: 'Confirm trade'
+  },
+  6: {
     name: 'revealCards',
     displayName: 'Reveal cards'
   }

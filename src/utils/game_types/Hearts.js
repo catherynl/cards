@@ -1,6 +1,6 @@
 import { getStandardDeck } from '../card';
 
-const TestHearts = {
+export const TestHearts = {
     deck: getStandardDeck(),
     handSortOrder: 'suitFirst',
     maxPlayers: 4,
@@ -25,4 +25,32 @@ const TestHearts = {
     ]
 };
 
-export default TestHearts;
+export const TestHearts2 = {
+    deck: getStandardDeck(),
+    handSortOrder: 'suitFirst',
+    maxPlayers: 4,
+    minPlayers: 1,
+    name: 'Test Hearts',
+    numPlayers: 4,
+    rankOrder: 'A-high',
+    stages: [
+        {
+            name: 'Deal Stage',
+            type: 'deal',
+            dealCountPerPlayer: 13,
+            handleRemaining: 'keepInDeck',
+            availableActions: [false, false, false, false, true, false]
+        },
+        {
+            name: 'Trade Stage',
+            type: 'trade',
+            availableActions: [false, false, true, true, false, true]
+        },
+        {
+            name: 'Play Stage',
+            type: 'play',
+            nextPlayerRules: 'trickTaking',
+            availableActions: [true, false, false, true, false, false]
+        }
+    ]
+};

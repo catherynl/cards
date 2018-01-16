@@ -18,7 +18,9 @@ class Game extends Component {
         currentStage: 0,
         hands: [],
         players: [],
-        recentlyPlayed: [] },
+        recentlyPlayed: [],
+        tradeConfirmed: [],
+      },
       cardsSelected: [],  // booleans, one for each card in this player's hand
       minPlayers: 10000,  // prevents "Start Game" from being shown too early
     };
@@ -52,6 +54,13 @@ class Game extends Component {
       const { gameState } = this.state;
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
+
+      if (snapshot.key === 'tradeConfirmed') {
+        const tradeConfirmed = snapshot.val();
+        if (this._getNumPlayers() === tradeConfirmed.filter(i => i).length) {
+          this.enterNextStage();
+        }
+      }
     };
     const removalListenerCallback = snapshot => {
       if (snapshot.key === 'hands') {
@@ -76,6 +85,11 @@ class Game extends Component {
 
   isYourTurn() {
     return this.props.playerIndex === this.state.gameState.playerToMove;
+  }
+
+  enterNextStage() {
+    const nextStage = this._getCurrentStage() + 1;
+    fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
   }
 
   shouldShowStartGameButton() {
@@ -121,7 +135,7 @@ class Game extends Component {
   }
 
   drawCardsClicked() {
-    console.log('deal cards clicked');
+    return;
   }
 
   passCardsClicked() {
@@ -133,6 +147,10 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
+  confirmTradeClicked() {
+    fire.database().ref(this._getFirePrefix() + '/tradeConfirmed/' + this.props.playerIndex).set(true);
+  }
+
   dealCardsClicked() {
     const deck = new Deck({ cards: this.gameType.getDeck() });
     const hands = deck.deal(this._getNumPlayers());
@@ -140,12 +158,11 @@ class Game extends Component {
     const numCardsInMyHand = hands[this.props.playerIndex].length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
-    this.nextStageClicked()
+    this.enterNextStage();
   }
 
   nextStageClicked() {
-    const nextStage = this._getCurrentStage() + 1;
-    fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
+    this.enterNextStage();
   }
 
   endGameClicked() {
