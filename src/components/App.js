@@ -52,7 +52,6 @@ class App extends Component {
       playerToMove: 0,
       started: false,
       currentStage: 0,
-      table: 0,
       winner: 0
     };
     const gameRef = fire.database().ref('games').push(game);

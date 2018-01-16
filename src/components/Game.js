@@ -204,7 +204,7 @@ class Game extends Component {
             ? this.renderPlayersTurnIndicator()
             : null }
         </div>
-        { gameState.hands ? this.renderPlayersHand(ind) : null }
+        { gameState.hands ? this.renderHand(ind) : null }
         Recently played
         <br />
         { gameState.recentlyPlayed[ind]
@@ -217,30 +217,23 @@ class Game extends Component {
     );
   }
 
-  renderPlayersHand(playerInd) {
+  renderHand(playerInd) {
     const hand = this.state.gameState.hands[playerInd];
     if (!hand) {
       return <div></div>; // to allow correct spacing
     }
     const cards = hand.cards;
-    if (playerInd === this.props.playerIndex) {
-      return (
-        <Hand
-          cards={ cards ? cards : [] }
-          isYours={ true }
-          visible={ true }
-          onSelect={ this.onCardSelected.bind(this) }
-          onPlayCards={ this.playCardsClicked.bind(this) }
-          cardsSelected={ this.state.cardsSelected }
-        />);
-    } else {
-      return (
-        <Hand
-          cards={ cards ? cards : [] }
-          isYours={ false }
-          visible={ false }
-        />);
-    }
+    return (
+      <Hand
+        key={ playerInd }
+        cards={ cards ? cards : [] }
+        isYours={ playerInd === this.props.playerIndex }
+        visible={ hand.visibility[this.props.playerIndex] }
+        onSelect={ this.onCardSelected.bind(this) }
+        onPlayCards={ this.playCardsClicked.bind(this) }
+        cardsSelected={ this.state.cardsSelected }
+      />
+    );
   }
 
   renderPlayerActions() {
@@ -260,6 +253,20 @@ class Game extends Component {
     );
   }
 
+  renderNonPlayerHands() {
+    return (
+      <div>
+        { this.state.gameState.hands
+          ? <div className='non-player-hands'>
+              { Object.keys(this.state.gameState.hands)
+                .filter(i => i >= 20) // TODO magic number
+                .map(i => this.renderHand(i)) }
+            </div>
+          : null }
+      </div>
+    );
+  }
+
   renderStageName() {
     const stageIndex = this._getCurrentStage();
     return (
@@ -275,6 +282,7 @@ class Game extends Component {
         { range(this._getNumPlayers()).map(ind =>
           this.renderPlayer(ind)
         )}
+        { this.renderNonPlayerHands() }
         { this.shouldShowNextStageButton()
           ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
           : null }
