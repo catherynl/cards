@@ -65,11 +65,15 @@ class Game extends Component {
     const removalListenerCallback = snapshot => {
       if (snapshot.key === 'hands') {
         const { gameState } = this.state;
-        this.gameType.getHandIndices().forEach(i => {
-          gameState.hands[i] = {};
-        });
+        gameState['hands'] = {};
+        this.setState({ gameState });
+      } else if (snapshot.key === 'recentlyPlayed') {
+        const { gameState } = this.state;
+        gameState['recentlyPlayed'] = [];
+        this.setState({ gameState });
       } else {
-        window.alert('WARNING: a field other than "hands" has been removed from the game state database: ' + snapshot.key);
+        window.alert('WARNING: a field other than "hands" or "recentlyPlayed" has been ' +
+                      'removed from the game state database: ' + snapshot.key);
       }
     };
 
@@ -124,6 +128,10 @@ class Game extends Component {
 
   playCardsClicked() {
     const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+    if (!myHand) {
+      window.alert('nothing to play.');
+      return;
+    }
     const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
     if (cardsSelected.length === 0) {
       window.alert('must select at least one card to play.');
@@ -168,6 +176,20 @@ class Game extends Component {
 
   nextStageClicked() {
     this.enterNextStage();
+  }
+
+  playAgainClicked() {
+    const { gameState } = this.state;
+    const resetGameState = {
+      started: false,
+      finished: false,
+      currentStage: 0,
+      hands: {},
+      recentlyPlayed: [],
+      playerToMove: 0
+    };
+    Object.assign(gameState, resetGameState);
+    fire.database().ref(this._getFirePrefix()).set(gameState);
   }
 
   endGameClicked() {
@@ -297,6 +319,7 @@ class Game extends Component {
     return (
       <div>
         <p>Game is finished! The winner is <span className='player-name'>player { this.state.gameState.winner }!</span></p>
+        <button onClick={ this.playAgainClicked.bind(this) }>Play Again!</button>
         <button onClick={ this.leaveGameClicked.bind(this) }>Back to Home</button>
       </div>
     );
