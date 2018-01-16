@@ -5,25 +5,35 @@ import KeyHandler from 'react-key-handler';
 class Chat extends Component {
 
   constructor(props) {
-    super(props); // username
+    super(props); // username, gameId
     this.state = { 
-      messages: []
+      messages: [],
+      messagesRef: 0
     };
   }
 
-  componentWillMount() {
-    /* Create reference to messages in Firebase Database */
-    const messagesRef = fire.database().ref('messages').orderByKey().limitToLast(20);
-    messagesRef.on('child_added', snapshot => {
-      /* Update React state when message is added at Firebase Database */
-      const message = { text: snapshot.val(), id: snapshot.key };
-      this.setState({ messages: [message].concat(this.state.messages) });
-    })
+  componentWillReceiveProps(props) {
+    // remove previous listener and clear old messages
+    if (this.state.messagesRef && props.gameId !== this.props.gameId) {
+      this.state.messagesRef.off('child_added');
+      this.setState({ messages: [] });
+    }
+
+    // create new listener
+    if (!this.state.messagesRef || props.gameId !== this.props.gameId) {
+      const messagesRef = fire.database().ref('messages/' + props.gameId).orderByKey().limitToLast(20);
+      messagesRef.on('child_added', snapshot => {
+        /* Update React state when message is added at Firebase Database */
+        const message = { text: snapshot.val(), id: snapshot.key };
+        this.setState({ messages: [message].concat(this.state.messages) });
+      });
+      this.setState({ messagesRef });
+    }
   }
 
   addMessage(e) {
     e.preventDefault();
-    fire.database().ref('messages').push({
+    fire.database().ref('messages/' + this.props.gameId).push({
       username: this.props.username,
       message: this.inputMessage.value
     });

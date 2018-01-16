@@ -189,7 +189,7 @@ class App extends Component {
           }
         </div>
         <div className='chat-section'>
-          <Chat username={ this.state.username } />
+          <Chat username={ this.state.username } gameId={ this.state.gameId } />
           <br />
         </div>
       </div>
