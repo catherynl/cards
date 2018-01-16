@@ -17,6 +17,10 @@ input, form input {
     padding: 2px 2px 2px 5px;
 }
 
+ul {
+    margin-top: -2px;
+}
+
 .cards {
     display: inline-block;
     margin-top: 5px;

@@ -6,7 +6,7 @@ const imageUrls = {
   'heart': require('./../images/heart.png'),
   'club': require('./../images/club.png'),
   'diamond': require('./../images/diamond.png')
-}
+};
 
 class Card extends Component {
 
@@ -18,12 +18,16 @@ class Card extends Component {
     return (
       <div className='card-outer'>
         <div className={this.props.selected ? 'card selected' : 'card'}>
-          <img src={ imageUrls[suit.name] } 
-               alt={ suit.name } 
-               style={ {'width': '15px', 
-                        'height': '15px', 
-                        'marginBottom': '-2px'} } />
-          &nbsp;
+          { Object.keys(imageUrls).includes(suit.name)
+            ? <span>
+                <img src={ imageUrls[suit.name] }
+                  alt={ suit.name }
+                  style={ {'width': '15px',
+                           'height': '15px',
+                           'marginBottom': '-2px'} } />
+                &nbsp;
+              </span>
+            : null }
           { rankToSymbol[card.rank] }
         </div>
         <div className='card-key-binding'>

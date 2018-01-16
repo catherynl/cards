@@ -118,7 +118,7 @@ class App extends Component {
   renderNewGame() {
     return (
       <div>
-        Start new game:
+        Start new game of game type below:
         <ul>
         {
           this.state.availableGameTypes.map(
@@ -173,6 +173,8 @@ class App extends Component {
         <br />
         { this.renderChangeUsername() }
         { this.renderGoToGame() }
+        Or create your own game!
+        <br />
         <button onClick={ this.newTypeClicked.bind(this) }>Create new game type</button>
       </div>
     );
