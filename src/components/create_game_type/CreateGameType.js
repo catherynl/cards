@@ -3,6 +3,7 @@ import fire from '../../fire';
 
 import CreateGameBasics from './CreateGameBasics';
 import CreateDeck from './CreateDeck';
+import TestHearts from '../../utils/game_types/Hearts';
 
 class CreateGameType extends Component {
 
@@ -49,7 +50,9 @@ class CreateGameType extends Component {
                        maxPlayers: this.maxPlayers,
                        deck: this.deck,
                        rankOrder: this.state.rankOrder,
-                       handSortOrder: this.state.handSortOrder };
+                       handSortOrder: this.state.handSortOrder,
+                       stages: TestHearts.stages
+                     };
     const gameTypeRef = fire.database().ref('/gameTypes').push(gameType);
     window.alert('Submitted "' + this.name + ' (' + gameTypeRef.key + ')" to database!');
     this.props.backToHome();
