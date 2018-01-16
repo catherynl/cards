@@ -53,7 +53,7 @@ class CreateDeck extends Component {
       window.alert('must give custom card a name');
       return;
     }
-    const rank = parseInt(this.inputCustomCardRank.value, 10);
+    const rank = parseInt(this.inputCustomCardRank.value === '' ? 0 : this.inputCustomCardRank.value, 10);
     if (Number.isNaN(rank) || Math.abs(rank) > 99) {
       window.alert('invalid rank for custom card: ' + this.inputCustomCardRank.value);
       return;
@@ -110,7 +110,7 @@ class CreateDeck extends Component {
             <input type="text" ref={ el => this.inputCustomCardName = el } />
           </li>
           <li>
-            Custom card value (for purposes of organizing hands only): &nbsp;
+            Custom card value, for purposes of organizing hands (optional): &nbsp;
             <input type="text" ref={ el => this.inputCustomCardRank = el } />
           </li>
           <li>
