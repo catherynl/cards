@@ -16,6 +16,10 @@ class CreateStages extends Component {
     this.inputDealCount = {}
   }
 
+  _getStageType(stageInd) {
+    return this.state.stageTypes[stageInd];
+  }
+
   addStageClicked(stageType) {
     const stageInd = this.state.stageTypes.length;
 
@@ -103,7 +107,7 @@ class CreateStages extends Component {
       <div>
         Available actions:
         {
-          Object.keys(actionMap).map( (key) =>
+          STAGES[this._getStageType(stageInd)].availableActions.map( (key) =>
             <div key={ key }>
               <input
                 type="checkbox"
@@ -122,6 +126,8 @@ class CreateStages extends Component {
     return (
       <div>
         Deal counter per player: &nbsp; <input type="text" ref={ el => this.inputDealCount[stageInd] = el } />
+        <br />
+        What should be done with any leftover cards?
         { HANDLE_REMAINING.map(
           (option, ind) => {
             return (
@@ -144,6 +150,7 @@ class CreateStages extends Component {
     return (
       <div>
         { this.renderAvailableActions(stageInd) }
+        What rules determine whose turn comes next?
         { NEXT_PLAYER.map(
           (option, ind) => {
             return (
