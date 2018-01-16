@@ -26,16 +26,6 @@ class App extends Component {
     });
 
     const gameTypesRef = fire.database().ref('gameTypes');
-    const gameTypeValue = await gameTypesRef.once('value');
-    const availableGameTypesObj = gameTypeValue.val();
-    const availableGameTypes = [];
-    for (const key in availableGameTypesObj) {
-      if (availableGameTypesObj.hasOwnProperty(key)) {
-        availableGameTypes.push({ name: availableGameTypesObj[key].name, id: key });
-      }
-    }
-    this.setState({ availableGameTypes });
-
     gameTypesRef.on('child_added', snapshot => {
       const { availableGameTypes } = this.state;
       availableGameTypes.push({ name: snapshot.val().name, id: snapshot.key });
