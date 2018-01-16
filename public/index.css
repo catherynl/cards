@@ -80,6 +80,12 @@ ul {
     width: 65%;
 }
 
+.game-types-ul {
+    column-count: 2;
+    list-style: none;
+    margin-left: -40px;
+}
+
 .game-id {
     font-size: 15px;
     color: blue;

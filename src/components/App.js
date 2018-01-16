@@ -116,7 +116,7 @@ class App extends Component {
     return (
       <div>
         Start new game of game type below:
-        <ul>
+        <ul className='game-types-ul'>
         {
           this.state.availableGameTypes.map(
             (gameType, ind) => {
