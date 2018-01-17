@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { range } from 'lodash';
 
 import { actionMap, STAGES, HANDLE_REMAINING, NEXT_PLAYER } from '../../utils/stage';
 
@@ -43,6 +44,9 @@ class CreateStages extends Component {
         const { nextPlayerDuringPlay } = this.state;
         nextPlayerDuringPlay[stageInd] = NEXT_PLAYER[0];
         updatedState['nextPlayerDuringPlay'] = nextPlayerDuringPlay;
+        break;
+      case 2: // trade
+      case 3: // buffer
         break;
       default:
         console.log('ERROR. invalid stage type encountered:', stageType);
@@ -100,16 +104,16 @@ class CreateStages extends Component {
       const stageInd = stageTypesWithInds[displayInd].stageInd;
       const stageType = stageTypesWithInds[displayInd].stageType;
       let stage = {
-                    name: this.state.stageNames[stageInd],
-                    type: STAGES[stageType].name,
-                    availableActions: this.state.availableActions[stageInd]
-                  };
+        name: this.state.stageNames[stageInd],
+        type: STAGES[stageType].name,
+        availableActions: this.state.availableActions[stageInd]
+      };
       switch (stageType) {
         case 0:
           const dealCountPerPlayer = parseInt(this.state.dealCounts[stageInd], 10);
           if (Number.isNaN(dealCountPerPlayer) || dealCountPerPlayer <= 0) {
             window.alert('invalid deal count per player in stage ' + (displayInd + 1) +
-                           ': ' + this.state.dealCounts[stageInd]);
+                         ': ' + this.state.dealCounts[stageInd]);
             return;
           }
           stage['dealCountPerPlayer'] = dealCountPerPlayer;
@@ -206,6 +210,9 @@ class CreateStages extends Component {
         return this.renderDealStageInterface(stageInd);
       case 1:
         return this.renderPlayStageInterface(stageInd);
+      case 2: // trade
+      case 3: // buffer
+        return null // these stages don't have extra options
       default:
         console.log('ERROR. invalid stage type encountered: ', stageType);
     }
@@ -244,8 +251,12 @@ class CreateStages extends Component {
             )
           }
         </ul>
-        <button onClick={ () => this.addStageClicked(0) }>Add deal stage</button>
-        <button onClick={ () => this.addStageClicked(1) }>Add play stage</button>
+        { range(4).map(i =>
+            <button key={ i } onClick={ () => this.addStageClicked(i) }>
+              Add { STAGES[i].name } stage
+            </button>
+          )
+        }
         <br />
         <button onClick={ this.finishClicked.bind(this) }>Done adding stages!</button>
       </div>

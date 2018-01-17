@@ -41,6 +41,18 @@ export const STAGES = {
     displayName: 'Play stage',
     defaultActions: [true, false, false, true, false, false, false],
     availableActions: [0, 1, 2, 3, 6]
+  },
+  2: {
+    name: 'trade',
+    displayName: 'Trade stage',
+    defaultActions: [false, false, true, true, false, true, false],
+    availableActions: [2, 6]
+  },
+  3: {
+    name: 'buffer',
+    displayName: 'Buffer stage',
+    defaultActions: [false, false, false, false, false, false, false],
+    availableActions: false
   }
 };
 
