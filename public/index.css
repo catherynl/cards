@@ -71,11 +71,12 @@ ul {
 .chat {
     border: solid 1px lightgray;
     margin-top: 10px;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 10px 0px 10px;
 }
 
 .chat ul {
-    margin-top: 1px;
+    margin-top: 3px;
+    margin-left: -20px;
     width: 200px;
     line-height: 1.5;
 }

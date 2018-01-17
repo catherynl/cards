@@ -13,7 +13,7 @@ class Chat extends Component {
 
   _onFirebaseChange(snapshot) {
     const message = { text: snapshot.val(), id: snapshot.key };
-    this.setState({ messages: [message].concat(this.state.messages) });
+    this.setState({ messages: [message].concat(this.state.messages).splice(0, 10) });
   }
 
   componentWillMount() {
