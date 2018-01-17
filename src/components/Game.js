@@ -20,9 +20,10 @@ class Game extends Component {
         players: [],
         recentlyPlayed: [],
         tradeConfirmed: [],
+        cardsToBePassed: {},
       },
-      cardsSelected: [],  // booleans, one for each card in this player's hand
-      minPlayers: 10000,  // prevents "Start Game" from being shown too early
+      cardsSelected: [], // booleans, one for each card in this player's hand
+      minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
   }
@@ -58,6 +59,14 @@ class Game extends Component {
       if (snapshot.key === 'tradeConfirmed') {
         const tradeConfirmed = snapshot.val();
         if (this._getNumPlayers() === tradeConfirmed.filter(i => i).length) {
+          const hands = gameState.hands;
+          const cardsToBePassed = gameState.cardsToBePassed;
+          range(this._getNumPlayers()).forEach(i => {
+            const newCards = hands[i].cards.concat(cardsToBePassed[i]);
+            this.gameType.sortHand(newCards);
+            hands[i].cards = newCards;
+          });
+          fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
           this.enterNextStage();
         }
       }
@@ -144,11 +153,34 @@ class Game extends Component {
       .set(remainingHand);
   }
 
-  drawCardsClicked() {
-    return;
+  passCardsClicked() {
+    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+    if (!myHand) {
+      window.alert('nothing to play.');
+      return;
+    }
+    const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+    if (selectedCards.length === 0) {
+      window.alert('must select at least one card to pass.');
+      return;
+    }
+    const passIndex = (this.props.playerIndex + 1) % this._getNumPlayers();
+    const cardsToBePassed = this.state.gameState.cardsToBePassed;
+    const newCardsToBePassed = cardsToBePassed[passIndex]
+      ? cardsToBePassed[passIndex].concat(selectedCards)
+      : selectedCards;
+
+    fire.database()
+      .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
+      .set(newCardsToBePassed);
+    const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
+    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
+    fire.database()
+      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+      .set(remainingHand);
   }
 
-  passCardsClicked() {
+  drawCardsClicked() {
     return;
   }
 
@@ -254,16 +286,17 @@ class Game extends Component {
       return <div></div>; // to allow correct spacing
     }
     const cards = hand.cards;
+    const isYours = playerInd === this.props.playerIndex;
     return (
       <Hand
         key={ playerInd }
         cards={ cards ? cards : [] }
-        isYours={ playerInd === this.props.playerIndex }
+        isYours={ isYours }
         visible={ hand.visibility[this.props.playerIndex] }
         displayMode={ hand.displayMode }
-        onSelect={ this.onCardSelected.bind(this) }
-        onPlayCards={ this.playCardsClicked.bind(this) }
-        cardsSelected={ this.state.cardsSelected }
+        onSelect={ isYours ? this.onCardSelected.bind(this) : null }
+        onPlayCards={ isYours ? this.playCardsClicked.bind(this) : null }
+        cardsSelected={ isYours ? this.state.cardsSelected : null }
       />
     );
   }
