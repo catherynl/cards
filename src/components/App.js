@@ -56,7 +56,7 @@ class App extends Component {
       winner: 0
     };
     const gameRef = fire.database().ref('games').push(game);
-    fire.database().ref('sharedNotes/' + gameRef.key).set('');
+    fire.database().ref('sharedNotes/' + gameRef.key).set({ text: '', playerLock: -1 });
     this.setState({ gameId: gameRef.key });
   }
 
@@ -165,7 +165,7 @@ class App extends Component {
 
   renderSharedNotes() {
     return (
-      <SharedNotes gameId={ this.state.gameId } />
+      <SharedNotes gameId={ this.state.gameId } playerIndex={ this.state.playerIndex } />
     );
   }
 
