@@ -7,27 +7,30 @@ class Chat extends Component {
   constructor(props) {
     super(props); // username, gameId
     this.state = { 
-      messages: [],
-      messagesRef: 0
+      messages: []
     };
   }
 
-  componentWillReceiveProps(props) {
-    // remove previous listener and clear old messages
-    if (this.state.messagesRef && props.gameId !== this.props.gameId) {
-      this.state.messagesRef.off('child_added');
-      this.setState({ messages: [] });
-    }
+  _onFirebaseChange(snapshot) {
+    const message = { text: snapshot.val(), id: snapshot.key };
+    this.setState({ messages: [message].concat(this.state.messages) });
+  }
 
-    // create new listener
-    if (!this.state.messagesRef || props.gameId !== this.props.gameId) {
+  componentWillMount() {
+    const messagesRef = fire.database().ref('messages/' + this.props.gameId).orderByKey().limitToLast(20);
+    messagesRef.on('child_added', this._onFirebaseChange.bind(this));
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.gameId !== this.props.gameId) {
+      // remove previous listener and clear old messages
+      const oldMessagesRef = fire.database().ref('messages/' + this.props.gameId).orderByKey().limitToLast(20);
+      oldMessagesRef.off('child_added');
+      this.setState({ messages: [] });
+
+      // create new listener
       const messagesRef = fire.database().ref('messages/' + props.gameId).orderByKey().limitToLast(20);
-      messagesRef.on('child_added', snapshot => {
-        /* Update React state when message is added at Firebase Database */
-        const message = { text: snapshot.val(), id: snapshot.key };
-        this.setState({ messages: [message].concat(this.state.messages) });
-      });
-      this.setState({ messagesRef });
+      messagesRef.on('child_added', this._onFirebaseChange.bind(this));
     }
   }
 
