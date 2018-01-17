@@ -205,6 +205,12 @@ class Game extends Component {
   renderStartGameButton() {
     return (
       <div>
+        Players so far:
+        {
+          this.state.gameState.players.map((player, ind) => {
+            return (<div>&nbsp; { player } (Player { ind + 1 })</div>);
+          })
+        }
         <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
       </div>
     );
