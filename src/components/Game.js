@@ -70,7 +70,25 @@ class Game extends Component {
     const gameTypeRef = fire.database().ref('gameTypes/' + newGameState.gameTypeId);
     const gameType = await gameTypeRef.once('value');
     this.gameType = new GameType(gameType.val());
-    this.setState({ minPlayers: this.gameType.getMinPlayers() });
+    let newPlayersToMove = Array(this._getNumPlayers()).fill(false);
+    const stageType = this.gameType.getStageType(0);
+    switch (stageType) {
+      case 'deal':
+      case 'trade':
+        newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+        break;
+      case 'play':
+        newPlayersToMove[0] = true;
+        break;
+      case 'buffer':
+        break;
+      default:
+        console.log('stage unrecognized, no players to move');
+    };
+    this.setState({ 
+      minPlayers: this.gameType.getMinPlayers(),
+      playersToMove: newPlayersToMove
+    });
 
     const listenerCallback = snapshot => {
       const { gameState } = this.state;
