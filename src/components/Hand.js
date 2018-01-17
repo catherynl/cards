@@ -15,7 +15,7 @@ class Hand extends Component {
 
     // props:
     // cards [], cardsSelected, isYours (boolean), visible (boolean),
-    // onSelect (callback that takes cardIndex), onPlayCards (callback)
+    // onSelect (callback that takes cardIndex)
 
   _getKeyBinding(cardIndex) {
     return KEYS[cardIndex];
@@ -26,10 +26,6 @@ class Hand extends Component {
   }
 
   recordKeyPress(keyValue) {
-    if (keyValue === 'Enter') {
-      this.props.onPlayCards();
-      return;
-    }
     const keyInd = KEYS.indexOf(keyValue);
     if (keyInd >= 0 && keyInd < this.props.cards.length) {
       this.props.onSelect(keyInd);
@@ -61,7 +57,6 @@ class Hand extends Component {
         { range(Math.min(this.props.cards.length, KEYS.length)).map(ind =>
           <KeyHandler key={ ind } keyEventName="keydown" keyValue={ this._getKeyBinding(ind) } onKeyHandle={() => this.recordKeyPress(this._getKeyBinding(ind))} />
         )}
-        <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={() => this.recordKeyPress("Enter")} />
       </div>
     );
   }

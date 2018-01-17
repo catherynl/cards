@@ -1,6 +1,7 @@
 import { range } from 'lodash';
 
 import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS } from './magic_numbers';
+import { PLAY_CARDS_INDEX } from './stage';
 
 class GameType {
 
@@ -52,6 +53,10 @@ class GameType {
     return this.stages.length;
   }
 
+  getPlayCardsInStage(stageIndex) {
+    return this.getActionInStage(stageIndex, PLAY_CARDS_INDEX);
+  }
+
   getActionInStage(stageIndex, actionIndex) {
     return this.stages[stageIndex].availableActions[actionIndex];
   }
@@ -64,7 +69,11 @@ class GameType {
     return this.stages[stageIndex].dealCountPerPlayer;
   }
 
-  getNextPlayerRulesInStage(stageIndex) {
+  getIsTrickTakingInStage(stageIndex) {
+    return this._getNextPlayerRulesInStage(stageIndex) === 'trickTaking';
+  }
+
+  _getNextPlayerRulesInStage(stageIndex) {
     return this.stages[stageIndex].nextPlayerRules;
   }
 

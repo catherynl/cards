@@ -28,6 +28,7 @@ export const actionMap = {
     displayName: 'Reveal cards'
   }
 };
+export const PLAY_CARDS_INDEX = 0;
 
 export const STAGES = {
   0: {

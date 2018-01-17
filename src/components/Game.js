@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import fire from '../fire';
+import KeyHandler from 'react-key-handler';
 import { range } from 'lodash';
 
 import Deck from './Deck';
@@ -52,8 +53,8 @@ class Game extends Component {
     return this.state.gameState.hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards;
   }
 
-  _isTrickTakingGame() {
-    return this.gameType.getNextPlayerRulesInStage(this._getCurrentStage()) === 'trickTaking';
+  _isTrickTakingStage() {
+    return this.gameType.getIsTrickTakingInStage(this._getCurrentStage());
   }
 
   async componentWillMount() {
@@ -158,7 +159,7 @@ class Game extends Component {
       window.alert('must select at least one card to play.');
       return;
     }
-    if (this._isTrickTakingGame() && this._haveRecentlyPlayed()) {
+    if (this._isTrickTakingStage() && this._haveRecentlyPlayed()) {
       // end of the trick has been reached, so clear recentlyPlayed
       const { hands } = this.state.gameState;
       range(this._getNumPlayers()).forEach(ind => {
@@ -210,7 +211,7 @@ class Game extends Component {
     const nextPlayerInCycle = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
     let newPlayerToMove = nextPlayerInCycle;
 
-    if (this._isTrickTakingGame()) {
+    if (this._isTrickTakingStage()) {
       const recentlyPlayed = this._getRecentlyPlayed();
       const numPlayersWhoHavePlayed = recentlyPlayed.filter((val) => val).length;
       if (numPlayersWhoHavePlayed === this._getNumPlayers()) {
@@ -346,7 +347,6 @@ class Game extends Component {
         visible={ hand.visibility[this.props.playerIndex] }
         displayMode={ hand.displayMode }
         onSelect={ isYours ? this.onCardSelected.bind(this) : null }
-        onPlayCards={ isYours ? this.playCardsClicked.bind(this) : null }
         cardsSelected={ isYours ? this.state.cardsSelected : null }
       />
     );
@@ -364,6 +364,11 @@ class Game extends Component {
               const onClick = this[name + 'Clicked'].bind(this);
               return <button key={i} onClick={onClick}>{displayName}</button>;
             })
+        }
+        {
+          this.gameType.getPlayCardsInStage(this._getCurrentStage())
+          ? <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={ this.playCardsClicked.bind(this) } />
+          : null
         }
       </div>
     );
