@@ -282,7 +282,12 @@ class Game extends Component {
           ? <div className='non-player-hands'>
               { Object.keys(this.state.gameState.hands)
                 .filter(i => i >= 20) // TODO magic number
-                .map(i => this.renderHand(i)) }
+                .map(i => {
+                  return (<div>
+                    Stack id: { i }
+                    { this.renderHand(i) }
+                  </div>);
+                }) }
             </div>
           : null }
       </div>
