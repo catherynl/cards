@@ -263,6 +263,18 @@ class Game extends Component {
     this.enterNextStage();
   }
 
+  enterPressed() {
+    if (this.isYourTurn()) {
+      // if at least play is a valid option, and at least one card is selected, play; else, end turn.
+      const canPlayCards = this.gameType.getPlayCardsInStage(this._getCurrentStage());
+      if (canPlayCards && this.state.cardsSelected.some(val => val)) {
+        this.playCardsClicked();
+      } else if (this.gameType.getEndTurnInStage(this._getCurrentStage())) {
+        this.endTurnClicked();
+      }
+    }
+  }
+
   nextStageClicked() {
     this.enterNextStage();
   }
@@ -365,11 +377,7 @@ class Game extends Component {
               return <button key={i} onClick={onClick}>{displayName}</button>;
             })
         }
-        {
-          this.gameType.getPlayCardsInStage(this._getCurrentStage())
-          ? <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={ this.playCardsClicked.bind(this) } />
-          : null
-        }
+        <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={ this.enterPressed.bind(this) } />
       </div>
     );
   }

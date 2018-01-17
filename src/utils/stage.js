@@ -13,7 +13,7 @@ export const actionMap = {
   },
   3: {
     name: 'endTurn',
-    displayName: 'End turn'
+    displayName: 'End turn (Enter)'
   },
   4: {
     name: 'dealCards',
@@ -29,6 +29,7 @@ export const actionMap = {
   }
 };
 export const PLAY_CARDS_INDEX = 0;
+export const END_TURN_INDEX = 3;
 
 export const STAGES = {
   0: {

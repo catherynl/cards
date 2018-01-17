@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 
 import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS } from './magic_numbers';
-import { PLAY_CARDS_INDEX } from './stage';
+import { PLAY_CARDS_INDEX, END_TURN_INDEX } from './stage';
 
 class GameType {
 
@@ -55,6 +55,10 @@ class GameType {
 
   getPlayCardsInStage(stageIndex) {
     return this.getActionInStage(stageIndex, PLAY_CARDS_INDEX);
+  }
+
+  getEndTurnInStage(stageIndex) {
+    return this.getActionInStage(stageIndex, END_TURN_INDEX);
   }
 
   getActionInStage(stageIndex, actionIndex) {
