@@ -62,34 +62,37 @@ class GameType {
     return this.stages[stageIndex].dealCountPerPlayer;
   }
 
+  getNextPlayerRulesInStage(stageIndex) {
+    return this.stages[stageIndex].nextPlayerRules;
+  }
+
   getHandIndices() {
     return range(this.maxPlayers).concat([21]); // TODO fix for more decks
   }
 
-  // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
-  _getCompareFunction() {
-    let getCardComparisonRank;
+  getCardComparisonRank(card) {
     switch (this.rankOrder) {
       case 'K-high':
-        getCardComparisonRank = (card) => card.rank;
-        break;
+        return card.rank;
       case 'A-high':
-        getCardComparisonRank = (card) => card.rank === 1 ? 13 : card.rank - 1;
-        break;
+        return card.rank === 1 ? 13 : card.rank - 1;
       case '2-high':
-        getCardComparisonRank = (card) => card.rank < 3 ? card.rank + 11 : card.rank - 2;
-        break;
+        return card.rank < 3 ? card.rank + 11 : card.rank - 2;
       default:
         console.log('ERROR: invalid rankOrder encountered:', this.rankOrder);
         return;
     }
+  }
+
+  // returns compare function for sorting cards, based on this.rankOrder and this.handSortOrder
+  _getCompareFunction() {
     let getCardValue;
     switch (this.handSortOrder) {
       case 'suitFirst':
-        getCardValue = (card) => card.suit * 100 + getCardComparisonRank(card);   // assumes card rank will never exceed 100
+        getCardValue = (card) => card.suit * 100 + this.getCardComparisonRank(card);   // assumes card rank will never exceed 100
         break;
       case 'rankFirst':
-        getCardValue = (card) => getCardComparisonRank(card) * 10 + card.suit;    // assumes there will never be more than 10 suits
+        getCardValue = (card) => this.getCardComparisonRank(card) * 10 + card.suit;    // assumes there will never be more than 10 suits
         break;
       default:
         console.log('ERROR: invalid handSortOrder encountered:', this.handSortOrder);

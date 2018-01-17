@@ -6,6 +6,7 @@ import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
 import { actionMap } from '../utils/stage';
+import { RECENTLY_PLAYED_INDEX, DECK_INDEX, MAX_ABS_CARD_RANK } from '../utils/magic_numbers';
 
 class Game extends Component {
 
@@ -18,7 +19,6 @@ class Game extends Component {
         currentStage: 0,
         hands: {},
         players: [],
-        recentlyPlayed: [],
         tradeConfirmed: [],
         cardsToBePassed: {},
       },
@@ -32,12 +32,28 @@ class Game extends Component {
     return 'games/' + this.props.gameId;
   }
 
+  _getRecentlyPlayedCardsFirePrefix() {
+    return this._getFirePrefix() + '/hands/' + (RECENTLY_PLAYED_INDEX + this.props.playerIndex) + '/cards';
+  }
+
   _getNumPlayers() {
     return this.state.gameState.players.length;
   }
 
   _getCurrentStage() {
     return this.state.gameState.currentStage;
+  }
+
+  _getRecentlyPlayed() {
+    return range(this._getNumPlayers()).map(ind => this.state.gameState.hands[RECENTLY_PLAYED_INDEX + ind].cards);
+  }
+
+  _haveRecentlyPlayed() {
+    return this.state.gameState.hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards;
+  }
+
+  _isTrickTakingGame() {
+    return this.gameType.getNextPlayerRulesInStage(this._getCurrentStage()) === 'trickTaking';
   }
 
   async componentWillMount() {
@@ -76,12 +92,8 @@ class Game extends Component {
         const { gameState } = this.state;
         gameState['hands'] = {};
         this.setState({ gameState });
-      } else if (snapshot.key === 'recentlyPlayed') {
-        const { gameState } = this.state;
-        gameState['recentlyPlayed'] = [];
-        this.setState({ gameState });
       } else {
-        window.alert('WARNING: a field other than "hands" or "recentlyPlayed" has been ' +
+        window.alert('WARNING: a field other than "hands" has been ' +
                       'removed from the game state database: ' + snapshot.key);
       }
     };
@@ -146,7 +158,17 @@ class Game extends Component {
       window.alert('must select at least one card to play.');
       return;
     }
-    fire.database().ref(this._getFirePrefix() + '/recentlyPlayed/' + this.props.playerIndex).set(cardsSelected);
+    if (this._isTrickTakingGame() && this._haveRecentlyPlayed()) {
+      // end of the trick has been reached, so clear recentlyPlayed
+      const { hands } = this.state.gameState;
+      range(this._getNumPlayers()).forEach(ind => {
+        hands[RECENTLY_PLAYED_INDEX + ind].cards = [];
+      });
+      hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards = cardsSelected;
+      fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
+    } else {
+      fire.database().ref(this._getRecentlyPlayedCardsFirePrefix()).set(cardsSelected);
+    }
     const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
     this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
     fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
@@ -185,7 +207,34 @@ class Game extends Component {
   }
 
   endTurnClicked() {
-    const newPlayerToMove = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
+    const nextPlayerInCycle = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
+    let newPlayerToMove = nextPlayerInCycle;
+
+    if (this._isTrickTakingGame()) {
+      const recentlyPlayed = this._getRecentlyPlayed();
+      const numPlayersWhoHavePlayed = recentlyPlayed.filter((val) => val).length;
+      if (numPlayersWhoHavePlayed === this._getNumPlayers()) {
+        // try to determine who won the trick
+        const eachPlayerPlayedSingleCard = recentlyPlayed.every((val) => val.length === 1);
+        if (eachPlayerPlayedSingleCard) {
+          const startingSuit = recentlyPlayed[nextPlayerInCycle][0].suit;
+          let maxRankOfStartingSuit = -MAX_ABS_CARD_RANK;
+          let winningPlayer = -1;
+          recentlyPlayed.forEach((val, ind) =>
+          {
+            if (val[0].suit === startingSuit) {
+              const rank = this.gameType.getCardComparisonRank(val[0]);
+              if (rank > maxRankOfStartingSuit) {
+                maxRankOfStartingSuit = rank;
+                winningPlayer = ind;
+              }
+            }
+          });
+          newPlayerToMove = winningPlayer;
+        }
+      }
+    }
+
     fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
   }
 
@@ -202,6 +251,13 @@ class Game extends Component {
     Object.keys(hands).forEach(i => this.gameType.sortHand(hands[i].cards));
     const numCardsInMyHand = hands[this.props.playerIndex].cards.length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
+    // augment hands with recently played
+    range(this._getNumPlayers()).forEach(i => {
+      hands[RECENTLY_PLAYED_INDEX + i] = { 
+        cards: [],
+        displayMode: 'fan',
+        visibility: Array(this._getNumPlayers()).fill(true) };
+    });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
     this.enterNextStage();
   }
@@ -217,7 +273,6 @@ class Game extends Component {
       finished: false,
       currentStage: 0,
       hands: {},
-      recentlyPlayed: [],
       playerToMove: 0
     };
     Object.assign(gameState, resetGameState);
@@ -269,12 +324,8 @@ class Game extends Component {
         { gameState.hands ? this.renderHand(ind) : null }
         Recently played
         <br />
-        { gameState.recentlyPlayed[ind]
-          ? <Hand
-            cards={ gameState.recentlyPlayed[ind] }
-            isYours={ false }
-            displayMode={ 'fan' }
-            visible={ true } />
+        { gameState.hands[RECENTLY_PLAYED_INDEX + ind]
+          ? this.renderHand(RECENTLY_PLAYED_INDEX + ind)
           : null }
       </div>
     );
@@ -324,9 +375,9 @@ class Game extends Component {
         { this.state.gameState.hands
           ? <div className='non-player-hands'>
               { Object.keys(this.state.gameState.hands)
-                .filter(i => i >= 20) // TODO magic number
+                .filter(i => i >= DECK_INDEX)
                 .map(i => {
-                  return (<div>
+                  return (<div key={ i }>
                     Stack id: { i }
                     { this.renderHand(i) }
                   </div>);

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import Card from './Card';
 import { range } from 'lodash';
+
+import Card from './Card';
+import { DECK_INDEX } from '../utils/magic_numbers';
 
 class Deck extends Component {
 
@@ -46,7 +48,7 @@ class Deck extends Component {
             displayMode: 'single',
             visibility: Array(numPlayers).fill(false)
           };
-          hands[20] = deck; // TODO fix magic number
+          hands[DECK_INDEX] = deck;
           break;
         case 'dealOut':
           range(usedCards, deckCards.length).forEach(i => {
