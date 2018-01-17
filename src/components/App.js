@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import fire from '../fire';
 
 import Chat from './Chat';
+import SharedNotes from './SharedNotes';
 import Game from './Game';
 import CreateGameType from './create_game_type/CreateGameType';
 
@@ -55,6 +56,7 @@ class App extends Component {
       winner: 0
     };
     const gameRef = fire.database().ref('games').push(game);
+    fire.database().ref('sharedNotes/' + gameRef.key).set({ text: '', playerLock: -1 });
     this.setState({ gameId: gameRef.key });
   }
 
@@ -161,6 +163,12 @@ class App extends Component {
     );
   }
 
+  renderSharedNotes() {
+    return (
+      <SharedNotes gameId={ this.state.gameId } playerIndex={ this.state.playerIndex } />
+    );
+  }
+
   renderHome() {
     return (
       <div>
@@ -189,6 +197,7 @@ class App extends Component {
         </div>
         <div className='chat-section'>
           <Chat username={ this.state.username } gameId={ this.state.gameId } />
+          { this.state.gameId ? this.renderSharedNotes() : null }
           <br />
         </div>
       </div>
