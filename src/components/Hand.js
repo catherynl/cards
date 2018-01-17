@@ -74,6 +74,7 @@ class Hand extends Component {
         const lastIndex = this.props.cards.length - 1;
         return this.renderCard(this.props.cards[lastIndex], lastIndex);
       default:
+        console.log('tried to render', this.props.cards)
         console.log('unrecognized hand display mode');
     }
   }

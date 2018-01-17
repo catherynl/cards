@@ -241,6 +241,7 @@ class Game extends Component {
           ? <Hand
             cards={ gameState.recentlyPlayed[ind] }
             isYours={ false }
+            displayMode={ 'fan' }
             visible={ true } />
           : null }
       </div>
