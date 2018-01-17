@@ -50,7 +50,7 @@ class App extends Component {
       finished: false,
       gameTypeId: gameTypeId,
       players: [this.state.username],
-      playerToMove: 0,
+      playersToMove: [true],
       started: false,
       currentStage: 0,
       winner: 0
@@ -86,6 +86,7 @@ class App extends Component {
 
     fire.database().ref(firePrefix + '/players/' + numPlayers).set(this.state.username);
     fire.database().ref(firePrefix + '/recentlyPlayed/' + numPlayers).set(0);
+    fire.database().ref(firePrefix + '/playersToMove/' + numPlayers).set(false);
     fire.database().ref(firePrefix + '/hands/' + numPlayers).set(0);
 
     const updatedPlayers = await fire.database().ref(firePrefix + '/players/' + numPlayers).once('value');

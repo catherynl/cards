@@ -14,8 +14,9 @@ button, .button {
 }
 
 input, form input {
-    margin-right: 5px;
+    margin-right: 10px;
     height: 24px;
+    width: 140px;
     padding: 2px 2px 2px 5px;
 }
 

@@ -57,6 +57,10 @@ class Game extends Component {
     return this.gameType.getIsTrickTakingInStage(this._getCurrentStage());
   }
 
+  _getPlayersToMove() {
+    return this.state.gameState.playersToMove;
+  }
+
   async componentWillMount() {
     const gamesRef = fire.database().ref(this._getFirePrefix());
     const currentState = await gamesRef.once('value');
@@ -111,12 +115,32 @@ class Game extends Component {
   }
 
   isYourTurn() {
-    return this.props.playerIndex === this.state.gameState.playerToMove;
+    return this._getPlayersToMove()[this.props.playerIndex];
   }
 
   enterNextStage() {
     const nextStage = this._getCurrentStage() + 1;
     fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
+
+    let newPlayersToMove = Array(this._getNumPlayers()).fill(false);
+    const stageType = this.gameType.getStageType(nextStage);
+    switch (stageType) {
+      case 'deal':
+      case 'trade':
+        newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+        break;
+      case 'play':
+        newPlayersToMove[0] = true;
+        break;
+      case 'buffer':
+        break;
+      default:
+        console.log('stage unrecognized, no players to move');
+    };
+
+    fire.database()
+      .ref(this._getFirePrefix() + '/playersToMove')
+      .set(newPlayersToMove);
   }
 
   shouldShowStartGameButton() {
@@ -142,6 +166,10 @@ class Game extends Component {
 
   shouldShowEndGameButton() {
     return true; // TODO game logic
+  }
+
+  shouldShowPlayersTurnIndicator(i) {
+    return this._getPlayersToMove()[i]
   }
 
   startGameClicked() {
@@ -208,7 +236,7 @@ class Game extends Component {
   }
 
   endTurnClicked() {
-    const nextPlayerInCycle = (this.state.gameState.playerToMove + 1) % this._getNumPlayers();
+    const nextPlayerInCycle = (this.props.playerIndex + 1) % this._getNumPlayers();
     let newPlayerToMove = nextPlayerInCycle;
 
     if (this._isTrickTakingStage()) {
@@ -236,7 +264,12 @@ class Game extends Component {
       }
     }
 
-    fire.database().ref(this._getFirePrefix() + '/playerToMove').set(newPlayerToMove);
+    fire.database()
+      .ref(this._getFirePrefix() + '/playersToMove/' + this.props.playerIndex)
+      .set(false);
+    fire.database()
+      .ref(this._getFirePrefix() + '/playersToMove/' + newPlayerToMove)
+      .set(true);
   }
 
   confirmTradeClicked() {
@@ -286,7 +319,7 @@ class Game extends Component {
       finished: false,
       currentStage: 0,
       hands: {},
-      playerToMove: 0
+      playersToMove: Array(this._getNumPlayers()).fill(false)
     };
     Object.assign(gameState, resetGameState);
     fire.database().ref(this._getFirePrefix()).set(gameState);
@@ -330,7 +363,7 @@ class Game extends Component {
         <div className='player-name'>
           {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
           &nbsp;
-          { ind === this.state.gameState.playerToMove
+          { this.shouldShowPlayersTurnIndicator(ind)
             ? this.renderPlayersTurnIndicator()
             : null }
         </div>

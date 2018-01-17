@@ -1,5 +1,3 @@
-import { range } from 'lodash';
-
 import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS } from './magic_numbers';
 import { PLAY_CARDS_INDEX, END_TURN_INDEX } from './stage';
 
@@ -65,6 +63,10 @@ class GameType {
     return this.stages[stageIndex].availableActions[actionIndex];
   }
 
+  getStageType(stageIndex) {
+    return this.stages[stageIndex].type;
+  }
+
   getHandleRemainingInStage(stageIndex) {
     return this.stages[stageIndex].handleRemaining;
   }
@@ -79,10 +81,6 @@ class GameType {
 
   _getNextPlayerRulesInStage(stageIndex) {
     return this.stages[stageIndex].nextPlayerRules;
-  }
-
-  getHandIndices() {
-    return range(this.maxPlayers).concat([21]); // TODO fix for more decks
   }
 
   getCardComparisonRank(card) {
