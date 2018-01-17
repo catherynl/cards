@@ -259,6 +259,7 @@ class Game extends Component {
         cards={ cards ? cards : [] }
         isYours={ playerInd === this.props.playerIndex }
         visible={ hand.visibility[this.props.playerIndex] }
+        displayMode={ hand.displayMode }
         onSelect={ this.onCardSelected.bind(this) }
         onPlayCards={ this.playCardsClicked.bind(this) }
         cardsSelected={ this.state.cardsSelected }

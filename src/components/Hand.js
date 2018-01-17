@@ -66,13 +66,25 @@ class Hand extends Component {
     );
   }
 
+  renderCards() {
+    switch (this.props.displayMode) {
+      case 'fan':
+        return this.props.cards.map((card, index) => this.renderCard(card, index));
+      case 'single':
+        const lastIndex = this.props.cards.length - 1;
+        return this.renderCard(this.props.cards[lastIndex], lastIndex);
+      default:
+        console.log('unrecognized hand display mode');
+    }
+  }
+
   render() {
     return (
       <div>
         { this.props.isYours ? this.renderKeyListeners() : null }
         <div className="cards">
           { this.props.cards.length > 0
-            ? this.props.cards.map((card, index) => this.renderCard(card, index))
+            ? this.renderCards()
             : <p>(Your hand is empty)</p> }
         </div>
       </div>
