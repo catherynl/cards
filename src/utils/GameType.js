@@ -1,5 +1,7 @@
 import { range } from 'lodash';
 
+import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS } from './magic_numbers';
+
 class GameType {
 
   constructor(gameType) {
@@ -89,10 +91,11 @@ class GameType {
     let getCardValue;
     switch (this.handSortOrder) {
       case 'suitFirst':
-        getCardValue = (card) => card.suit * 100 + this.getCardComparisonRank(card);   // assumes card rank will never exceed 100
+        getCardValue = (card) => card.suit * MAX_ABS_CARD_RANK + this.getCardComparisonRank(card);
         break;
       case 'rankFirst':
-        getCardValue = (card) => this.getCardComparisonRank(card) * 10 + card.suit;    // assumes there will never be more than 10 suits
+        // 10 is a large enough constant to account for custom suits
+        getCardValue = (card) => this.getCardComparisonRank(card) * (MAX_NUM_SUITS + 10) + card.suit;
         break;
       default:
         console.log('ERROR: invalid handSortOrder encountered:', this.handSortOrder);

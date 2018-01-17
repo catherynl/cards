@@ -1,4 +1,18 @@
-import { getStandardDeck } from '../card';
+import { range } from 'lodash';
+
+const getStandardDeck = () => {
+  const standardDeck = [];
+  range(4).forEach(suit => {
+    range(1, 14).forEach(rank => {
+      const card = {
+        suit: suit,
+        rank: rank
+      }
+      standardDeck.push(card);
+    });
+  });
+  return standardDeck;
+};
 
 export const TestHearts = {
     deck: getStandardDeck(),

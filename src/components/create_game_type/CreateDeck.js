@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { range } from 'lodash';
-import { Suits, CUSTOM_SUIT, RANK_ORDERS, HAND_SORT_ORDERS } from '../../utils/card';
 
 import Hand from '../Hand';
+import { MAX_NUM_SUITS, CUSTOM_SUIT, RANK_ORDERS, HAND_SORT_ORDERS } from '../../utils/card';
+import { MAX_ABS_CARD_RANK } from '../../utils/magic_numbers';
 
 class CreateDeck extends Component {
 
@@ -54,7 +55,7 @@ class CreateDeck extends Component {
       return;
     }
     const rank = parseInt(this.inputCustomCardRank.value === '' ? 0 : this.inputCustomCardRank.value, 10);
-    if (Number.isNaN(rank) || Math.abs(rank) > 99) {
+    if (Number.isNaN(rank) || Math.abs(rank) >= MAX_ABS_CARD_RANK) {
       window.alert('invalid rank for custom card: ' + this.inputCustomCardRank.value);
       return;
     }
@@ -70,7 +71,7 @@ class CreateDeck extends Component {
       window.alert('invalid number of suits: ' + this.inputNumSuits.value);
       return;
     }
-    if (numSuits >= Object.keys(Suits).length) {
+    if (numSuits > MAX_NUM_SUITS) {
       window.alert('number of suits exceeds the max accepted.');
       return;
     }

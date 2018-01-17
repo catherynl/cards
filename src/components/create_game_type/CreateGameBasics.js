@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { MAX_NUM_PLAYERS } from '../../utils/magic_numbers';
 
 class CreateGameBasics extends Component {
 
@@ -12,17 +13,17 @@ class CreateGameBasics extends Component {
       return;
     }
     const minPlayers = parseInt(this.inputMinPlayers.value === '' ? 1 : this.inputMinPlayers.value, 10);
-    if (Number.isNaN(minPlayers) || minPlayers > 99) {
+    if (Number.isNaN(minPlayers)) {
       window.alert('invalid value for minPlayers: ' + this.inputMinPlayers.value);
       return;
     }
-    const maxPlayers = parseInt(this.inputMaxPlayers.value === '' ? 20 : this.inputMaxPlayers.value, 10);
+    const maxPlayers = parseInt(this.inputMaxPlayers.value === '' ? MAX_NUM_PLAYERS : this.inputMaxPlayers.value, 10);
     if (Number.isNaN(maxPlayers) || maxPlayers < 1) {
       window.alert('invalid value for maxPlayers: ' + this.inputMaxPlayers.value);
       return;
     }
-    if (maxPlayers > 20) {
-      window.alert('max players cannot exceed 20');
+    if (maxPlayers > MAX_NUM_PLAYERS) {
+      window.alert('max players cannot exceed ' + MAX_NUM_PLAYERS);
       return;
     }
     if (maxPlayers < minPlayers) {
@@ -43,7 +44,7 @@ class CreateGameBasics extends Component {
         <input type="text" ref={ el => this.inputMinPlayers = el } placeholder="1" />
         <br />
         Maximum players supported: &nbsp;
-        <input type="text" ref={ el => this.inputMaxPlayers = el } placeholder="20" />
+        <input type="text" ref={ el => this.inputMaxPlayers = el } placeholder={ MAX_NUM_PLAYERS } />
         <br />
         <button onClick={ this.finishClicked.bind(this) }>Next</button>
       </div>

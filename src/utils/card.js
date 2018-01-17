@@ -1,5 +1,3 @@
-import { range } from 'lodash';
-
 export const Suits = {
   0: {
     'name': 'spade',
@@ -38,6 +36,7 @@ export const Suits = {
   }
 };
 export const CUSTOM_SUIT = 6;
+export const MAX_NUM_SUITS = Object.keys(Suits).length - 1;
 
 export const RANK_ORDERS = ['K-high', 'A-high', '2-high'];
 export const HAND_SORT_ORDERS = ['suitFirst', 'rankFirst'];
@@ -56,18 +55,4 @@ export const rankToSymbol = {
   11: 'J',
   12: 'Q',
   13: 'K'
-};
-
-export const getStandardDeck = () => {
-  const standardDeck = [];
-  range(4).forEach(suit => {
-    range(1, 14).forEach(rank => {
-      const card = {
-        suit: suit,
-        rank: rank
-      }
-      standardDeck.push(card);
-    });
-  });
-  return standardDeck;
 };
