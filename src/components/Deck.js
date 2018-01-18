@@ -7,7 +7,7 @@ import { DECK_NAME } from '../utils/hand';
 
 class Deck extends Component {
 
-  // props: cards (array of cards)
+  // props: cards (array of cards), displayMode, visible
 
   getCards() {
     return this.props.cards;
@@ -47,8 +47,8 @@ class Deck extends Component {
           const deck = {
             name: DECK_NAME,
             cards: deckCards.slice(usedCards),
-            displayMode: 'single',
-            visibility: Array(numPlayers).fill(false)
+            displayMode: this.props.displayMode,
+            visibility: Array(numPlayers).fill(this.props.visible)
           };
           hands[DECK_INDEX] = deck;
           break;

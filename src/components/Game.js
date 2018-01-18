@@ -6,7 +6,7 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
-import { ACTION_MAP, PASS_CARDS_INDEX } from '../utils/stage';
+import { ACTION_MAP, PASS_CARDS_INDEX, DRAW_CARDS_INDEX } from '../utils/stage';
 import { RECENTLY_PLAYED_INDEX, DECK_INDEX, MAX_ABS_CARD_RANK } from '../utils/magic_numbers';
 
 class Game extends Component {
@@ -25,7 +25,7 @@ class Game extends Component {
       },
       cardsSelected: [], // booleans, one for each card in this player's hand
       secondPhaseAction: -1,   // actionIndex corresponding to action awaiting confirmation; else -1
-      selectedPlayer: -1,   // index of player selected (e.g., for pass cards); -1 if none
+      selectedTarget: -1,   // index of player selected to pass cards to, or index of pile to draw from; -1 if none
       minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
@@ -282,7 +282,7 @@ class Game extends Component {
     } else {
       console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      const passIndex = this.state.selectedPlayer;
+      const passIndex = this.state.selectedTarget;
       if (passIndex === -1) {
         window.alert('must select player to pass to.');
         return;
@@ -291,6 +291,7 @@ class Game extends Component {
       // TODO: de-dup these lines from above
       const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
       const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+
       selectedCards.forEach(card => {
         card.newlyObtained = true;
       })
@@ -313,7 +314,26 @@ class Game extends Component {
   }
 
   drawCardsClicked() {
-    return;
+    if (this.state.secondPhaseAction === -1) {
+      this.setState({ secondPhaseAction: DRAW_CARDS_INDEX });
+    } else {
+      console.assert(this.state.secondPhaseAction === DRAW_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
+
+      const targetInd = this.state.selectedTarget;
+      const hands = this.state.gameState.hands;
+      const targetCards = hands[targetInd].cards;
+      if (targetCards.length === 0) {
+        window.alert('cannot draw from here -- pile is empty.');
+        return;
+      }
+      const newCard = targetCards.pop();
+      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
+      const myCards = hands[this.props.playerIndex].cards;
+      myCards.push(newCard);
+      this.gameType.sortHand(myCards);
+      fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards').set(myCards);
+      this.setState({ secondPhaseAction: -1 });
+    }
   }
 
   endTurnClicked() {
@@ -358,7 +378,11 @@ class Game extends Component {
   }
 
   dealCardsClicked() {
-    const deck = new Deck({ cards: this.gameType.getDeck() });
+    const deck = new Deck({
+      cards: this.gameType.getDeck(),
+      displayMode: this.state.gameState.hands[DECK_INDEX].displayMode,
+      visible: this.state.gameState.hands[DECK_INDEX].visibility[this.props.playerIndex]
+    });
     const hands = deck.deal(
       this._getNumPlayers(),
       this.gameType.getDealCountPerPlayerInStage(this._getCurrentStage()),
@@ -420,8 +444,8 @@ class Game extends Component {
     }
   }
 
-  recordPlayerSelection(playerInd) {
-    this.setState({ selectedPlayer: playerInd });
+  recordTargetSelection(targetInd) {
+    this.setState({ selectedTarget: targetInd });
   }
 
   nextStageClicked() {
@@ -556,31 +580,54 @@ class Game extends Component {
   }
 
   renderSecondPhaseAction(actionInd) {
-    if (actionInd === PASS_CARDS_INDEX) {
-      return (
-        <div>
-          Which player are you passing to?
-          {
-            range(this._getNumPlayers())
-              .filter(i => i !== this.props.playerIndex)
-              .map(i => {
-                const keyBinding = (i + 1) % 10;
-                return (
-                  <div key={i}>
-                    Player {i + 1} (Press { keyBinding }) &nbsp;
-                    { this.state.selectedPlayer === i ? <span>Selected!</span> : null }
+    switch (actionInd) {
+      case PASS_CARDS_INDEX:
+        return (
+          <div>
+            Which player are you passing to?
+            {
+              range(this._getNumPlayers())
+                .filter(i => i !== this.props.playerIndex)
+                .map(i => {
+                  const keyBinding = (i + 1) % 10;
+                  return (
+                    <div key={i}>
+                      Player {i + 1} (Press { keyBinding }) &nbsp;
+                      { this.state.selectedTarget === i ? <span>Selected!</span> : null }
+                      <KeyHandler
+                        keyEventName="keydown"
+                        keyValue={ keyBinding.toString() }
+                        onKeyHandle={ () => this.recordTargetSelection(i) } />
+                    </div>
+                  );
+                })
+            }
+          </div>
+        );
+      case DRAW_CARDS_INDEX:
+        return (
+          <div>
+            Which pile are you drawing from?
+            {
+              Object.keys(this.state.gameState.hands)
+                // can only draw from nonempty table piles
+                .filter(i => i >= DECK_INDEX && this.state.gameState.hands[i].cards.length > 0)
+                .map((handInd, i) => {
+                  return (<div key={ i }>
+                    { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
+                    (Press { i } to select) &nbsp;
+                    { this.state.selectedTarget === handInd ? <span>Selected!</span> : null }
                     <KeyHandler
                       keyEventName="keydown"
-                      keyValue={ keyBinding.toString() }
-                      onKeyHandle={ () => this.recordPlayerSelection(i) } />
-                  </div>
-                );
-              })
-          }
-        </div>
-      );
-    } else {
-      console.log('ERROR. invalid type of action passed to renderSecondPhaseAction.');
+                      keyValue={ i.toString() }
+                      onKeyHandle={ () => this.recordTargetSelection(handInd) } />
+                  </div>);
+                })
+            }
+          </div>
+        );
+      default:
+        console.log('ERROR. invalid type of action passed to renderSecondPhaseAction.');
     }
   }
 

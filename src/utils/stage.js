@@ -33,6 +33,7 @@ export const ACTION_MAP = {
   },
 };
 export const PLAY_CARDS_INDEX = 0;
+export const DRAW_CARDS_INDEX = 1;
 export const PASS_CARDS_INDEX = 2;
 export const END_TURN_INDEX = 3;
 

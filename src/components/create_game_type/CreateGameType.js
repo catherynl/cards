@@ -62,7 +62,8 @@ class CreateGameType extends Component {
                        deck: this.deck,
                        rankOrder: this.state.rankOrder,
                        handSortOrder: this.state.handSortOrder,
-                       stages: this.stages
+                       stages: this.stages,
+                       additionalHands: this.additionalHands
                      };
     const gameTypeRef = fire.database().ref('/gameTypes').push(gameType);
     window.alert('Submitted "' + this.name + ' (' + gameTypeRef.key + ')" to database!');
