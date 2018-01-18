@@ -76,6 +76,10 @@ class Hand extends Component {
     }
   }
 
+  renderEmptyHand() {
+    return (<Card isEmpty={ true }/>);
+  }
+
   render() {
     return (
       <div>
@@ -83,7 +87,7 @@ class Hand extends Component {
         <div className="cards">
           { this.props.cards.length > 0
             ? this.renderCards()
-            : <p>(Your hand is empty)</p> }
+            : this.renderEmptyHand() }
         </div>
       </div>
     );

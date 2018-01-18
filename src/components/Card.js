@@ -12,7 +12,7 @@ const imageUrls = {
 
 class Card extends Component {
 
-  // props: card: { suit, rank}, visible, selected, keyBinding
+  // props: card: { suit, rank}, visible, selected, isEmpty, keyBinding
 
   renderVisibleCard() {
     const { card } = this.props;
@@ -47,16 +47,22 @@ class Card extends Component {
   }
 
   renderHiddenCard() {
-    return (<div className='card hidden'>?</div>)
+    return (<div className='card hidden'>?</div>);
+  }
+
+  renderEmptyCard() {
+    return (<div className='card empty'>(none)</div>);
   }
 
   render() {
+    if (this.props.isEmpty) {
+      return this.renderEmptyCard();
+    }
     return (
       <div>
         { this.props.visible
           ? this.renderVisibleCard()
-          : this.renderHiddenCard()
-        }
+          : this.renderHiddenCard() }
       </div>
     );
   }

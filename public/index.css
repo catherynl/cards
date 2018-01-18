@@ -39,6 +39,7 @@ ul {
     display: inline-block;
     margin-top: 5px;
     width: 97%;
+    height: 60px;
 }
 
 .card-outer {
@@ -65,6 +66,10 @@ ul {
 .card.selected {
     border-color: #00dddd;
     border-width: 2px;
+}
+
+.card.empty {
+    font-size: 11px;
 }
 
 .card.newly-obtained {
