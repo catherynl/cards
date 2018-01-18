@@ -43,7 +43,6 @@ ul {
 
 .card-outer {
     float: left;
-    margin-bottom: 15px;
 }
 
 .card {
@@ -64,6 +63,15 @@ ul {
 
 .card.selected {
     border-color: #00dddd;
+    border-width: 2px;
+}
+
+.card.empty {
+    font-size: 11px;
+}
+
+.card.newly-obtained {
+    border-color: darkorange;
     border-width: 2px;
 }
 
