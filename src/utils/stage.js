@@ -26,6 +26,10 @@ export const actionMap = {
   6: {
     name: 'revealCards',
     displayName: 'Reveal cards'
+  },
+  7: {
+    name: 'undoPlay',
+    displayName: 'Undo play'
   }
 };
 export const PLAY_CARDS_INDEX = 0;
@@ -35,25 +39,25 @@ export const STAGES = {
   0: {
     name: 'deal',
     displayName: 'Deal stage',
-    defaultActions: [false, false, false, false, true, false, false],
+    defaultActions: [false, false, false, false, true, false, false, false],
     availableActions: false
   },
   1: {
     name: 'play',
     displayName: 'Play stage',
-    defaultActions: [true, false, false, true, false, false, false],
+    defaultActions: [true, false, false, true, false, false, false, true],
     availableActions: [0, 1, 2, 3, 6]
   },
   2: {
     name: 'trade',
     displayName: 'Trade stage',
-    defaultActions: [false, false, true, true, false, true, false],
+    defaultActions: [false, false, true, false, false, true, false, false],
     availableActions: [2, 6]
   },
   3: {
     name: 'buffer',
     displayName: 'Buffer stage',
-    defaultActions: [false, false, false, false, false, false, false],
+    defaultActions: [false, false, false, false, false, false, false, false],
     availableActions: false
   }
 };

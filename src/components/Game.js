@@ -99,7 +99,8 @@ class Game extends Component {
           const hands = gameState.hands;
           const cardsToBePassed = gameState.cardsToBePassed;
           range(this._getNumPlayers()).forEach(i => {
-            const newCards = hands[i].cards.concat(cardsToBePassed[i]);
+            const cardsToConcat = cardsToBePassed[i] ? cardsToBePassed[i] : [];
+            const newCards = hands[i].cards.concat(cardsToConcat);
             this.gameType.sortHand(newCards);
             hands[i].cards = newCards;
           });
@@ -311,6 +312,10 @@ class Game extends Component {
     });
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
     this.enterNextStage();
+  }
+
+  undoPlayClicked() {
+
   }
 
   enterPressed() {
