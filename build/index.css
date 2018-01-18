@@ -6,6 +6,7 @@ body {
 }
 
 button, .button {
+    -webkit-appearance: none;
     height: 30px;
     width: 150px;
     margin: 5px 20px 5px 0px;
@@ -13,14 +14,16 @@ button, .button {
 }
 
 input, form input {
-    margin-right: 5px;
+    margin-right: 10px;
     height: 24px;
+    width: 140px;
     padding: 2px 2px 2px 5px;
 }
 
 textarea {
     width: 100%;
     height: 200px;
+    border-color: lightgray;
 }
 
 textarea:disabled {
@@ -71,11 +74,12 @@ ul {
 .chat {
     border: solid 1px lightgray;
     margin-top: 10px;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 10px 0px 10px;
 }
 
 .chat ul {
-    margin-top: 1px;
+    margin-top: 3px;
+    margin-left: -20px;
     width: 200px;
     line-height: 1.5;
 }
