@@ -218,6 +218,7 @@ class Game extends Component {
       .ref(this._getFirePrefix() + '/playersToMove')
       .set(newPlayersToMove);
     fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
+    fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
   }
 
   shouldShowStartGameButton() {
