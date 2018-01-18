@@ -115,7 +115,6 @@ class Game extends Component {
             hands[i].cards = newCards;
           });
           fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
-          fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
           fire.database().ref(this._getFirePrefix() + '/cardsToBePassed').set({});
         }
       }
@@ -152,6 +151,15 @@ class Game extends Component {
     return this._getPlayersToMove()[this.props.playerIndex];
   }
 
+  haveConfirmedTrade() {
+    return this.state.gameState.tradeConfirmed[this.props.playerIndex];
+  }
+
+  allHaveConfirmedTrade() {
+    const tradeConfirmed = Array.from(this.state.gameState.tradeConfirmed);
+    return this._getNumPlayers() === tradeConfirmed.filter(i => i).length;
+  }
+
   enterNextStage() {
     const nextStage = this._getCurrentStage() + 1;
     fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
@@ -175,6 +183,7 @@ class Game extends Component {
     fire.database()
       .ref(this._getFirePrefix() + '/playersToMove')
       .set(newPlayersToMove);
+    fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
   }
 
   shouldShowStartGameButton() {
@@ -183,7 +192,7 @@ class Game extends Component {
   }
 
   shouldShowPlayerActions() {
-    return this.isYourTurn();
+    return this.isYourTurn() && !this.haveConfirmedTrade();
   }
 
   shouldShowGameInPlay() {
@@ -448,6 +457,16 @@ class Game extends Component {
     );
   }
 
+  renderTradeConfirmed() {
+    let text = this.haveConfirmedTrade()
+      ? 'Confirmed trade! Waiting for other players.'
+      : '';
+    text = this.allHaveConfirmedTrade()
+      ? 'Everyone has confirmed! See results of trade.'
+      : text;
+    return (<div>{ text }</div>);
+  }
+
   renderPlayerActions() {
     return (
       <div className='player-actions'>
@@ -514,6 +533,7 @@ class Game extends Component {
     return (
       <div>
         { this.renderStageName() }
+        { this.renderTradeConfirmed() }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { range(this._getNumPlayers()).map(ind =>
           this.renderPlayer(ind)
