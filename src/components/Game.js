@@ -83,6 +83,12 @@ class Game extends Component {
     return this.state.gameState.playersToMove;
   }
 
+  _getValidPileIndsToDrawFrom() {
+    // can only draw from nonempty table piles
+    return Object.keys(this.state.gameState.hands)
+            .filter(i => i >= DECK_INDEX && this._getNumCardsInHand(i) > 0)
+  }
+
   getFirstStagePlayersToMove() {
     const stageType = this.gameType.getStageType(0);
     switch (stageType) {
@@ -285,13 +291,14 @@ class Game extends Component {
 
   passCardsClicked() {
     if (this.state.secondPhaseAction === -1) {
-      if (this._getNumPlayers() === 1) {
+      const numPlayers = this._getNumPlayers();
+      if (numPlayers === 1) {
         window.alert('no other players to pass to!');
         return;
       }
       const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
       if (!myHand) {
-        window.alert('nothing to play.');
+        window.alert('nothing to pass.');
         return;
       }
       const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
@@ -299,7 +306,12 @@ class Game extends Component {
         window.alert('must select at least one card to pass.');
         return;
       }
-      this.setState({ secondPhaseAction: PASS_CARDS_INDEX });
+      const updatedState = { secondPhaseAction: PASS_CARDS_INDEX };
+      if (numPlayers === 2) {
+        // only one other player to pass to, so set the choice by default
+        updatedState['selectedTarget'] = 1 - this.props.playerIndex;
+      }
+      this.setState(updatedState);
     } else {
       console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
@@ -336,7 +348,16 @@ class Game extends Component {
 
   drawCardsClicked() {
     if (this.state.secondPhaseAction === -1) {
-      this.setState({ secondPhaseAction: DRAW_CARDS_INDEX });
+      const validPilesForDraw = this._getValidPileIndsToDrawFrom();
+      if (validPilesForDraw.length === 0) {
+        window.alert('no piles to draw from.');
+        return;
+      }
+      const updatedState = { secondPhaseAction: DRAW_CARDS_INDEX };
+      if (validPilesForDraw.length === 1) {
+        updatedState['selectedTarget'] = validPilesForDraw[0];
+      }
+      this.setState(updatedState);
     } else {
       console.assert(this.state.secondPhaseAction === DRAW_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
@@ -645,9 +666,7 @@ class Game extends Component {
           <div>
             Which pile are you drawing from?
             {
-              Object.keys(this.state.gameState.hands)
-                // can only draw from nonempty table piles
-                .filter(i => i >= DECK_INDEX && this._getNumCardsInHand(i) > 0)
+              this._getValidPileIndsToDrawFrom()
                 .map((handInd, i) => {
                   return (<div key={ i }>
                     { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
