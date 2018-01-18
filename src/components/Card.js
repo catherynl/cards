@@ -17,9 +17,16 @@ class Card extends Component {
   renderVisibleCard() {
     const { card } = this.props;
     const suit = Suits[card.suit];
+    const cssClasses = ['card'];
+    if (this.props.selected) {
+      cssClasses.push('selected');
+    }
+    if (this.props.newlyObtained) {
+      cssClasses.push('newly-obtained');
+    }
     return (
       <div className='card-outer'>
-        <div className={this.props.selected ? 'card selected' : 'card'}>
+        <div className={cssClasses.join(' ')}>
           { Object.keys(imageUrls).includes(suit.name)
             ? <span>
                 <img src={ imageUrls[suit.name] }

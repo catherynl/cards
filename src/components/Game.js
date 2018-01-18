@@ -182,6 +182,16 @@ class Game extends Component {
         console.log('stage unrecognized, no players to move');
     };
 
+    // clean up newly obtained tag
+    const hands = this.state.gameState.hands;
+    Object.keys(hands).forEach(i => {
+      if (hands[i].cards) {
+        hands[i].cards.forEach(card => {
+          card.newlyObtained = false;
+        });
+      }
+    });
+
     fire.database()
       .ref(this._getFirePrefix() + '/playersToMove')
       .set(newPlayersToMove);
@@ -278,7 +288,9 @@ class Game extends Component {
       // TODO: de-dup these lines from above
       const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
       const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-
+      selectedCards.forEach(card => {
+        card.newlyObtained = true;
+      })
       const cardsToBePassed = this.state.gameState.cardsToBePassed;
       const newCardsToBePassed = cardsToBePassed[passIndex]
         ? cardsToBePassed[passIndex].concat(selectedCards)

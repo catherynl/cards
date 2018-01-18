@@ -255,8 +255,7 @@ class CreateStages extends Component {
             <button key={ i } onClick={ () => this.addStageClicked(i) }>
               Add { STAGES[i].name } stage
             </button>
-          )
-        }
+        ) }
         <br />
         <button onClick={ this.finishClicked.bind(this) }>Done adding stages!</button>
       </div>

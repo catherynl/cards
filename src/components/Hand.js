@@ -38,6 +38,7 @@ class Hand extends Component {
         key={ index }
         card={ card }
         visible={ this.props.visible }
+        newlyObtained={ card.newlyObtained }
         selected={this._getCardSelected(index)}
         keyBinding={this._getKeyBinding(index)}/>
       );
@@ -46,6 +47,7 @@ class Hand extends Component {
         key={ index }
         card={ card }
         visible={ this.props.visible }
+        newlyObtained={ card.newlyObtained }
         selected={this._getCardSelected(index)}/>
       );
     }

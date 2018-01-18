@@ -67,6 +67,11 @@ ul {
     border-width: 2px;
 }
 
+.card.newly-obtained {
+    border-color: darkorange;
+    border-width: 2px;
+}
+
 .card-key-binding {
     text-align: center;
 }
