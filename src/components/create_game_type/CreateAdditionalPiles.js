@@ -11,7 +11,7 @@ class CreateAdditionalPiles extends Component {
       piles: {
         0: {
           name: DECK_NAME,
-          visible: true,
+          visible: false,
           displayMode: 'single'
         }
       }  // object mapping index to object (name, visible, displayMode)
@@ -68,14 +68,6 @@ class CreateAdditionalPiles extends Component {
   renderPileInterface(pileInd, displayInd) {
     return (
       <div>
-        Pile { displayInd } &nbsp;
-        {
-          displayInd === 1
-          ? null   // not allowed to delete the deck
-          : <button onClick={ () => this.deletePileClicked(pileInd) }>Delete pile</button>
-        }
-        <br />
-
         Pile name: &nbsp;
         {
           displayInd === 1
@@ -111,6 +103,12 @@ class CreateAdditionalPiles extends Component {
             )
           }
         )}
+
+        {
+          displayInd === 1
+          ? null   // not allowed to delete the deck
+          : <button onClick={ () => this.deletePileClicked(pileInd) }>Delete pile</button>
+        }
       </div>
     );
   }

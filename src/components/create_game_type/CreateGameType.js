@@ -134,7 +134,7 @@ class CreateGameType extends Component {
         );
       case 4:
         return (
-          <p>Created { this.additionalPiles.length } card piles for the table! Ready to submit...</p>
+          <p>Created { this.additionalHands.length } card piles for the table! Ready to submit...</p>
         );
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
