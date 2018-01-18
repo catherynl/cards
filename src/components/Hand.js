@@ -14,7 +14,7 @@ const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's'
 class Hand extends Component {
 
     // props:
-    // cards [], cardsSelected, isYours (boolean), visible (boolean),
+    // cards [], cardsSelected, isActionable (boolean), visible (boolean),
     // onSelect (callback that takes cardIndex)
 
   _getKeyBinding(cardIndex) {
@@ -33,7 +33,7 @@ class Hand extends Component {
   }
 
   renderCard(card, index) {
-    if (this.props.isYours) {
+    if (this.props.isActionable) {
       return (<Card
         key={ index }
         card={ card }
@@ -83,7 +83,7 @@ class Hand extends Component {
   render() {
     return (
       <div>
-        { this.props.isYours ? this.renderKeyListeners() : null }
+        { this.props.isActionable ? this.renderKeyListeners() : null }
         <div className="cards">
           { this.props.cards.length > 0
             ? this.renderCards()

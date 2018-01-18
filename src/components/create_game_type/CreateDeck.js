@@ -90,7 +90,7 @@ class CreateDeck extends Component {
         Ranks to include:
         <Hand
           cards={ this._getNonCustomCards(1, range(1, 14)) }
-          isYours={ true }
+          isActionable={ true }
           displayMode={ 'fan' }
           visible={ true }
           onSelect={ this.onRankSelected.bind(this) }

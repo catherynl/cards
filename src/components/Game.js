@@ -542,14 +542,15 @@ class Game extends Component {
     }
     const cards = hand.cards;
     const isYours = playerInd === this.props.playerIndex;
+    const isActionable = isYours && this.state.secondPhaseAction === -1;
     return (
       <Hand
         key={ playerInd }
         cards={ cards ? cards : [] }
-        isYours={ isYours }
+        isActionable={ isActionable }
         visible={ hand.visibility[this.props.playerIndex] }
         displayMode={ hand.displayMode }
-        onSelect={ isYours ? this.onCardSelected.bind(this) : null }
+        onSelect={ isActionable ? this.onCardSelected.bind(this) : null }
         cardsSelected={ isYours ? this.state.cardsSelected : null }
       />
     );
