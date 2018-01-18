@@ -43,6 +43,13 @@ class Game extends Component {
     return this.state.gameState.players.length;
   }
 
+  _getNumCardsInHand(handInd) {
+    if (this.state.gameState.hands[handInd] && this.state.gameState.hands[handInd].cards) {
+      return this.state.gameState.hands[handInd].cards.length;
+    }
+    return 0;
+  }
+
   _getCurrentStage() {
     return this.state.gameState.currentStage;
   }
@@ -319,20 +326,31 @@ class Game extends Component {
     } else {
       console.assert(this.state.secondPhaseAction === DRAW_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      const targetInd = this.state.selectedTarget;
-      const hands = this.state.gameState.hands;
-      const targetCards = hands[targetInd].cards;
-      if (targetCards.length === 0) {
-        window.alert('cannot draw from here -- pile is empty.');
+      const numCardsToDraw = parseInt(this.numCardsToActOn.value === '' ? 1 : this.numCardsToActOn.value, 10);
+      if (numCardsToDraw < 1) {
+        window.alert('cannot draw fewer than 1 card.');
         return;
       }
-      const newCard = targetCards.pop();
+
+      const targetInd = this.state.selectedTarget;
+      const hands = this.state.gameState.hands;
+      if (!(hands[targetInd])) {
+        window.alert('must select somewhere to draw from.');
+        return;
+      }
+      if (this._getNumCardsInHand(targetInd) < numCardsToDraw) {
+        window.alert('cannot draw from here -- pile has too few cards.');
+        return;
+      }
+      const targetCards = hands[targetInd].cards;
+      const newCards = range(numCardsToDraw).map(i => targetCards.pop());
       fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
       const myCards = hands[this.props.playerIndex].cards;
-      myCards.push(newCard);
+      myCards.concat(newCards);
       this.gameType.sortHand(myCards);
       fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards').set(myCards);
       this.setState({ secondPhaseAction: -1 });
+      this.numCardsToActOn.value = '';
     }
   }
 
@@ -611,7 +629,7 @@ class Game extends Component {
             {
               Object.keys(this.state.gameState.hands)
                 // can only draw from nonempty table piles
-                .filter(i => i >= DECK_INDEX && this.state.gameState.hands[i].cards.length > 0)
+                .filter(i => i >= DECK_INDEX && this._getNumCardsInHand(i) > 0)
                 .map((handInd, i) => {
                   return (<div key={ i }>
                     { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
@@ -624,6 +642,8 @@ class Game extends Component {
                   </div>);
                 })
             }
+            How many cards would you like to draw? &nbsp;
+            <input type="text" ref={ el => this.numCardsToActOn = el } placeholder="1" />
           </div>
         );
       default:
