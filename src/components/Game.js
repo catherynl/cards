@@ -202,7 +202,7 @@ class Game extends Component {
   }
 
   shouldShowPlayersTurnIndicator(i) {
-    return this._getPlayersToMove()[i]
+    return this.gameType.getStageType(this._getCurrentStage()) === 'play' && this._getPlayersToMove()[i]
   }
 
   startGameClicked() {
@@ -390,7 +390,7 @@ class Game extends Component {
 
   renderPlayersTurnIndicator(ind) {
     const text = this.props.playerIndex === ind ? '(Your turn)' : '(This player\'s turn)';
-    return <span className='your-turn'>{ text }</span>;
+    return <span className='turn-indicator'>{ text }</span>;
   }
 
   renderPlayer(ind) {
@@ -473,8 +473,26 @@ class Game extends Component {
 
   renderStageName() {
     const stageIndex = this._getCurrentStage();
+    let text;
+    const stageType = this.gameType.getStageType(stageIndex);
+    switch (stageType) {
+      case 'deal':
+        text = '(Anyone can deal)';
+        break;
+      case 'trade':
+        text = '(Everyone should move)';
+        break;
+      case 'buffer':
+        text = '(No moves on buffer mode)';
+        break;
+      default:
+        text = '';
+    }
     return (
-      <div>Stage {stageIndex + 1}: {this.gameType.getStage(stageIndex).name}</div>
+      <div>
+        Stage {stageIndex + 1}: {this.gameType.getStage(stageIndex).name}
+        <span className='turn-indicator'> {text}</span>
+      </div>
     );
   }
 
