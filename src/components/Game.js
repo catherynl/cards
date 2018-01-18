@@ -66,8 +66,13 @@ class Game extends Component {
     switch (stageType) {
       case 'deal':
       case 'trade':
+        let newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+        fire.database()
+          .ref(this._getFirePrefix() + '/playersToMove')
+          .set(newPlayersToMove);
+        return newPlayersToMove;
       case 'buffer':
-        const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+        newPlayersToMove = Array(this._getNumPlayers()).fill(false);
         fire.database()
           .ref(this._getFirePrefix() + '/playersToMove')
           .set(newPlayersToMove);
