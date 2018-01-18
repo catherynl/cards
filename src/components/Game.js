@@ -6,7 +6,7 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
-import { actionMap, PASS_CARDS_INDEX } from '../utils/stage';
+import { ACTION_MAP, PASS_CARDS_INDEX } from '../utils/stage';
 import { RECENTLY_PLAYED_INDEX, DECK_INDEX, MAX_ABS_CARD_RANK } from '../utils/magic_numbers';
 
 class Game extends Component {
@@ -383,6 +383,13 @@ class Game extends Component {
     this.setState({ secondPhaseAction: -1 });
   }
 
+  revealHandClicked() {
+    const visibility = Array(this._getNumPlayers()).fill(true);
+    fire.database()
+      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/visibility')
+      .set(visibility);
+  }
+
   enterPressed() {
     if (this.isYourTurn()) {
       // if at least play is a valid option, and at least one card is selected, play; else, end turn.
@@ -502,10 +509,10 @@ class Game extends Component {
     return (
       <div className='player-actions'>
         {
-          range(Object.keys(actionMap).length)    // forces i to be a Number, not a string
+          range(Object.keys(ACTION_MAP).length)    // forces i to be a Number, not a string
             .filter(i => this.gameType.getActionInStage(this._getCurrentStage(), i))
             .map(i => {
-              const action = actionMap[i];
+              const action = ACTION_MAP[i];
               const {name, displayName} = action;
               const onClick = this[name + 'Clicked'].bind(this);
               if (this.state.secondPhaseAction === -1) {

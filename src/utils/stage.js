@@ -1,4 +1,4 @@
-export const actionMap = {
+export const ACTION_MAP = {
   0: {
     name: 'playCards',
     displayName: 'Play cards'
@@ -13,7 +13,7 @@ export const actionMap = {
   },
   3: {
     name: 'endTurn',
-    displayName: 'End turn (Enter)'
+    displayName: 'End turn'
   },
   4: {
     name: 'dealCards',
@@ -24,13 +24,13 @@ export const actionMap = {
     displayName: 'Ready to Continue'
   },
   6: {
-    name: 'revealCards',
-    displayName: 'Reveal cards'
+    name: 'revealHand',
+    displayName: 'Reveal hand'
   },
   7: {
     name: 'undoPlay',
     displayName: 'Undo play'
-  }
+  },
 };
 export const PLAY_CARDS_INDEX = 0;
 export const PASS_CARDS_INDEX = 2;
