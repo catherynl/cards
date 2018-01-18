@@ -6,7 +6,7 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
-import { actionMap } from '../utils/stage';
+import { actionMap, PASS_CARDS_INDEX } from '../utils/stage';
 import { RECENTLY_PLAYED_INDEX, DECK_INDEX, MAX_ABS_CARD_RANK } from '../utils/magic_numbers';
 
 class Game extends Component {
@@ -24,6 +24,8 @@ class Game extends Component {
         cardsToBePassed: {},
       },
       cardsSelected: [], // booleans, one for each card in this player's hand
+      secondPhaseAction: -1,   // actionIndex corresponding to action awaiting confirmation; else -1
+      selectedPlayer: -1,   // index of player selected (e.g., for pass cards); -1 if none
       minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
@@ -248,30 +250,51 @@ class Game extends Component {
   }
 
   passCardsClicked() {
-    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-    if (!myHand) {
-      window.alert('nothing to play.');
-      return;
-    }
-    const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-    if (selectedCards.length === 0) {
-      window.alert('must select at least one card to pass.');
-      return;
-    }
-    const passIndex = (this.props.playerIndex + 1) % this._getNumPlayers();
-    const cardsToBePassed = this.state.gameState.cardsToBePassed;
-    const newCardsToBePassed = cardsToBePassed[passIndex]
-      ? cardsToBePassed[passIndex].concat(selectedCards)
-      : selectedCards;
+    if (this.state.secondPhaseAction === -1) {
+      if (this._getNumPlayers() === 1) {
+        window.alert('no other players to pass to!');
+        return;
+      }
+      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+      if (!myHand) {
+        window.alert('nothing to play.');
+        return;
+      }
+      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+      if (selectedCards.length === 0) {
+        window.alert('must select at least one card to pass.');
+        return;
+      }
+      this.setState({ secondPhaseAction: PASS_CARDS_INDEX });
+    } else {
+      console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-    fire.database()
-      .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
-      .set(newCardsToBePassed);
-    const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
-    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
-    fire.database()
-      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-      .set(remainingHand);
+      const passIndex = this.state.selectedPlayer;
+      if (passIndex === -1) {
+        window.alert('must select player to pass to.');
+        return;
+      }
+
+      // TODO: de-dup these lines from above
+      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+
+      const cardsToBePassed = this.state.gameState.cardsToBePassed;
+      const newCardsToBePassed = cardsToBePassed[passIndex]
+        ? cardsToBePassed[passIndex].concat(selectedCards)
+        : selectedCards;
+
+      fire.database()
+        .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
+        .set(newCardsToBePassed);
+      const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
+      this.setState({
+        cardsSelected: Array(remainingHand.length).fill(false),
+        secondPhaseAction: -1 });
+      fire.database()
+        .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+        .set(remainingHand);
+    }
   }
 
   drawCardsClicked() {
@@ -356,6 +379,10 @@ class Game extends Component {
       .set([]);
   }
 
+  cancelActionClicked() {
+    this.setState({ secondPhaseAction: -1 });
+  }
+
   enterPressed() {
     if (this.isYourTurn()) {
       // if at least play is a valid option, and at least one card is selected, play; else, end turn.
@@ -366,6 +393,10 @@ class Game extends Component {
         this.endTurnClicked();
       }
     }
+  }
+
+  recordPlayerSelection(playerInd) {
+    this.setState({ selectedPlayer: playerInd });
   }
 
   nextStageClicked() {
@@ -471,17 +502,66 @@ class Game extends Component {
     return (
       <div className='player-actions'>
         {
-          Object.keys(actionMap)
+          range(Object.keys(actionMap).length)    // forces i to be a Number, not a string
             .filter(i => this.gameType.getActionInStage(this._getCurrentStage(), i))
             .map(i => {
               const action = actionMap[i];
               const {name, displayName} = action;
               const onClick = this[name + 'Clicked'].bind(this);
-              return <button key={i} onClick={onClick}>{displayName}</button>;
+              if (this.state.secondPhaseAction === -1) {
+                return <button key={i} onClick={onClick}>{displayName}</button>;
+              } else {
+                if (this.state.secondPhaseAction === i) {
+                  return (
+                    <div key={i}>
+                      { this.renderSecondPhaseAction(i) }
+                      <button onClick={onClick}>Confirm {displayName}</button>
+                    </div>
+                  )
+                } else {
+                  return null;   // don't display actions other than the one waiting for confirmation
+                }
+              }
             })
         }
+        { this.state.secondPhaseAction !== -1 ? this.renderCancelAction() : null }
         <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={ this.enterPressed.bind(this) } />
       </div>
+    );
+  }
+
+  renderSecondPhaseAction(actionInd) {
+    if (actionInd === PASS_CARDS_INDEX) {
+      return (
+        <div>
+          Which player are you passing to?
+          {
+            range(this._getNumPlayers())
+              .filter(i => i !== this.props.playerIndex)
+              .map(i => {
+                const keyBinding = (i + 1) % 10;
+                return (
+                  <div key={i}>
+                    Player {i + 1} (Press { keyBinding }) &nbsp;
+                    { this.state.selectedPlayer === i ? <span>Selected!</span> : null }
+                    <KeyHandler
+                      keyEventName="keydown"
+                      keyValue={ keyBinding.toString() }
+                      onKeyHandle={ () => this.recordPlayerSelection(i) } />
+                  </div>
+                );
+              })
+          }
+        </div>
+      );
+    } else {
+      console.log('ERROR. invalid type of action passed to renderSecondPhaseAction.');
+    }
+  }
+
+  renderCancelAction() {
+    return (
+      <button onClick={ this.cancelActionClicked.bind(this) }>Cancel</button>
     );
   }
 

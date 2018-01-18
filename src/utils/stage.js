@@ -21,7 +21,7 @@ export const actionMap = {
   },
   5: {
     name: 'confirmTrade',
-    displayName: 'Confirm trade'
+    displayName: 'Ready to Continue'
   },
   6: {
     name: 'revealCards',
@@ -33,6 +33,7 @@ export const actionMap = {
   }
 };
 export const PLAY_CARDS_INDEX = 0;
+export const PASS_CARDS_INDEX = 2;
 export const END_TURN_INDEX = 3;
 
 export const STAGES = {
