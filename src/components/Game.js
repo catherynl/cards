@@ -65,11 +65,19 @@ class Game extends Component {
     const gamesRef = fire.database().ref(this._getFirePrefix());
     const currentState = await gamesRef.once('value');
     const newGameState = Object.assign(this.state.gameState, currentState.val());
-    this.setState({ gameState: newGameState });
 
     const gameTypeRef = fire.database().ref('gameTypes/' + newGameState.gameTypeId);
     const gameType = await gameTypeRef.once('value');
     this.gameType = new GameType(gameType.val());
+    const stageType = this.gameType.getStageType(0);
+    if (stageType === 'deal' || stageType === 'trade') {
+      const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+      newGameState.playersToMove = newPlayersToMove;
+      fire.database()
+        .ref(this._getFirePrefix() + '/playersToMove')
+        .set(newPlayersToMove);
+    }
+    this.setState({ gameState: newGameState });
     this.setState({ minPlayers: this.gameType.getMinPlayers() });
 
     const listenerCallback = snapshot => {
