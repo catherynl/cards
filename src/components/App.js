@@ -5,13 +5,14 @@ import Chat from './Chat';
 import SharedNotes from './SharedNotes';
 import Game from './Game';
 import CreateGameType from './create_game_type/CreateGameType';
+import { getRandomName } from '../utils/words';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      username: 'anonymous monkey',
+      username: getRandomName(),
       playerIndex: 0,
       gameId: 0,
       creatingGame: false,
