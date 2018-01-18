@@ -61,6 +61,19 @@ class Game extends Component {
     return this.state.gameState.playersToMove;
   }
 
+  getFirstStagePlayersToMove() {
+    const stageType = this.gameType.getStageType(0);
+    if (stageType === 'deal' || stageType === 'trade') {
+      const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+      fire.database()
+        .ref(this._getFirePrefix() + '/playersToMove')
+        .set(newPlayersToMove);
+      return newPlayersToMove;
+    } else {
+      return this.state.gameState.playersToMove;
+    }
+  }
+
   async componentWillMount() {
     const gamesRef = fire.database().ref(this._getFirePrefix());
     const currentState = await gamesRef.once('value');
@@ -69,14 +82,9 @@ class Game extends Component {
     const gameTypeRef = fire.database().ref('gameTypes/' + newGameState.gameTypeId);
     const gameType = await gameTypeRef.once('value');
     this.gameType = new GameType(gameType.val());
-    const stageType = this.gameType.getStageType(0);
-    if (stageType === 'deal' || stageType === 'trade') {
-      const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
-      newGameState.playersToMove = newPlayersToMove;
-      fire.database()
-        .ref(this._getFirePrefix() + '/playersToMove')
-        .set(newPlayersToMove);
-    }
+
+    newGameState.playersToMove = this.getFirstStagePlayersToMove()
+
     this.setState({ gameState: newGameState });
     this.setState({ minPlayers: this.gameType.getMinPlayers() });
 
@@ -327,7 +335,7 @@ class Game extends Component {
       finished: false,
       currentStage: 0,
       hands: {},
-      playersToMove: Array(this._getNumPlayers()).fill(false)
+      playersToMove: this.getFirstStagePlayersToMove()
     };
     Object.assign(gameState, resetGameState);
     fire.database().ref(this._getFirePrefix()).set(gameState);
