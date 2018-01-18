@@ -4,19 +4,20 @@ import fire from '../../fire';
 import CreateGameBasics from './CreateGameBasics';
 import CreateDeck from './CreateDeck';
 import CreateStages from './CreateStages';
+import CreateAdditionalPiles from './CreateAdditionalPiles';
 
 class CreateGameType extends Component {
 
   constructor(props) {
     super(props);  // backToHome (callback)
     this.state = {
-      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: createStages, 3: finished
+      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: createStages, 3: additionalPiles, 4: finished
 
       // props for CreateDeck
       rankOrder: 'A-high',
       handSortOrder: 'suitFirst'
     };
-    // other fields: name, minPlayers, maxPlayers, deck, stages
+    // other fields: name, minPlayers, maxPlayers, deck, stages, additionalHands
   }
 
   rankOrderChanged(e) {
@@ -46,6 +47,11 @@ class CreateGameType extends Component {
 
   setStages(stages) {
     this.stages = stages;
+    this._incrementStage();
+  }
+
+  setAdditionalHands(additionalHands) {
+    this.additionalHands = additionalHands;
     this._incrementStage();
   }
 
@@ -90,6 +96,12 @@ class CreateGameType extends Component {
     );
   }
 
+  renderCreateAdditionalPiles() {
+    return (
+      <CreateAdditionalPiles onFinish={ this.setAdditionalHands.bind(this) } />
+    );
+  }
+
   renderSubmit() {
     return (
       <button onClick={ this.submitClicked.bind(this) }>Submit Game Type</button>
@@ -118,7 +130,11 @@ class CreateGameType extends Component {
         );
       case 3:
         return (
-          <p>Created a game with { this.stages.length } stages! Ready to submit...</p>
+          <p>Created a game with { this.stages.length } stages! One last thing:</p>
+        );
+      case 4:
+        return (
+          <p>Created { this.additionalPiles.length } card piles for the table! Ready to submit...</p>
         );
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
@@ -134,6 +150,8 @@ class CreateGameType extends Component {
       case 2:
         return this.renderCreateStages();
       case 3:
+        return this.renderCreateAdditionalPiles();
+      case 4:
         return this.renderSubmit();
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);

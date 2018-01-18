@@ -1,4 +1,4 @@
-import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS } from './magic_numbers';
+import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS, DECK_INDEX } from './magic_numbers';
 import { PLAY_CARDS_INDEX, END_TURN_INDEX } from './stage';
 
 class GameType {
@@ -6,6 +6,7 @@ class GameType {
   constructor(gameType) {
     this.name = gameType.name;
     this.deck = gameType.deck;
+    this.additionalHands = gameType.additionalHands;
     this.rankOrder = gameType.rankOrder;
     this.handSortOrder = gameType.handSortOrder;
     this.minPlayers = gameType.minPlayers;
@@ -81,6 +82,20 @@ class GameType {
 
   _getNextPlayerRulesInStage(stageIndex) {
     return this.stages[stageIndex].nextPlayerRules;
+  }
+
+  getHandsFromAdditionalHands(numPlayers) {
+    const hands = {};
+    this.additionalHands.forEach((val, ind) =>
+    {
+      hands[DECK_INDEX + ind] = {
+        name: val.name,
+        cards: [],
+        visibility: Array(numPlayers).fill(val.visible),
+        displayMode: val.displayMode
+      };
+    });
+    return hands;
   }
 
   getCardComparisonRank(card) {

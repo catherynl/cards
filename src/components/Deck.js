@@ -3,6 +3,7 @@ import { range } from 'lodash';
 
 import Card from './Card';
 import { DECK_INDEX } from '../utils/magic_numbers';
+import { DECK_NAME } from '../utils/hand';
 
 class Deck extends Component {
 
@@ -44,6 +45,7 @@ class Deck extends Component {
       switch (handleRemaining) {
         case 'keepInDeck':
           const deck = {
+            name: DECK_NAME,
             cards: deckCards.slice(usedCards),
             displayMode: 'single',
             visibility: Array(numPlayers).fill(false)

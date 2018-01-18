@@ -94,10 +94,12 @@ class Game extends Component {
     const gameType = await gameTypeRef.once('value');
     this.gameType = new GameType(gameType.val());
 
-    newGameState.playersToMove = this.getFirstStagePlayersToMove()
+    newGameState.playersToMove = this.getFirstStagePlayersToMove();
 
-    this.setState({ gameState: newGameState });
-    this.setState({ minPlayers: this.gameType.getMinPlayers() });
+    this.setState({
+      gameState: newGameState,
+      minPlayers: this.gameType.getMinPlayers()
+    });
 
     const listenerCallback = snapshot => {
       const { gameState } = this.state;
@@ -133,7 +135,7 @@ class Game extends Component {
           this.setState({ gameState });
           break;
         default:
-          window.alert('WARNING: a field other than "hands" has been ' +
+          window.alert('WARNING: a field that was not expected to be cleared has been ' +
                        'removed from the game state database: ' + snapshot.key);
       }
     };
@@ -228,6 +230,7 @@ class Game extends Component {
   }
 
   startGameClicked() {
+    fire.database().ref(this._getFirePrefix() + '/hands').set(this.gameType.getHandsFromAdditionalHands(this._getNumPlayers()));
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
@@ -360,7 +363,7 @@ class Game extends Component {
       this._getNumPlayers(),
       this.gameType.getDealCountPerPlayerInStage(this._getCurrentStage()),
       this.gameType.getHandleRemainingInStage(this._getCurrentStage()));
-    Object.keys(hands).forEach(i => this.gameType.sortHand(hands[i].cards));
+    range(this._getNumPlayers()).forEach(i => this.gameType.sortHand(hands[i].cards));
     const numCardsInMyHand = hands[this.props.playerIndex].cards.length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
     // augment hands with recently played
@@ -370,7 +373,10 @@ class Game extends Component {
         displayMode: 'fan',
         visibility: Array(this._getNumPlayers()).fill(true) };
     });
-    fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
+
+    let oldHands = this.state.gameState.hands;
+    oldHands = Object.assign(oldHands, hands);
+    fire.database().ref(this._getFirePrefix() + '/hands').set(oldHands);
     this.enterNextStage();
   }
 
@@ -593,7 +599,7 @@ class Game extends Component {
                 .filter(i => i >= DECK_INDEX)
                 .map(i => {
                   return (<div key={ i }>
-                    Stack id: { i }
+                    Stack id: { i } ({ this.state.gameState.hands[i].name })
                     { this.renderHand(i) }
                   </div>);
                 }) }
