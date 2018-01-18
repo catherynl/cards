@@ -185,7 +185,7 @@ const ANIMALS = [
 	"rattlesnake", "raven", "reindeer", "reptile", "rhinoceros", "roadrunner", "rodent", "rook", "rooster", "roundworm",
 	"sailfish", "salamander", "salmon", "sawfish", "scallop", "scorpion", "seahorse", "shark", "sheep", "shrew",
 	"shrimp", "silkworm", "silverfish", "skink", "skunk", "sloth", "slug", "smelt", "snail", "snake",
-	"snipe", "sole", "sparrow", "spider", "spoonbill", "squid", "squirrel", "starfish", "stingray", "stoat",
+	"snipe", "sole", "sparrow", "spoonbill", "squid", "squirrel", "starfish", "stingray", "stoat",
 	"stork", "sturgeon", "swallow", "swan", "swift", "swordfish", "swordtail", "tahr", "takin", "tapir",
 	"tarantula", "tarsier", "termite", "tern", "thrush", "tick", "tiger", "tiglon", "toad", "tortoise",
 	"toucan", "trout", "tuna", "turkey", "turtle", "tyrannosaurus", "urial", "vicuna", "viper", "vole",

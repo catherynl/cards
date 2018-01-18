@@ -63,14 +63,18 @@ class Game extends Component {
 
   getFirstStagePlayersToMove() {
     const stageType = this.gameType.getStageType(0);
-    if (stageType === 'deal' || stageType === 'trade') {
-      const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
-      fire.database()
-        .ref(this._getFirePrefix() + '/playersToMove')
-        .set(newPlayersToMove);
-      return newPlayersToMove;
-    } else {
-      return this.state.gameState.playersToMove;
+    switch (stageType) {
+      case 'deal':
+      case 'trade':
+      case 'buffer':
+        const newPlayersToMove = Array(this._getNumPlayers()).fill(true);
+        fire.database()
+          .ref(this._getFirePrefix() + '/playersToMove')
+          .set(newPlayersToMove);
+        return newPlayersToMove;
+      case 'play':
+      default:
+        return this.state.gameState.playersToMove;
     }
   }
 
@@ -93,31 +97,37 @@ class Game extends Component {
       gameState[snapshot.key] = snapshot.val();
       this.setState({ gameState });
 
-      if (snapshot.key === 'tradeConfirmed') {
+      if (snapshot.key === 'tradeConfirmed' && this.props.playerIndex === 0 ) {
         const tradeConfirmed = snapshot.val();
         if (this._getNumPlayers() === tradeConfirmed.filter(i => i).length) {
           const hands = gameState.hands;
           const cardsToBePassed = gameState.cardsToBePassed;
           range(this._getNumPlayers()).forEach(i => {
             const cardsToConcat = cardsToBePassed[i] ? cardsToBePassed[i] : [];
+            hands[i].cards = hands[i].cards ? hands[i].cards : [];
             const newCards = hands[i].cards.concat(cardsToConcat);
             this.gameType.sortHand(newCards);
             hands[i].cards = newCards;
           });
           fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
-          this.enterNextStage();
+          fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
+          fire.database().ref(this._getFirePrefix() + '/cardsToBePassed').set({});
         }
       }
     };
 
     const removalListenerCallback = snapshot => {
-      if (snapshot.key === 'hands') {
-        const { gameState } = this.state;
-        gameState['hands'] = {};
-        this.setState({ gameState });
-      } else {
-        window.alert('WARNING: a field other than "hands" has been ' +
-                      'removed from the game state database: ' + snapshot.key);
+      switch (snapshot.key) {
+        case 'hands':
+        case 'cardsToBePassed':
+        case 'tradeConfirmed':
+          const { gameState } = this.state;
+          gameState[snapshot.key] = {};
+          this.setState({ gameState });
+          break;
+        default:
+          window.alert('WARNING: a field other than "hands" has been ' +
+                       'removed from the game state database: ' + snapshot.key);
       }
     };
 
