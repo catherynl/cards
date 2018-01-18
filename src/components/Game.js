@@ -126,6 +126,7 @@ class Game extends Component {
         case 'hands':
         case 'cardsToBePassed':
         case 'tradeConfirmed':
+        case 'recentlyPlayed':
           const { gameState } = this.state;
           gameState[snapshot.key] = {};
           this.setState({ gameState });
@@ -330,7 +331,20 @@ class Game extends Component {
   }
 
   undoPlayClicked() {
-
+    const { gameState } = this.state;
+    const recentlyPlayed = this._getRecentlyPlayed();
+    const cardsToReplace = (recentlyPlayed && recentlyPlayed[this.props.playerIndex])
+     ? recentlyPlayed[this.props.playerIndex]
+     : [];
+    const myHand = gameState.hands[this.props.playerIndex];
+    const myCards = (myHand && myHand.cards) ? myHand.cards : [];
+    const newHand = myCards.concat(cardsToReplace);
+    fire.database()
+      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+      .set(newHand);
+    fire.database()
+      .ref(this._getRecentlyPlayedCardsFirePrefix())
+      .set([]);
   }
 
   enterPressed() {
