@@ -39,12 +39,10 @@ ul {
     display: inline-block;
     margin-top: 5px;
     width: 97%;
-    height: 60px;
 }
 
 .card-outer {
     float: left;
-    margin-bottom: 15px;
 }
 
 .card {

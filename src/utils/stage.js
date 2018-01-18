@@ -36,6 +36,7 @@ export const PLAY_CARDS_INDEX = 0;
 export const DRAW_CARDS_INDEX = 1;
 export const PASS_CARDS_INDEX = 2;
 export const END_TURN_INDEX = 3;
+export const UNDO_PLAY_INDEX = 7;
 
 export const STAGES = {
   0: {

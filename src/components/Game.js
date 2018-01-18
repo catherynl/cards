@@ -6,8 +6,17 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
-import { ACTION_MAP, PASS_CARDS_INDEX, DRAW_CARDS_INDEX } from '../utils/stage';
-import { RECENTLY_PLAYED_INDEX, DECK_INDEX, MAX_ABS_CARD_RANK } from '../utils/magic_numbers';
+import {
+  ACTION_MAP,
+  PASS_CARDS_INDEX,
+  DRAW_CARDS_INDEX,
+  UNDO_PLAY_INDEX,
+} from '../utils/stage';
+import {
+  RECENTLY_PLAYED_INDEX,
+  DECK_INDEX,
+  MAX_ABS_CARD_RANK
+} from '../utils/magic_numbers';
 
 class Game extends Component {
 
@@ -59,7 +68,11 @@ class Game extends Component {
   }
 
   _haveRecentlyPlayed() {
-    return this.state.gameState.hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards;
+    if (this.state.gameState.hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   _isTrickTakingStage() {
@@ -577,6 +590,9 @@ class Game extends Component {
               const {name, displayName} = action;
               const onClick = this[name + 'Clicked'].bind(this);
               if (this.state.secondPhaseAction === -1) {
+                if (i === UNDO_PLAY_INDEX && !this._haveRecentlyPlayed()) {
+                  return null; // only display "Undo play" button if recently played
+                }
                 return <button key={i} onClick={onClick}>{displayName}</button>;
               } else {
                 if (this.state.secondPhaseAction === i) {
