@@ -108,6 +108,7 @@ class Game extends Component {
         }
       }
     };
+
     const removalListenerCallback = snapshot => {
       if (snapshot.key === 'hands') {
         const { gameState } = this.state;
@@ -367,8 +368,8 @@ class Game extends Component {
     );
   }
 
-  renderPlayersTurnIndicator() {
-    const text = this.isYourTurn() ? '(Your turn)' : '(This player\'s turn)';
+  renderPlayersTurnIndicator(ind) {
+    const text = this.props.playerIndex === ind ? '(Your turn)' : '(This player\'s turn)';
     return <span className='your-turn'>{ text }</span>;
   }
 
@@ -380,7 +381,7 @@ class Game extends Component {
           {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
           &nbsp;
           { this.shouldShowPlayersTurnIndicator(ind)
-            ? this.renderPlayersTurnIndicator()
+            ? this.renderPlayersTurnIndicator(ind)
             : null }
         </div>
         { gameState.hands ? this.renderHand(ind) : null }
