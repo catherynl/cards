@@ -380,8 +380,8 @@ class Game extends Component {
       const targetCards = hands[targetInd].cards;
       const newCards = range(numCardsToDraw).map(i => targetCards.pop());
       fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
-      const myCards = hands[this.props.playerIndex].cards;
-      myCards.concat(newCards);
+      let myCards = hands[this.props.playerIndex].cards;
+      myCards = myCards.concat(newCards);
       this.gameType.sortHand(myCards);
       fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards').set(myCards);
       this.setState({ secondPhaseAction: -1 });
