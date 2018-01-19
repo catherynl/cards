@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import fire from '../fire';
-import KeyHandler from 'react-key-handler';
 import { range } from 'lodash';
 
 import Deck from './Deck';
 import Hand from './Hand';
+import PlayerActions from './PlayerActions';
 import GameType from '../utils/GameType';
 import {
   ACTION_MAP,
   PASS_CARDS_INDEX,
   DRAW_CARDS_INDEX,
-  UNDO_PLAY_INDEX,
   DISCARD_CARDS_INDEX
 } from '../utils/stage';
 import {
@@ -37,6 +36,7 @@ class Game extends Component {
       cardsSelected: [], // booleans, one for each card in this player's hand
       secondPhaseAction: -1,   // actionIndex corresponding to action awaiting confirmation; else -1
       selectedTarget: -1,   // index of player selected to pass cards to, or index of pile to draw from; -1 if none
+      numCardsToActOn: '',  // string input for second phase of user input when drawing cards
       minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
@@ -308,6 +308,10 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
+  playerActionTaken(actionInd) {
+    this[ACTION_MAP[actionInd].name + 'Clicked']();
+  }
+
   playCardsClicked() {
     if (!this.atLeastOneCardSelected('play')) {
       return;
@@ -384,7 +388,7 @@ class Game extends Component {
     } else {
       console.assert(this.state.secondPhaseAction === DRAW_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      const numCardsToDraw = parseInt(this.numCardsToActOn.value === '' ? 1 : this.numCardsToActOn.value, 10);
+      const numCardsToDraw = parseInt(this.state.numCardsToActOn === '' ? 1 : this.state.numCardsToActOn, 10);
       if (numCardsToDraw < 1) {
         window.alert('cannot draw fewer than 1 card.');
         return;
@@ -401,8 +405,7 @@ class Game extends Component {
 
       const newCards = this.popCardsFromHand(targetInd, numCardsToDraw);
       this.appendCardsToHand(this.props.playerIndex, newCards, true);
-      this.setState({ secondPhaseAction: -1 });
-      this.numCardsToActOn.value = '';
+      this.setState({ secondPhaseAction: -1, numCardsToActOn: '' });
     }
   }
 
@@ -511,15 +514,15 @@ class Game extends Component {
       .set([]);
   }
 
-  cancelActionClicked() {
-    this.setState({ secondPhaseAction: -1 });
-  }
-
   revealHandClicked() {
     const visibility = Array(this._getNumPlayers()).fill(true);
     fire.database()
       .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/visibility')
       .set(visibility);
+  }
+
+  cancelActionClicked() {
+    this.setState({ secondPhaseAction: -1 });
   }
 
   enterPressed() {
@@ -536,6 +539,10 @@ class Game extends Component {
 
   recordTargetSelection(targetInd) {
     this.setState({ selectedTarget: targetInd });
+  }
+
+  updateNumCardsToActOn(e) {
+    this.setState({ numCardsToActOn: e.target.value });
   }
 
   nextStageClicked() {
@@ -653,117 +660,20 @@ class Game extends Component {
   }
 
   renderPlayerActions() {
-    return (
-      <div className='player-actions'>
-        {
-          range(Object.keys(ACTION_MAP).length)    // forces i to be a Number, not a string
-            .filter(i => this.gameType.getActionInStage(this._getCurrentStage(), i))
-            .map(i => {
-              const action = ACTION_MAP[i];
-              const {name, displayName} = action;
-              const onClick = this[name + 'Clicked'].bind(this);
-              if (this.state.secondPhaseAction === -1) {
-                if (i === UNDO_PLAY_INDEX && !this._haveRecentlyPlayed()) {
-                  return null; // only display "Undo play" button if recently played
-                }
-                return <button key={i} onClick={onClick}>{displayName}</button>;
-              } else {
-                if (this.state.secondPhaseAction === i) {
-                  return (
-                    <div key={i}>
-                      { this.renderSecondPhaseAction(i) }
-                      <button onClick={onClick}>Confirm {displayName}</button>
-                    </div>
-                  )
-                } else {
-                  return null;   // don't display actions other than the one waiting for confirmation
-                }
-              }
-            })
-        }
-        { this.state.secondPhaseAction !== -1 ? this.renderCancelAction() : null }
-        <KeyHandler keyEventName="keydown" keyValue="Enter" onKeyHandle={ this.enterPressed.bind(this) } />
-      </div>
-    );
-  }
-
-  renderSecondPhaseAction(actionInd) {
-    switch (actionInd) {
-      case PASS_CARDS_INDEX:
-        return (
-          <div>
-            Which player are you passing to?
-            {
-              range(this._getNumPlayers())
-                .filter(i => i !== this.props.playerIndex)
-                .map(i => {
-                  const keyBinding = (i + 1) % 10;
-                  return (
-                    <div key={i}>
-                      Player {i + 1} (Press { keyBinding }) &nbsp;
-                      { this.state.selectedTarget === i ? <span>Selected!</span> : null }
-                      <KeyHandler
-                        keyEventName="keydown"
-                        keyValue={ keyBinding.toString() }
-                        onKeyHandle={ () => this.recordTargetSelection(i) } />
-                    </div>
-                  );
-                })
-            }
-          </div>
-        );
-      case DRAW_CARDS_INDEX:
-        return (
-          <div>
-            Which pile are you drawing from?
-            {
-              this._getValidPileIndsToDrawFrom()
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.state.selectedTarget === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.recordTargetSelection(handInd) } />
-                  </div>);
-                })
-            }
-            How many cards would you like to draw? &nbsp;
-            <input type="text" ref={ el => this.numCardsToActOn = el } placeholder="1" />
-          </div>
-        );
-      case DISCARD_CARDS_INDEX:
-        return (
-          <div>
-            Which pile are you discarding to?
-            {
-              Object.keys(this.state.gameState.hands)
-                .filter(i => i >= DECK_INDEX)
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.state.selectedTarget === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.recordTargetSelection(handInd) } />
-                  </div>);
-                })
-            }
-          </div>
-        );
-      default:
-        console.log('ERROR. invalid type of action passed to renderSecondPhaseAction.');
-    }
-  }
-
-  renderCancelAction() {
-    return (
-      <button onClick={ this.cancelActionClicked.bind(this) }>Cancel</button>
-    );
+    return <PlayerActions
+      gameState={ this.state.gameState }
+      gameType={ this.gameType }
+      playerIndex={ this.props.playerIndex }
+      secondPhaseAction={ this.state.secondPhaseAction }
+      selectedTarget={ this.state.selectedTarget }
+      numCardsToActOn={ this.state.numCardsToActOn }
+      validPileIndsToDrawFrom={ this._getValidPileIndsToDrawFrom() }
+      recordTargetSelection={ this.recordTargetSelection.bind(this) }
+      updateNumCardsToActOn={ this.updateNumCardsToActOn.bind(this) }
+      onCancelAction={ this.cancelActionClicked.bind(this) }
+      enterPressed={ this.enterPressed.bind(this) }
+      onPlayerAction={ this.playerActionTaken.bind(this) }
+    />;
   }
 
   renderNonPlayerHands() {
