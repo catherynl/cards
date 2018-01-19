@@ -16,7 +16,6 @@ import {
   RECENTLY_PLAYED_INDEX,
   DECK_INDEX,
   MAX_ABS_CARD_RANK,
-  CARD_WIDTH_UI
 } from '../utils/magic_numbers';
 
 class Game extends Component {
@@ -300,6 +299,10 @@ class Game extends Component {
 
   shouldShowPlayersTurnIndicator(i) {
     return this.gameType.getStageType(this._getCurrentStage()) === 'play' && this._getPlayersToMove()[i]
+  }
+
+  shouldShowNonPlayerHands() {
+    return this.gameType.getShouldShowNonPlayerHands();
   }
 
   startGameClicked() {
@@ -610,13 +613,15 @@ class Game extends Component {
   renderRecentlyPlayed() {
     return (
       <div className='recently-played'>
-        Recently played
+        <span>Recently played</span>
         <br />
-        { range(this._getNumPlayers()).map(i => 
-          <div className='recently-played-hand' key={ i }>
-            Player { i + 1 }
-            { this.renderHand(RECENTLY_PLAYED_INDEX + i) }
-          </div>) }
+        <div className='recently-played-hands'>
+          { range(this._getNumPlayers()).map(i =>
+            <div className='recently-played-hand' key={ i }>
+              Player { i + 1 }
+              { this.renderHand(RECENTLY_PLAYED_INDEX + i) }
+            </div>) }
+        </div>
       </div>
     );
   }
@@ -683,10 +688,21 @@ class Game extends Component {
         { Object.keys(hands)
           .filter(i => i >= DECK_INDEX)
           .map(i => {
-            return (<div key={ i } style={ { width: CARD_WIDTH_UI * hands.length } }>
+            return (<div key={ i } className='non-player-hand'>
               { this.renderHand(i) }
             </div>);
           }) }
+      </div>
+    );
+  }
+
+  renderOtherPlayers() {
+    return (
+      <div className='other-player-hands'>
+        { range(this._getNumPlayers())
+            .filter(i => i !== this.props.playerIndex)
+            .map(ind =>
+              this.renderPlayer(ind)) }
       </div>
     );
   }
@@ -724,12 +740,8 @@ class Game extends Component {
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { this.renderPlayer(this.props.playerIndex) }
         { this.renderRecentlyPlayed() }
-        { this.renderNonPlayerHands() }
-        { range(this._getNumPlayers())
-          .filter(i => i !== this.props.playerIndex)
-          .map(ind =>
-            this.renderPlayer(ind)
-        )}
+        { this.shouldShowNonPlayerHands() ? this.renderNonPlayerHands() : null }
+        { this.renderOtherPlayers() }
         { this.shouldShowNextStageButton()
           ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
           : null }

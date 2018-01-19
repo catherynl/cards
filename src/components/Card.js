@@ -59,7 +59,7 @@ class Card extends Component {
 
   render() {
     if (this.props.isEmpty) {
-      return this.renderEmptyCard();
+      return (<div>{ this.renderEmptyCard() }</div>);
     }
     return (
       <div>

@@ -123,6 +123,7 @@ ul {
 
 .player {
     margin-top: 10px;
+    flex: 1;
 }
 
 .player-name {
@@ -134,13 +135,29 @@ ul {
     margin-bottom: 10px;
 }
 
+.recently-played-hands {
+    display: flex;
+    width: 95%;
+}
+
 .recently-played-hand {
     display: inline-block;
     margin-right: 5px;
+    min-width: 100px;
+    flex: 1;
+}
+
+.other-player-hands {
+    display: flex;
 }
 
 .non-player-hands {
-    display: inline-block;
+    display: flex;
+    margin-top: 5px;
+}
+
+.non-player-hand {
+    flex: 1;
 }
 
 .username {

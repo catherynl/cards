@@ -1,5 +1,5 @@
 import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS, DECK_INDEX } from './magic_numbers';
-import { PLAY_CARDS_INDEX, END_TURN_INDEX } from './stage';
+import { PLAY_CARDS_INDEX, END_TURN_INDEX, DRAW_CARDS_INDEX } from './stage';
 
 class GameType {
 
@@ -78,6 +78,12 @@ class GameType {
 
   getIsTrickTakingInStage(stageIndex) {
     return this._getNextPlayerRulesInStage(stageIndex) === 'trickTaking';
+  }
+
+  getShouldShowNonPlayerHands() {
+    return this.stages
+      .filter(stage => stage.availableActions[DRAW_CARDS_INDEX])
+      .length > 0;
   }
 
   _getNextPlayerRulesInStage(stageIndex) {
