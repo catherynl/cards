@@ -11,6 +11,7 @@ import {
   PASS_CARDS_INDEX,
   DRAW_CARDS_INDEX,
   UNDO_PLAY_INDEX,
+  DISCARD_CARDS_INDEX
 } from '../utils/stage';
 import {
   RECENTLY_PLAYED_INDEX,
@@ -389,6 +390,45 @@ class Game extends Component {
     }
   }
 
+  discardCardsClicked() {
+    if (this.state.secondPhaseAction === -1) {
+      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+      if (!myHand) {
+        window.alert('nothing to discard.');
+        return;
+      }
+      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+      if (selectedCards.length === 0) {
+        window.alert('must select at least one card to discard.');
+        return;
+      }
+      this.setState({ secondPhaseAction: DISCARD_CARDS_INDEX });
+    } else {
+      console.assert(this.state.secondPhaseAction === DISCARD_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
+
+      const targetInd = this.state.selectedTarget;
+      const hands = this.state.gameState.hands;
+      if (!(hands[targetInd])) {
+        window.alert('must select somewhere to discard to.');
+        return;
+      }
+
+      const myCards = this.state.gameState.hands[this.props.playerIndex].cards;
+      const selectedCards = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
+      const remainingHand = myCards.filter((el, ind) => !this.state.cardsSelected[ind]);
+      fire.database()
+        .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+        .set(remainingHand);
+
+      let targetCards = hands[targetInd].cards ? hands[targetInd].cards : [];
+      targetCards = targetCards.concat(selectedCards);
+      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
+      this.setState({
+        cardsSelected: Array(remainingHand.length).fill(false),
+        secondPhaseAction: -1 });
+    }
+  }
+
   endTurnClicked() {
     const nextPlayerInCycle = (this.props.playerIndex + 1) % this._getNumPlayers();
     let newPlayerToMove = nextPlayerInCycle;
@@ -685,6 +725,27 @@ class Game extends Component {
             }
             How many cards would you like to draw? &nbsp;
             <input type="text" ref={ el => this.numCardsToActOn = el } placeholder="1" />
+          </div>
+        );
+      case DISCARD_CARDS_INDEX:
+        return (
+          <div>
+            Which pile are you discarding to?
+            {
+              Object.keys(this.state.gameState.hands)
+                .filter(i => i >= DECK_INDEX)
+                .map((handInd, i) => {
+                  return (<div key={ i }>
+                    { this.state.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
+                    (Press { i } to select) &nbsp;
+                    { this.state.selectedTarget === handInd ? <span>Selected!</span> : null }
+                    <KeyHandler
+                      keyEventName="keydown"
+                      keyValue={ i.toString() }
+                      onKeyHandle={ () => this.recordTargetSelection(handInd) } />
+                  </div>);
+                })
+            }
           </div>
         );
       default:
