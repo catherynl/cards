@@ -748,8 +748,11 @@ class Game extends Component {
         { this.renderStageName() }
         { this.renderTradeConfirmed() }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
-        { range(this._getNumPlayers()).map(ind =>
-          this.renderPlayer(ind)
+        { this.renderPlayer(this.props.playerIndex) }
+        { range(this._getNumPlayers())
+          .filter(i => i !== this.props.playerIndex)
+          .map(ind =>
+            this.renderPlayer(ind)
         )}
         { this.renderNonPlayerHands() }
         { this.shouldShowNextStageButton()
