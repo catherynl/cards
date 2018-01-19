@@ -7,6 +7,8 @@ import Game from './Game';
 import CreateGameType from './create_game_type/CreateGameType';
 import { getRandomName } from '../utils/words';
 
+const INVALID_GAMEID_CHARS = [".", "#", "$", "[", "]"];
+
 class App extends Component {
 
   constructor(props) {
@@ -64,7 +66,7 @@ class App extends Component {
   async enterGameClicked(e) {
     e.preventDefault();
     const gameId = this.inputGameId.value;
-    if (!gameId) {
+    if (!gameId || INVALID_GAMEID_CHARS.some((char) => gameId.indexOf(char) !== -1)) {
       window.alert('Invalid game id');
       return;
     }
