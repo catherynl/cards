@@ -707,7 +707,7 @@ class Game extends Component {
                 .filter(i => i >= DECK_INDEX)
                 .map(i => {
                   return (<div key={ i }>
-                    Stack id: { i } ({ this.state.gameState.hands[i].name })
+                    { this.state.gameState.hands[i].name } ({ i })
                     { this.renderHand(i) }
                   </div>);
                 }) }

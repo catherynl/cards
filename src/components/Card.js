@@ -47,7 +47,10 @@ class Card extends Component {
   }
 
   renderHiddenCard() {
-    return (<div className='card hidden'>?</div>);
+    const text = this.props.showStackSize
+      ? '(' + this.props.stackSize + ')'
+      : '?';
+    return (<div className='card hidden'>{ text }</div>);
   }
 
   renderEmptyCard() {

@@ -32,15 +32,18 @@ class Hand extends Component {
     }
   }
 
-  renderCard(card, index) {
+  renderCard(index, showStackSize) {
+    const card = this.props.cards[index];
     if (this.props.isActionable) {
       return (<Card
         key={ index }
         card={ card }
         visible={ this.props.visible }
         newlyObtained={ card.newlyObtained }
-        selected={this._getCardSelected(index)}
-        keyBinding={this._getKeyBinding(index)}/>
+        selected={ this._getCardSelected(index) }
+        showStackSize={ showStackSize }
+        stackSize={ this.props.cards.length }
+        keyBinding={ this._getKeyBinding(index) }/>
       );
     } else {
       return (<Card
@@ -48,7 +51,9 @@ class Hand extends Component {
         card={ card }
         visible={ this.props.visible }
         newlyObtained={ card.newlyObtained }
-        selected={this._getCardSelected(index)}/>
+        selected={ this._getCardSelected(index) }
+        showStackSize={ showStackSize }
+        stackSize={ this.props.cards.length }/>
       );
     }
   }
@@ -64,12 +69,15 @@ class Hand extends Component {
   }
 
   renderCards() {
+    const lastIndex = this.props.cards.length - 1;
+    if (!this.props.visible) {
+      return this.renderCard(lastIndex, true);
+    }
     switch (this.props.displayMode) {
       case 'fan':
-        return this.props.cards.map((card, index) => this.renderCard(card, index));
+        return this.props.cards.map((card, index) => this.renderCard(index, false));
       case 'single':
-        const lastIndex = this.props.cards.length - 1;
-        return this.renderCard(this.props.cards[lastIndex], lastIndex);
+        return this.renderCard(lastIndex, true);
       default:
         console.log('tried to render', this.props.cards)
         console.log('unrecognized hand display mode');
