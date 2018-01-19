@@ -192,6 +192,50 @@ class Game extends Component {
     return this._getNumPlayers() === tradeConfirmed.filter(i => i).length;
   }
 
+  // actionName: string for purposes of printing errors
+  atLeastOneCardSelected(actionName) {
+    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
+    if (!myHand) {
+      window.alert('nothing to ' + actionName + '.');
+      return false;
+    }
+    const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
+    if (selectedCards.length === 0) {
+      window.alert('must select at least one card to ' + actionName + '.');
+      return false;
+    }
+    return true;
+  }
+
+  appendCardsToHand(handInd, cards, sortHand) {
+    let cardsInHand = this._getCardsFromHand(handInd);
+    cardsInHand = cardsInHand.concat(cards);
+    if (sortHand) {
+      this.gameType.sortHand(cardsInHand);
+    }
+    fire.database().ref(this._getFirePrefix() + '/hands/' + handInd + '/cards').set(cardsInHand);
+  }
+
+  popCardsFromHand(handInd, numCards) {
+    const cardsInHand = this._getCardsFromHand(handInd);
+    const numCardsToPop = Math.min(numCards, cardsInHand.length);
+    const poppedCards = range(numCardsToPop).map(i => cardsInHand.pop());
+    fire.database().ref(this._getFirePrefix() + '/hands/' + handInd + '/cards').set(cardsInHand);
+    return poppedCards;
+  }
+
+  // updates hand in firebase, clears cardsSelected, and returns selected cards
+  removeSelectedCardsFromHand() {
+    const myCards = this._getCardsFromHand(this.props.playerIndex);
+    const selectedCards = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
+    const remainingHand = myCards.filter((el, ind) => !this.state.cardsSelected[ind]);
+    fire.database()
+      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+      .set(remainingHand);
+    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
+    return selectedCards;
+  }
+
   enterNextStage() {
     const nextStage = this._getCurrentStage() + 1;
     fire.database().ref(this._getFirePrefix() + '/currentStage').set(nextStage);
@@ -265,16 +309,11 @@ class Game extends Component {
   }
 
   playCardsClicked() {
-    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-    if (!myHand) {
-      window.alert('nothing to play.');
+    if (!this.atLeastOneCardSelected('play')) {
       return;
     }
-    const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-    if (cardsSelected.length === 0) {
-      window.alert('must select at least one card to play.');
-      return;
-    }
+    const myCards = this._getCardsFromHand(this.props.playerIndex);
+    const cardsSelected = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
     if (this._isTrickTakingStage() && this._haveRecentlyPlayed()) {
       // end of the trick has been reached, so clear recentlyPlayed
       const { hands } = this.state.gameState;
@@ -286,10 +325,7 @@ class Game extends Component {
     } else {
       fire.database().ref(this._getRecentlyPlayedCardsFirePrefix()).set(cardsSelected);
     }
-    const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
-    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
-    fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-      .set(remainingHand);
+    this.removeSelectedCardsFromHand();
   }
 
   passCardsClicked() {
@@ -299,22 +335,14 @@ class Game extends Component {
         window.alert('no other players to pass to!');
         return;
       }
-      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-      if (!myHand) {
-        window.alert('nothing to pass.');
-        return;
+      if (this.atLeastOneCardSelected('pass')) {
+        const updatedState = { secondPhaseAction: PASS_CARDS_INDEX };
+        if (numPlayers === 2) {
+          // only one other player to pass to, so set the choice by default
+          updatedState['selectedTarget'] = 1 - this.props.playerIndex;
+        }
+        this.setState(updatedState);
       }
-      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-      if (selectedCards.length === 0) {
-        window.alert('must select at least one card to pass.');
-        return;
-      }
-      const updatedState = { secondPhaseAction: PASS_CARDS_INDEX };
-      if (numPlayers === 2) {
-        // only one other player to pass to, so set the choice by default
-        updatedState['selectedTarget'] = 1 - this.props.playerIndex;
-      }
-      this.setState(updatedState);
     } else {
       console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
@@ -324,28 +352,20 @@ class Game extends Component {
         return;
       }
 
-      // TODO: de-dup these lines from above
-      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-
+      const selectedCards = this.removeSelectedCardsFromHand();
       selectedCards.forEach(card => {
         card.newlyObtained = true;
       })
+
       const cardsToBePassed = this.state.gameState.cardsToBePassed;
       const newCardsToBePassed = cardsToBePassed[passIndex]
         ? cardsToBePassed[passIndex].concat(selectedCards)
         : selectedCards;
-
       fire.database()
         .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
         .set(newCardsToBePassed);
-      const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
-      this.setState({
-        cardsSelected: Array(remainingHand.length).fill(false),
-        secondPhaseAction: -1 });
-      fire.database()
-        .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-        .set(remainingHand);
+
+      this.setState({ secondPhaseAction: -1 });
     }
   }
 
@@ -369,10 +389,8 @@ class Game extends Component {
         window.alert('cannot draw fewer than 1 card.');
         return;
       }
-
       const targetInd = this.state.selectedTarget;
-      const hands = this.state.gameState.hands;
-      if (!(hands[targetInd])) {
+      if (!(this.state.gameState.hands[targetInd])) {
         window.alert('must select somewhere to draw from.');
         return;
       }
@@ -380,54 +398,37 @@ class Game extends Component {
         window.alert('cannot draw from here -- pile has too few cards.');
         return;
       }
-      const targetCards = hands[targetInd].cards;
-      const newCards = range(numCardsToDraw).map(i => targetCards.pop());
-      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
-      let myCards = hands[this.props.playerIndex].cards;
-      myCards = myCards.concat(newCards);
-      this.gameType.sortHand(myCards);
-      fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards').set(myCards);
+
+      const newCards = this.popCardsFromHand(targetInd, numCardsToDraw);
+      this.appendCardsToHand(this.props.playerIndex, newCards, true);
       this.setState({ secondPhaseAction: -1 });
       this.numCardsToActOn.value = '';
     }
   }
 
+  _getCardsFromHand(handInd) {
+    const { hands } = this.state.gameState;
+    return hands[handInd].cards ? hands[handInd].cards : [];
+  }
+
   discardCardsClicked() {
     if (this.state.secondPhaseAction === -1) {
-      const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-      if (!myHand) {
-        window.alert('nothing to discard.');
-        return;
+      if (this.atLeastOneCardSelected('discard')) {
+        this.setState({ secondPhaseAction: DISCARD_CARDS_INDEX });
       }
-      const selectedCards = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-      if (selectedCards.length === 0) {
-        window.alert('must select at least one card to discard.');
-        return;
-      }
-      this.setState({ secondPhaseAction: DISCARD_CARDS_INDEX });
     } else {
       console.assert(this.state.secondPhaseAction === DISCARD_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
       const targetInd = this.state.selectedTarget;
-      const hands = this.state.gameState.hands;
-      if (!(hands[targetInd])) {
+      if (!(this.state.gameState.hands[targetInd])) {
         window.alert('must select somewhere to discard to.');
         return;
       }
 
-      const myCards = this.state.gameState.hands[this.props.playerIndex].cards;
-      const selectedCards = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
-      const remainingHand = myCards.filter((el, ind) => !this.state.cardsSelected[ind]);
-      fire.database()
-        .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-        .set(remainingHand);
+      const selectedCards = this.removeSelectedCardsFromHand();
+      this.appendCardsToHand(targetInd, selectedCards, false);
 
-      let targetCards = hands[targetInd].cards ? hands[targetInd].cards : [];
-      targetCards = targetCards.concat(selectedCards);
-      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(targetCards);
-      this.setState({
-        cardsSelected: Array(remainingHand.length).fill(false),
-        secondPhaseAction: -1 });
+      this.setState({ secondPhaseAction: -1 });
     }
   }
 
@@ -503,17 +504,8 @@ class Game extends Component {
   }
 
   undoPlayClicked() {
-    const { gameState } = this.state;
-    const recentlyPlayed = this._getRecentlyPlayed();
-    const cardsToReplace = (recentlyPlayed && recentlyPlayed[this.props.playerIndex])
-     ? recentlyPlayed[this.props.playerIndex]
-     : [];
-    const myHand = gameState.hands[this.props.playerIndex];
-    const myCards = (myHand && myHand.cards) ? myHand.cards : [];
-    const newHand = myCards.concat(cardsToReplace);
-    fire.database()
-      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-      .set(newHand);
+    const cardsToReplace = this._getCardsFromHand(RECENTLY_PLAYED_INDEX + this.props.playerIndex);
+    this.appendCardsToHand(this.props.playerIndex, cardsToReplace, true);
     fire.database()
       .ref(this._getRecentlyPlayedCardsFirePrefix())
       .set([]);
@@ -604,11 +596,6 @@ class Game extends Component {
             : null }
         </div>
         { gameState.hands ? this.renderHand(ind) : null }
-{/*        Recently played
-        <br />
-        { gameState.hands[RECENTLY_PLAYED_INDEX + ind]
-          ? this.renderHand(RECENTLY_PLAYED_INDEX + ind)
-          : null }*/}
       </div>
     );
   }
@@ -619,7 +606,7 @@ class Game extends Component {
         Recently played
         <br />
         { range(this._getNumPlayers()).map(i => 
-          <div className='recently-played-hand'>
+          <div className='recently-played-hand' key={ i }>
             Player { i + 1 }
             { this.renderHand(RECENTLY_PLAYED_INDEX + i) }
           </div>) }
