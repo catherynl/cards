@@ -20,6 +20,7 @@ class App extends Component {
       creatingGame: false,
       availableGameTypes: [],  // array of objects (with name, id fields)
     };
+    this.game = 
   }
 
   async componentWillMount() {
