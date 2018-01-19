@@ -6,6 +6,7 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import GameType from '../utils/GameType';
+import { playCardsClicked, undoPlayClicked } from '../utils/player_actions/play_cards';
 import {
   ACTION_MAP,
   PASS_CARDS_INDEX,
@@ -264,34 +265,6 @@ class Game extends Component {
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
-  playCardsClicked() {
-    const myHand = this.state.gameState.hands[this.props.playerIndex].cards;
-    if (!myHand) {
-      window.alert('nothing to play.');
-      return;
-    }
-    const cardsSelected = myHand.filter((el, ind) => this.state.cardsSelected[ind]);
-    if (cardsSelected.length === 0) {
-      window.alert('must select at least one card to play.');
-      return;
-    }
-    if (this._isTrickTakingStage() && this._haveRecentlyPlayed()) {
-      // end of the trick has been reached, so clear recentlyPlayed
-      const { hands } = this.state.gameState;
-      range(this._getNumPlayers()).forEach(ind => {
-        hands[RECENTLY_PLAYED_INDEX + ind].cards = [];
-      });
-      hands[RECENTLY_PLAYED_INDEX + this.props.playerIndex].cards = cardsSelected;
-      fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
-    } else {
-      fire.database().ref(this._getRecentlyPlayedCardsFirePrefix()).set(cardsSelected);
-    }
-    const remainingHand = myHand.filter((el, ind) => !this.state.cardsSelected[ind]);
-    this.setState({ cardsSelected: Array(remainingHand.length).fill(false) });
-    fire.database().ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-      .set(remainingHand);
-  }
-
   passCardsClicked() {
     if (this.state.secondPhaseAction === -1) {
       const numPlayers = this._getNumPlayers();
@@ -502,23 +475,6 @@ class Game extends Component {
     this.enterNextStage();
   }
 
-  undoPlayClicked() {
-    const { gameState } = this.state;
-    const recentlyPlayed = this._getRecentlyPlayed();
-    const cardsToReplace = (recentlyPlayed && recentlyPlayed[this.props.playerIndex])
-     ? recentlyPlayed[this.props.playerIndex]
-     : [];
-    const myHand = gameState.hands[this.props.playerIndex];
-    const myCards = (myHand && myHand.cards) ? myHand.cards : [];
-    const newHand = myCards.concat(cardsToReplace);
-    fire.database()
-      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
-      .set(newHand);
-    fire.database()
-      .ref(this._getRecentlyPlayedCardsFirePrefix())
-      .set([]);
-  }
-
   cancelActionClicked() {
     this.setState({ secondPhaseAction: -1 });
   }
@@ -535,7 +491,7 @@ class Game extends Component {
       // if at least play is a valid option, and at least one card is selected, play; else, end turn.
       const canPlayCards = this.gameType.getPlayCardsInStage(this._getCurrentStage());
       if (canPlayCards && this.state.cardsSelected.some(val => val)) {
-        this.playCardsClicked();
+        playCardsClicked(this);
       } else if (this.gameType.getEndTurnInStage(this._getCurrentStage())) {
         this.endTurnClicked();
       }
@@ -674,7 +630,8 @@ class Game extends Component {
             .map(i => {
               const action = ACTION_MAP[i];
               const {name, displayName} = action;
-              const onClick = this[name + 'Clicked'].bind(this);
+              // TODO: REMOVE HACK
+              const onClick = i === 0 ? () => playCardsClicked(this) : i === 7 ? () => undoPlayClicked(this) : this[name + 'Clicked'].bind(this);
               if (this.state.secondPhaseAction === -1) {
                 if (i === UNDO_PLAY_INDEX && !this._haveRecentlyPlayed()) {
                   return null; // only display "Undo play" button if recently played
