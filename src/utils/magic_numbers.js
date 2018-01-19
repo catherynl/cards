@@ -7,3 +7,5 @@ export const DECK_INDEX = 2 * MAX_NUM_PLAYERS;
 
 export const MAX_ABS_CARD_RANK = 100;  // non-inclusive
 export const MAX_NUM_SUITS = GAME_TYPE_MAX_NUM_SUITS;
+
+export const CARD_WIDTH_UI = 42;

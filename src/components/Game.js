@@ -16,7 +16,8 @@ import {
 import {
   RECENTLY_PLAYED_INDEX,
   DECK_INDEX,
-  MAX_ABS_CARD_RANK
+  MAX_ABS_CARD_RANK,
+  CARD_WIDTH_UI
 } from '../utils/magic_numbers';
 
 class Game extends Component {
@@ -258,7 +259,8 @@ class Game extends Component {
   }
 
   startGameClicked() {
-    fire.database().ref(this._getFirePrefix() + '/hands').set(this.gameType.getHandsFromAdditionalHands(this._getNumPlayers()));
+    fire.database().ref(this._getFirePrefix() + '/hands')
+      .set(this.gameType.getHandsFromAdditionalHands(this._getNumPlayers()));
     fire.database().ref(this._getFirePrefix() + '/started').set(true);
   }
 
@@ -480,12 +482,15 @@ class Game extends Component {
       this._getNumPlayers(),
       this.gameType.getDealCountPerPlayerInStage(this._getCurrentStage()),
       this.gameType.getHandleRemainingInStage(this._getCurrentStage()));
-    range(this._getNumPlayers()).forEach(i => this.gameType.sortHand(hands[i].cards));
+    range(this._getNumPlayers()).forEach(i => {
+      this.gameType.sortHand(hands[i].cards);
+      hands[i].name = 'Player ' + (i + 1) + ': ' + this.state.gameState.players[i];
+    });
     const numCardsInMyHand = hands[this.props.playerIndex].cards.length;
     this.setState({ cardsSelected: Array(numCardsInMyHand).fill(false) });
     // augment hands with recently played
     range(this._getNumPlayers()).forEach(i => {
-      hands[RECENTLY_PLAYED_INDEX + i] = { 
+      hands[RECENTLY_PLAYED_INDEX + i] = {
         cards: [],
         displayMode: 'fan',
         visibility: Array(this._getNumPlayers()).fill(true) };
@@ -594,18 +599,30 @@ class Game extends Component {
     return (
       <div className='player' key={ ind }>
         <div className='player-name'>
-          {'Player ' + (ind + 1) + ': ' + gameState.players[ind]}
-          &nbsp;
           { this.shouldShowPlayersTurnIndicator(ind)
             ? this.renderPlayersTurnIndicator(ind)
             : null }
         </div>
         { gameState.hands ? this.renderHand(ind) : null }
-        Recently played
+{/*        Recently played
         <br />
         { gameState.hands[RECENTLY_PLAYED_INDEX + ind]
           ? this.renderHand(RECENTLY_PLAYED_INDEX + ind)
-          : null }
+          : null }*/}
+      </div>
+    );
+  }
+
+  renderRecentlyPlayed() {
+    return (
+      <div className='recently-played'>
+        Recently played
+        <br />
+        { range(this._getNumPlayers()).map(i => 
+          <div className='recently-played-hand'>
+            Player { i + 1 }
+            { this.renderHand(RECENTLY_PLAYED_INDEX + i) }
+          </div>) }
       </div>
     );
   }
@@ -619,15 +636,18 @@ class Game extends Component {
     const isYours = playerInd === this.props.playerIndex;
     const isActionable = isYours && this.state.secondPhaseAction === -1;
     return (
-      <Hand
-        key={ playerInd }
-        cards={ cards ? cards : [] }
-        isActionable={ isActionable }
-        visible={ hand.visibility[this.props.playerIndex] }
-        displayMode={ hand.displayMode }
-        onSelect={ isActionable ? this.onCardSelected.bind(this) : null }
-        cardsSelected={ isYours ? this.state.cardsSelected : null }
-      />
+      <div>
+        <div className='hand-name'>{hand.name}</div>
+        <Hand
+          key={ playerInd }
+          cards={ cards ? cards : [] }
+          isActionable={ isActionable }
+          visible={ hand.visibility[this.props.playerIndex] }
+          displayMode={ hand.displayMode }
+          onSelect={ isActionable ? this.onCardSelected.bind(this) : null }
+          cardsSelected={ isYours ? this.state.cardsSelected : null }
+        />
+      </div>
     );
   }
 
@@ -760,20 +780,16 @@ class Game extends Component {
   }
 
   renderNonPlayerHands() {
+    const hands = this.state.gameState.hands;
     return (
-      <div>
-        { this.state.gameState.hands
-          ? <div className='non-player-hands'>
-              { Object.keys(this.state.gameState.hands)
-                .filter(i => i >= DECK_INDEX)
-                .map(i => {
-                  return (<div key={ i }>
-                    { this.state.gameState.hands[i].name } ({ i })
-                    { this.renderHand(i) }
-                  </div>);
-                }) }
-            </div>
-          : null }
+      <div className='non-player-hands'>
+        { Object.keys(hands)
+          .filter(i => i >= DECK_INDEX)
+          .map(i => {
+            return (<div key={ i } style={ { width: CARD_WIDTH_UI * hands.length } }>
+              { this.renderHand(i) }
+            </div>);
+          }) }
       </div>
     );
   }
@@ -810,12 +826,13 @@ class Game extends Component {
         { this.renderTradeConfirmed() }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { this.renderPlayer(this.props.playerIndex) }
+        { this.renderRecentlyPlayed() }
+        { this.renderNonPlayerHands() }
         { range(this._getNumPlayers())
           .filter(i => i !== this.props.playerIndex)
           .map(ind =>
             this.renderPlayer(ind)
         )}
-        { this.renderNonPlayerHands() }
         { this.shouldShowNextStageButton()
           ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
           : null }

@@ -134,6 +134,15 @@ ul {
     margin-bottom: 10px;
 }
 
+.recently-played-hand {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.non-player-hands {
+    display: inline-block;
+}
+
 .username {
     color: blue;
 }
