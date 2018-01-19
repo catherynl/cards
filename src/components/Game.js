@@ -592,13 +592,17 @@ class Game extends Component {
   }
 
   renderTradeConfirmed() {
-    let text = this.haveConfirmedTrade()
-      ? 'Confirmed trade! Waiting for other players.'
-      : '';
-    text = this.allHaveConfirmedTrade()
-      ? 'Everyone has confirmed! See results of trade.'
-      : text;
-    return (<div>{ text }</div>);
+    if (this.allHaveConfirmedTrade()) {
+      return (
+        <div>
+          <div>Everyone has confirmed! See results of trade.</div>
+          <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
+        </div>);
+    } else if (this.haveConfirmedTrade()) {
+      return (<div>{ 'Confirmed trade! Waiting for other players.' }</div>);
+    } else {
+      return;
+    }
   }
 
   renderPlayerActions() {
