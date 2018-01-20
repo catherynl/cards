@@ -61,17 +61,17 @@ ul {
     margin-bottom: 10px;
 }
 
-.card.selected {
-    border-color: #00dddd;
-    border-width: 2px;
-}
-
 .card.empty {
     font-size: 11px;
 }
 
 .card.newly-obtained {
     border-color: darkorange;
+    border-width: 2px;
+}
+
+.card.selected {
+    border-color: #00dddd;
     border-width: 2px;
 }
 

@@ -236,6 +236,7 @@ class Game extends Component {
   removeSelectedCardsFromHand() {
     const myCards = this._getCardsFromHand(this.props.playerIndex);
     const selectedCards = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
+    selectedCards.forEach(card => { card['newlyObtained'] = false; });
     const remainingHand = myCards.filter((el, ind) => !this.state.cardsSelected[ind]);
     fire.database()
       .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
@@ -341,6 +342,7 @@ class Game extends Component {
     }
     const myCards = this._getCardsFromHand(this.props.playerIndex);
     const cardsSelected = myCards.filter((el, ind) => this.state.cardsSelected[ind]);
+    cardsSelected.forEach(card => { card['newlyObtained'] = false; });
     if (this._isTrickTakingStage() && this._haveRecentlyPlayed()) {
       // end of the trick has been reached, so clear recentlyPlayed
       const { hands } = this.state.gameState;
@@ -380,9 +382,6 @@ class Game extends Component {
       const passIndex = this.state.selectedTargets[0];
 
       const selectedCards = this.removeSelectedCardsFromHand();
-      selectedCards.forEach(card => {
-        card.newlyObtained = true;
-      })
 
       const cardsToBePassed = this.state.gameState.cardsToBePassed;
       const newCardsToBePassed = cardsToBePassed[passIndex]
@@ -427,6 +426,7 @@ class Game extends Component {
       }
 
       const newCards = this.popCardsFromHand(targetInd, numCardsToDraw);
+      newCards.forEach(card => { card['newlyObtained'] = true; });
       this.appendCardsToHand(this.props.playerIndex, newCards, true);
       this.setState({ secondPhaseAction: -1, numCardsToActOn: '' });
     }
@@ -509,6 +509,13 @@ class Game extends Component {
     fire.database()
       .ref(this._getFirePrefix() + '/playersToMove/' + newPlayerToMove)
       .set(true);
+
+    // clear newlyObtained tags from your hand
+    const myCards = this._getCardsFromHand(this.props.playerIndex);
+    myCards.forEach(card => { card['newlyObtained'] = false; });
+    fire.database()
+      .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/cards')
+      .set(myCards);
   }
 
   confirmTradeClicked() {
