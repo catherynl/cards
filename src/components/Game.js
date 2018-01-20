@@ -373,7 +373,7 @@ class Game extends Component {
     } else {
       console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      if (!this.state.selectedTargets[0]) {
+      if (!('0' in this.state.selectedTargets)) {   // cannot simply check this.state.selectedTargets[0], since 0 is a valid value
         window.alert('must select player to pass to.');
         return;
       }

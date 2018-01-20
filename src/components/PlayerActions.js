@@ -38,25 +38,33 @@ class PlayerActions extends Component {
     }
   }
 
-  renderPileChoices(pileInds) {
+  renderTargetChoices(targets, displayNameFunc) {
     return (
       <div>
         {
-          pileInds
-            .map((handInd, i) => {
-              return (<div key={ i }>
-                { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                (Press { i } to select) &nbsp;
-                { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
-                <KeyHandler
-                  keyEventName="keydown"
-                  keyValue={ i.toString() }
-                  onKeyHandle={ () => this.props.recordTargetSelection(0, handInd) } />
-              </div>);
+          targets
+            .map((target, i) => {
+              return (
+                <div key={ i }>
+                  <input
+                    type="radio"
+                    value={ target }
+                    checked={ this.props.selectedTargets[0] === target }
+                    onChange={ () => this.props.recordTargetSelection(0, target) }
+                  />
+                  { displayNameFunc(target) }
+                </div>);
             })
         }
       </div>
     );
+  }
+
+  renderPileChoices(pileInds) {
+    const displayNameFunc = (pileInd) => {
+      return this.props.gameState.hands[pileInd].name + ' (Stack id: ' + pileInd + ')';
+    }
+    return this.renderTargetChoices(pileInds, displayNameFunc);
   }
 
   renderSecondPhaseAction(actionInd) {
@@ -65,23 +73,11 @@ class PlayerActions extends Component {
         return (
           <div>
             Which player are you passing to?
-            {
-              range(this._getNumPlayers())
-                .filter(i => i !== this.props.playerIndex)
-                .map(i => {
-                  const keyBinding = (i + 1) % 10;
-                  return (
-                    <div key={i}>
-                      Player {i + 1} (Press { keyBinding }) &nbsp;
-                      { this.props.selectedTargets[0] === i ? <span>Selected!</span> : null }
-                      <KeyHandler
-                        keyEventName="keydown"
-                        keyValue={ keyBinding.toString() }
-                        onKeyHandle={ () => this.props.recordTargetSelection(0, i) } />
-                    </div>
-                  );
-                })
-            }
+            { this.renderTargetChoices(
+                range(this._getNumPlayers())
+                  .filter(i => i !== this.props.playerIndex),
+                (i) => 'Player ' + (i + 1)
+              )}
           </div>
         );
       case DRAW_CARDS_INDEX:

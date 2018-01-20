@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import KeyHandler from 'react-key-handler';
 import { range } from 'lodash';
 
 import {
@@ -12,9 +11,6 @@ import {
   DECK_INDEX
 } from '../utils/magic_numbers';
 
-const KEYS = Array.of('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd',
-                      'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm');
-
 class ModeratorActions extends Component {
 
   // props:
@@ -23,21 +19,23 @@ class ModeratorActions extends Component {
   // recordTargetSelection, updateNumCardsToActOn, onCancelAction (callbacks)
   // onModeratorAction (callback, takes actionInd)
 
-  renderPileChoices(pileInds, selectedValue, keybindingFunc, onKeyHandle) {
+  renderPileChoices(pileInds, selectedValue, onSelect) {
     return (
       <div>
         {
           pileInds
             .map((handInd, i) => {
-              return (<div key={ i }>
-                { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                (Press { keybindingFunc(i) } to select) &nbsp;
-                { selectedValue === handInd ? <span>Selected!</span> : null }
-                <KeyHandler
-                  keyEventName="keydown"
-                  keyValue={ keybindingFunc(i) }
-                  onKeyHandle={ () => onKeyHandle(handInd) } />
-              </div>);
+              return (
+                <div key={ i }>
+                  <input
+                      type="radio"
+                      value={ i }
+                      checked={ selectedValue === handInd }
+                      onChange={ () => onSelect(handInd) }
+                    />
+                  { this.props.gameState.hands[handInd].name } (Stack id: { handInd })
+                </div>
+              );
             })
         }
       </div>
@@ -53,14 +51,12 @@ class ModeratorActions extends Component {
             { this.renderPileChoices(
                 this.props.nonEmptyPileInds,
                 this.props.selectedTargets[0],
-                (i) => i.toString(),
                 (handInd) => this.props.recordTargetSelection(0, handInd)
             )}
             Pile to move to:
             { this.renderPileChoices(
                 Object.keys(this.props.gameState.hands).filter(i => i >= DECK_INDEX),
                 this.props.selectedTargets[1],
-                (i) => KEYS[i],
                 (handInd) => this.props.recordTargetSelection(1, handInd)
             )}
             How many cards would you like to move? &nbsp;
@@ -78,7 +74,6 @@ class ModeratorActions extends Component {
             { this.renderPileChoices(
                 this.props.nonEmptyPileInds,
                 this.props.selectedTargets[0],
-                (i) => i.toString(),
                 (handInd) => this.props.recordTargetSelection(0, handInd)
             )}
           </div>
