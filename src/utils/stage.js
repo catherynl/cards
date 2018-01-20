@@ -83,6 +83,12 @@ export const STAGES = {
     displayName: 'Buffer stage',
     defaultActions: [false, false, false, false, false, false, false, false, false],
     availableActions: false
+  },
+  4: {
+    name: 'moderator',
+    displayName: 'Moderator stage',
+    defaultActions: [false, false, false, false, false, false, false, false, false],
+    availableActions: false
   }
 };
 

@@ -11,7 +11,7 @@ class CreateGameType extends Component {
   constructor(props) {
     super(props);  // backToHome (callback)
     this.state = {
-      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: createStages, 3: additionalPiles, 4: finished
+      stage: 0,   // 0: basics (name and players), 1: createDeck, 2: additionalPiles, 3: createStages, 4: finished
 
       // props for CreateDeck
       rankOrder: 'A-high',
@@ -93,7 +93,7 @@ class CreateGameType extends Component {
 
   renderCreateStages() {
     return (
-      <CreateStages onFinish={ this.setStages.bind(this) } />
+      <CreateStages onFinish={ this.setStages.bind(this) } additionalHands={ this.additionalHands } />
     );
   }
 
@@ -131,11 +131,11 @@ class CreateGameType extends Component {
         );
       case 3:
         return (
-          <p>Created a game with { this.stages.length } stages! One last thing:</p>
+          <p>Created { this.additionalHands.length } card piles for the table! One last thing:</p>
         );
       case 4:
         return (
-          <p>Created { this.additionalHands.length } card piles for the table! Ready to submit...</p>
+          <p>Created a game with { this.stages.length } stages! Ready to submit...</p>
         );
       default:
         console.log('ERROR. invalid create game stage:', this.state.stage);
@@ -149,9 +149,9 @@ class CreateGameType extends Component {
       case 1:
         return this.renderCreateDeck();
       case 2:
-        return this.renderCreateStages();
-      case 3:
         return this.renderCreateAdditionalPiles();
+      case 3:
+        return this.renderCreateStages();
       case 4:
         return this.renderSubmit();
       default:

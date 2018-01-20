@@ -1,13 +1,20 @@
 import React, { Component } from 'react';
 import { range } from 'lodash';
 
-import { PLAYER_ACTION_MAP, STAGES, HANDLE_REMAINING, NEXT_PLAYER } from '../../utils/stage';
 import { Suits } from '../../utils/card';
+import {
+  PLAYER_ACTION_MAP,
+  MODERATOR_ACTION_MAP,
+  STAGES,
+  HANDLE_REMAINING,
+  NEXT_PLAYER,
+  MOVE_CARDS_INDEX,
+} from '../../utils/stage';
 
 class CreateStages extends Component {
 
   constructor(props) {
-    super(props);   // onFinish (callback, takes stages as an argument)
+    super(props);  // onFinish (callback, takes stages as an argument), additionalHands
     this.state = {
       stageTypes: [],  // stage names, or false (indicating a stage that has been deleted)
       stageNames: {},
@@ -15,13 +22,14 @@ class CreateStages extends Component {
       handleRemainingFromDeal: {},
       dealCounts: {},
       nextPlayerDuringPlay: {},
-      trumpSuit: {}   // stored as strings
+      trumpSuit: {},  // stored as strings
+      moderatorActions: {},  // stageInd => list of mod actions { moderatorActionType, name, target, numCards }
     };
   }
 
   _getValidStageTypesWithInds() {
     const stageTypesWithInds = this.state.stageTypes.map(
-                                  (stageType, ind) => {return { stageType: stageType, stageInd: ind }});
+      (stageType, ind) => {return { stageType: stageType, stageInd: ind }});
     return stageTypesWithInds.filter((val) => val.stageType !== false);
   }
 
@@ -52,11 +60,36 @@ class CreateStages extends Component {
       case 2: // trade
       case 3: // buffer
         break;
+      case 4:
+        const { moderatorActions } = this.state;
+        moderatorActions[stageInd] = [];
+        updatedState['moderatorActions'] = moderatorActions;
+        break;
       default:
         console.log('ERROR. invalid stage type encountered:', stageType);
     }
 
     this.setState(updatedState);
+  }
+
+
+  addModeratorActionClicked(stageInd, i) {
+    const action = {
+      moderatorActionType: i,
+    }
+    switch (i) {
+      case 20: // move cards
+        action.target = [0, 0]
+        break;
+      case 21: // shuffle pile
+        action.target = [0];
+        break;
+      default:
+        console.log('ERROR: unrecognized moderator action type');
+    }
+    const { moderatorActions } = this.state;
+    moderatorActions[stageInd].push(action);
+    this.setState({ moderatorActions });
   }
 
   deleteStageClicked(stageInd) {
@@ -101,6 +134,20 @@ class CreateStages extends Component {
     this.setState({ trumpSuit });
   }
 
+  moderatorActionTargetChanged(stageInd, listInd, targetInd, e) {
+    const newTargetI = parseInt(e.target.value, 10);
+    const { moderatorActions } = this.state;
+    moderatorActions[stageInd][listInd].target[targetInd] = newTargetI;
+    this.setState({ moderatorActions });
+  }
+
+  moderatorActionNumCardsChanged(stageInd, listInd, e) {
+    const { moderatorActions } = this.state;
+    const numCards = e.target.value;
+    moderatorActions[stageInd][listInd].numCards = numCards;
+    this.setState({ moderatorActions });
+  }
+
   finishClicked() {
     const stageTypesWithInds = this._getValidStageTypesWithInds();
     const numStages = stageTypesWithInds.length;
@@ -134,6 +181,22 @@ class CreateStages extends Component {
           if (stage['nextPlayerRules'] === 'trickTaking') {
             stage['trumpSuit'] = this.state.trumpSuit[stageInd];
           }
+          break;
+        case 4:
+          const moderatorActions = this.state.moderatorActions[stageInd];
+          for (let i in moderatorActions) {
+            const action = moderatorActions[i];
+            if (action.moderatorActionType === MOVE_CARDS_INDEX) {
+              const numCards = parseInt(action.numCards, 10);
+              if (Number.isNaN(numCards) || numCards <= 0) {
+                window.alert('invalid number of cards to move ' + (displayInd + 1) +
+                             ': ' + action.numCards);
+                return;
+              }
+              action.numCards = numCards;
+            }
+          }
+          stage['moderatorActions'] = moderatorActions;
           break;
         default:
           console.log('ERROR. invalid stage type encountered:', stageType);
@@ -248,6 +311,85 @@ class CreateStages extends Component {
     );
   }
 
+  renderAddModeratorActions(stageInd) {
+    return (
+      <div>
+        { Object.keys(MODERATOR_ACTION_MAP).map(i => parseInt(i, 10)).map( i =>
+          <button key={ i } onClick={ () => this.addModeratorActionClicked(stageInd, i) }>
+            Add '{ MODERATOR_ACTION_MAP[i].displayName }' action
+          </button>) }
+      </div>
+    );
+  }
+
+  renderModeratorActionOptions(action, stageInd, listInd, targetInd, optionName) {
+    // targetInd = 0 for single target or 'from', 1 for 'to'
+    return (
+      <li>
+        { optionName }
+        { this.props.additionalHands.map((hand, i) =>
+          <div key={ i }>
+            <input
+              type='radio'
+              value={ i }
+              checked={ i === action.target[targetInd] }
+              onChange={ (e) => this.moderatorActionTargetChanged(stageInd, listInd, targetInd, e) }
+            />{ hand.name } &nbsp;
+          </div>)
+        }
+      </li>
+    );
+  }
+
+  renderModeratorActionNumberOption(action, stageInd, listInd) {
+    return (
+      <li>
+        Number of cards to move: &nbsp;
+        <input
+          type="text"
+          onChange={ (e) => this.moderatorActionNumCardsChanged(stageInd, listInd, e) }
+          placeholder="1" />
+      </li>
+    );
+  }
+
+  renderModeratorActionType(action, stageInd, listInd) {
+    switch (action.moderatorActionType) {
+      case 20: // move cards
+        return <ul>
+          { this.renderModeratorActionOptions(action, stageInd, listInd, 0, 'From Target') }
+          { this.renderModeratorActionOptions(action, stageInd, listInd, 1, 'To Target') }
+          { this.renderModeratorActionNumberOption(action, stageInd, listInd) }
+        </ul>;
+      case 21: // shuffle cards in pile
+        return <ul>{ this.renderModeratorActionOptions(action, stageInd, listInd, 0, 'Target') }</ul>
+      default:
+        console.log('ERROR: unrecognized moderator action type');
+    }
+  }
+
+  renderModeratorAction(action, listInd, stageInd) {
+    return (
+      <ul key={ stageInd } className='moderator-action'>
+        { MODERATOR_ACTION_MAP[action.moderatorActionType].displayName }
+        { this.renderModeratorActionType(action, stageInd, listInd) }
+      </ul>
+    );
+  }
+
+  renderModeratorStageInterface(stageInd) {
+    return (
+      <div>
+        <ul key={ 'moderator-action-list-' + stageInd } className='moderator-actions-list'>
+          { this.state.moderatorActions[stageInd]
+            .map((action, i) => this.renderModeratorAction(action, i, stageInd)) }
+        </ul>
+
+        { this.renderAddModeratorActions(stageInd) }
+      </div>
+    );
+  }
+
   renderSpecificStageInterface(stageType, stageInd) {
     switch (stageType) {
       case 0:
@@ -257,8 +399,10 @@ class CreateStages extends Component {
       case 2: // trade
       case 3: // buffer
         return null // these stages don't have extra options
+      case 4:
+        return this.renderModeratorStageInterface(stageInd);
       default:
-        console.log('ERROR. invalid stage type encountered: ', stageType);
+        console.log('ERROR. invalid stage type encountered:', stageType);
     }
   }
 
@@ -295,7 +439,7 @@ class CreateStages extends Component {
             )
           }
         </ul>
-        { range(4).map(i =>
+        { range(Object.keys(STAGES).length).map(i =>
             <button key={ i } onClick={ () => this.addStageClicked(i) }>
               Add { STAGES[i].name } stage
             </button>
