@@ -1,5 +1,6 @@
 import { MAX_ABS_CARD_RANK, MAX_NUM_SUITS, DECK_INDEX } from './magic_numbers';
 import { PLAY_CARDS_INDEX, END_TURN_INDEX, DRAW_CARDS_INDEX } from './stage';
+import { CUSTOM_SUIT } from './card';
 
 class GameType {
 
@@ -113,6 +114,9 @@ class GameType {
   }
 
   getCardComparisonRank(card) {
+    if (card.suit === CUSTOM_SUIT) {
+      return card.rank;
+    }
     switch (this.rankOrder) {
       case 'K-high':
         return card.rank;
