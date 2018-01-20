@@ -12,7 +12,7 @@ const imageUrls = {
 
 class Card extends Component {
 
-  // props: card: { suit, rank}, visible, selected, isEmpty, keyBinding
+  // props: card: { suit, rank}, visible, selected, isEmpty, keyBinding, onClick
 
   renderVisibleCard() {
     const { card } = this.props;
@@ -26,7 +26,7 @@ class Card extends Component {
     }
     return (
       <div className='card-outer'>
-        <div className={cssClasses.join(' ')}>
+        <div className={cssClasses.join(' ')} onClick={ this.props.onClick.bind(this) }>
           { Object.keys(imageUrls).includes(suit.name)
             ? <span>
                 <img src={ imageUrls[suit.name] }

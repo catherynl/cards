@@ -43,6 +43,7 @@ class Hand extends Component {
         selected={ this._getCardSelected(index) }
         showStackSize={ showStackSize }
         stackSize={ this.props.cards.length }
+        onClick={ () => this.props.onSelect(index) }
         keyBinding={ this._getKeyBinding(index) }/>
       );
     } else {
@@ -53,7 +54,8 @@ class Hand extends Component {
         newlyObtained={ card.newlyObtained }
         selected={ this._getCardSelected(index) }
         showStackSize={ showStackSize }
-        stackSize={ this.props.cards.length }/>
+        stackSize={ this.props.cards.length }
+        onClick={ () => {} }/>   // no-op
       );
     }
   }
