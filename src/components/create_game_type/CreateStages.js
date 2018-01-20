@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { range } from 'lodash';
 
 import { PLAYER_ACTION_MAP, STAGES, HANDLE_REMAINING, NEXT_PLAYER } from '../../utils/stage';
+import { Suits } from '../../utils/card';
 
 class CreateStages extends Component {
 
@@ -13,7 +14,8 @@ class CreateStages extends Component {
       availableActions: {},
       handleRemainingFromDeal: {},
       dealCounts: {},
-      nextPlayerDuringPlay: {}
+      nextPlayerDuringPlay: {},
+      trumpSuit: {}   // stored as strings
     };
   }
 
@@ -41,9 +43,11 @@ class CreateStages extends Component {
         updatedState['dealCounts'] = dealCounts;
         break;
       case 1:
-        const { nextPlayerDuringPlay } = this.state;
+        const { nextPlayerDuringPlay, trumpSuit } = this.state;
         nextPlayerDuringPlay[stageInd] = NEXT_PLAYER[0];
         updatedState['nextPlayerDuringPlay'] = nextPlayerDuringPlay;
+        trumpSuit[stageInd] = 'none';
+        updatedState['trumpSuit'] = trumpSuit;
         break;
       case 2: // trade
       case 3: // buffer
@@ -91,6 +95,12 @@ class CreateStages extends Component {
     this.setState({ nextPlayerDuringPlay });
   }
 
+  trumpSuitChanged(stageInd, e) {
+    const { trumpSuit } = this.state;
+    trumpSuit[stageInd] = e.target.value;
+    this.setState({ trumpSuit });
+  }
+
   finishClicked() {
     const stageTypesWithInds = this._getValidStageTypesWithInds();
     const numStages = stageTypesWithInds.length;
@@ -121,6 +131,9 @@ class CreateStages extends Component {
           break;
         case 1:
           stage['nextPlayerRules'] = this.state.nextPlayerDuringPlay[stageInd];
+          if (stage['nextPlayerRules'] === 'trickTaking') {
+            stage['trumpSuit'] = this.state.trumpSuit[stageInd];
+          }
           break;
         default:
           console.log('ERROR. invalid stage type encountered:', stageType);
@@ -129,6 +142,36 @@ class CreateStages extends Component {
     }
 
     this.props.onFinish(stages);
+  }
+
+  shouldShowTrumpSuitInterface(stageInd) {
+    return this.state.nextPlayerDuringPlay[stageInd] === 'trickTaking';
+  }
+
+  renderTrumpSuitOption(option, displayName, stageInd) {
+    return (
+      <div key={ option }>
+        <input
+          type="radio"
+          value={ option }
+          checked={ this.state.trumpSuit[stageInd] === option }
+          onChange={ (e) => this.trumpSuitChanged(stageInd, e) }
+        />{ displayName } &nbsp;
+      </div>
+    )
+  }
+
+  renderTrumpSuitInterface(stageInd) {
+    return (
+      <div>
+        Does the game have a trump suit?
+        { range(4).map(   // TODO: generalize to include all suits in play
+          (option, ind) => this.renderTrumpSuitOption(option.toString(), Suits[option].name, stageInd)
+        )}
+        { this.renderTrumpSuitOption('none', 'no trump suit', stageInd) }
+        { this.renderTrumpSuitOption('query', 'depends/changes game to game. ask me in game!', stageInd) }
+      </div>
+    );
   }
 
   renderAvailableActions(stageType, stageInd) {
@@ -200,6 +243,7 @@ class CreateStages extends Component {
             )
           }
         )}
+        { this.shouldShowTrumpSuitInterface(stageInd) ? this.renderTrumpSuitInterface(stageInd) : null }
       </div>
     );
   }

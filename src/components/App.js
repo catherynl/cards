@@ -56,7 +56,8 @@ class App extends Component {
       playersToMove: [true],
       started: false,
       currentStage: 0,
-      winner: 0
+      winner: 0,
+      trumpSuit: 'none'
     };
     const gameRef = fire.database().ref('games').push(game);
     fire.database().ref('sharedNotes/' + gameRef.key).set({ text: '', playerLock: -1 });

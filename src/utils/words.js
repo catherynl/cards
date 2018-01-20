@@ -105,7 +105,7 @@ const ADJECTIVES = [
 	"magic", "short-term", "systematic", "obliged", "payable", "fun", "horrible", "primitive", "fascinating", "ideological",
 	"metropolitan", "surrounding", "estimated", "peaceful", "premier", "operational", "technological", "kind", "advisory", "hostile",
 	"precious", "gay", "accessible", "determined", "excited", "impressed", "provincial", "smart", "endless", "isolated",
-	"post-war", "drunk", "geographical", "like", "dynamic", "boring", "forthcoming", "unfortunate", "definite", "super",
+	"post-war", "drunk", "geographical", "like", "dynamic", "forthcoming", "unfortunate", "definite", "super",
 	"notable", "indirect", "stiff", "wealthy", "awkward", "lively", "neutral", "artistic", "content", "mature",
 	"colonial", "ambitious", "evil", "magnetic", "verbal", "legitimate", "sympathetic", "well-known", "empirical", "head",
 	"shallow", "vague", "naval", "depressed", "shared", "added", "shocked", "mid", "worthwhile", "qualified",

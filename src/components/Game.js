@@ -7,6 +7,7 @@ import Hand from './Hand';
 import PlayerActions from './PlayerActions';
 import ModeratorActions from './ModeratorActions';
 import GameType from '../utils/GameType';
+import { Suits } from '../utils/card';
 import { shuffleHand } from '../utils/hand';
 import {
   PLAYER_ACTION_MAP,
@@ -36,12 +37,14 @@ class Game extends Component {
         players: [],
         tradeConfirmed: [],
         cardsToBePassed: {},
+        trumpSuit: 'none'
       },
       cardsSelected: [], // booleans, one for each card in this player's hand
       secondPhaseAction: -1,   // actionIndex corresponding to action awaiting confirmation; else -1
       selectedTargets: {},   // contains target(s) such as index of player selected to pass cards to,
                              // or index of pile to draw from; -1 if none
       numCardsToActOn: '',  // string input for second phase of user input when drawing cards
+      inputTrumpSuit: 'none',  // user's current selection for the trump suit (when being queried)
       minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
     this.gameType = 0;
@@ -276,6 +279,9 @@ class Game extends Component {
       .set(newPlayersToMove);
     fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
     fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
+
+    const trumpSuit = this.gameType.getTrumpSuitInStage(nextStage);
+    fire.database().ref(this._getFirePrefix() + '/trumpSuit').set(trumpSuit);
   }
 
   shouldShowStartGameButton() {
@@ -309,6 +315,10 @@ class Game extends Component {
 
   shouldShowNonPlayerHands() {
     return this.gameType.getShouldShowNonPlayerHands();
+  }
+
+  shouldShowTrumpSuitQuery() {
+    return this.state.gameState.trumpSuit === 'query';
   }
 
   startGameClicked() {
@@ -448,6 +458,17 @@ class Game extends Component {
     }
   }
 
+  _updateTrickWinner(winnerObj, card, playerInd) {
+    if (card.suit === winnerObj.suit) {
+      const rank = this.gameType.getCardComparisonRank(card);
+      if (rank > winnerObj.maxRank) {
+        winnerObj['maxRank'] = rank;
+        winnerObj['playerInd'] = playerInd;
+      }
+    }
+    return winnerObj;
+  }
+
   endTurnClicked() {
     const nextPlayerInCycle = (this.props.playerIndex + 1) % this._getNumPlayers();
     let newPlayerToMove = nextPlayerInCycle;
@@ -458,21 +479,26 @@ class Game extends Component {
       if (numPlayersWhoHavePlayed === this._getNumPlayers()) {
         // try to determine who won the trick
         const eachPlayerPlayedSingleCard = recentlyPlayed.every((val) => val.length === 1);
+        // only guess if each player played exactly one card
         if (eachPlayerPlayedSingleCard) {
-          const startingSuit = recentlyPlayed[nextPlayerInCycle][0].suit;
-          let maxRankOfStartingSuit = -MAX_ABS_CARD_RANK;
-          let winningPlayer = -1;
+          let winnerInStartingSuit = {
+            suit: recentlyPlayed[nextPlayerInCycle][0].suit,
+            maxRank: -MAX_ABS_CARD_RANK,
+            playerInd: -1
+          };
+          let winnerInTrumpSuit = {
+            suit: parseInt(this.state.gameState.trumpSuit, 10),   // possibly NaN, but this is fine
+            maxRank: -MAX_ABS_CARD_RANK,
+            playerInd: -1
+          };
           recentlyPlayed.forEach((val, ind) =>
           {
-            if (val[0].suit === startingSuit) {
-              const rank = this.gameType.getCardComparisonRank(val[0]);
-              if (rank > maxRankOfStartingSuit) {
-                maxRankOfStartingSuit = rank;
-                winningPlayer = ind;
-              }
-            }
+            winnerInStartingSuit = this._updateTrickWinner(winnerInStartingSuit, val[0], ind);
+            winnerInTrumpSuit = this._updateTrickWinner(winnerInTrumpSuit, val[0], ind);
           });
-          newPlayerToMove = winningPlayer;
+          newPlayerToMove = winnerInTrumpSuit.playerInd === -1
+                            ? winnerInStartingSuit.playerInd
+                            : winnerInTrumpSuit.playerInd;
         }
       }
     }
@@ -632,6 +658,15 @@ class Game extends Component {
     this.setState({ numCardsToActOn: e.target.value });
   }
 
+  inputTrumpSuitChanged(e) {
+    this.setState({ inputTrumpSuit: e.target.value });
+  }
+
+  confirmTrumpSuitClicked() {
+    const trumpSuit = this.state.inputTrumpSuit;
+    fire.database().ref(this._getFirePrefix() + '/trumpSuit').set(trumpSuit);
+  }
+
   nextStageClicked() {
     this.enterNextStage();
   }
@@ -643,7 +678,8 @@ class Game extends Component {
       finished: false,
       currentStage: 0,
       hands: {},
-      playersToMove: this.getFirstStagePlayersToMove()
+      playersToMove: this.getFirstStagePlayersToMove(),
+      trumpSuit: 'none'
     };
     Object.assign(gameState, resetGameState);
     fire.database().ref(this._getFirePrefix()).set(gameState);
@@ -748,6 +784,32 @@ class Game extends Component {
     }
   }
 
+  renderTrumpSuitOption(option, displayName) {
+    return (
+      <div key={ option }>
+        <input
+          type="radio"
+          value={ option }
+          checked={ this.state.inputTrumpSuit === option }
+          onChange={ this.inputTrumpSuitChanged.bind(this) }
+        />{ displayName } &nbsp;
+      </div>
+    )
+  }
+
+  renderTrumpSuitQuery() {
+    return (
+      <div>
+        What is the trump suit for this round of play?
+        { range(4).map(   // TODO: generalize to include all suits in play
+          (option, ind) => this.renderTrumpSuitOption(option.toString(), Suits[option].name)
+        )}
+        { this.renderTrumpSuitOption('none', 'no trump suit') }
+        <button onClick={ this.confirmTrumpSuitClicked.bind(this) }>Confirm trump suit</button>
+      </div>
+    );
+  }
+
   renderPlayerActions() {
     return <PlayerActions
       gameState={ this.state.gameState }
@@ -841,6 +903,7 @@ class Game extends Component {
       <div>
         { this.renderStageName() }
         { this.renderTradeConfirmed() }
+        { this.shouldShowTrumpSuitQuery() ? this.renderTrumpSuitQuery() : null }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { this.renderPlayer(this.props.playerIndex) }
         { this.renderRecentlyPlayed() }

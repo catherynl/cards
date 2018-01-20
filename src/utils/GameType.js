@@ -77,7 +77,15 @@ class GameType {
   }
 
   getIsTrickTakingInStage(stageIndex) {
-    return this._getNextPlayerRulesInStage(stageIndex) === 'trickTaking';
+    return this.getStageType(stageIndex) === 'play' &&
+            this._getNextPlayerRulesInStage(stageIndex) === 'trickTaking';
+  }
+
+  getTrumpSuitInStage(stageIndex) {
+    if (!this.getIsTrickTakingInStage(stageIndex)) {
+      return 'none';
+    }
+    return this.stages[stageIndex].trumpSuit;
   }
 
   getShouldShowNonPlayerHands() {
