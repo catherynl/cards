@@ -187,7 +187,7 @@ class CreateStages extends Component {
           for (let i in moderatorActions) {
             const action = moderatorActions[i];
             if (action.moderatorActionType === MOVE_CARDS_INDEX) {
-              const numCards = parseInt(action.numCards, 10);
+              const numCards = parseInt(action.numCards ? action.numCards : 1, 10);
               if (Number.isNaN(numCards) || numCards <= 0) {
                 window.alert('invalid number of cards to move ' + (displayInd + 1) +
                              ': ' + action.numCards);
