@@ -69,6 +69,10 @@ class GameType {
     return this.stages[stageIndex].type;
   }
 
+  getIsModeratorStage(stageIndex) {
+    return this.getStageType(stageIndex) === 'moderator';
+  }
+
   getHandleRemainingInStage(stageIndex) {
     return this.stages[stageIndex].handleRemaining;
   }
@@ -87,6 +91,12 @@ class GameType {
       return 'none';
     }
     return this.stages[stageIndex].trumpSuit;
+  }
+
+  getModeratorActionsInStage(stageIndex) {
+    return this.stages[stageIndex].moderatorActions
+            ? this.stages[stageIndex].moderatorActions
+            : [];
   }
 
   getShouldShowNonPlayerHands() {

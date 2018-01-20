@@ -265,6 +265,7 @@ class Game extends Component {
         newPlayersToMove[0] = true;
         break;
       case 'buffer':
+      case 'moderator':
         break;
       default:
         console.log('stage unrecognized, no players to move');
@@ -279,15 +280,49 @@ class Game extends Component {
         });
       }
     });
+    fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
 
     fire.database()
       .ref(this._getFirePrefix() + '/playersToMove')
       .set(newPlayersToMove);
     fire.database().ref(this._getFirePrefix() + '/tradeConfirmed').set({});
-    fire.database().ref(this._getFirePrefix() + '/hands').set(hands);
 
     const trumpSuit = this.gameType.getTrumpSuitInStage(nextStage);
     fire.database().ref(this._getFirePrefix() + '/trumpSuit').set(trumpSuit);
+
+    if (stageType === 'moderator') {
+      this.executeModeratorActions(this.gameType.getModeratorActionsInStage(nextStage));
+    }
+  }
+
+  executeMoveCards(sourceInd, targetInd, numCardsToMove) {
+    const newCards = this.popCardsFromHand(sourceInd, numCardsToMove);
+    this.appendCardsToHand(targetInd, newCards, false);
+  }
+
+  executeShuffleHand(handInd) {
+    const cards = this._getCardsFromHand(handInd);
+    const shuffledCards = shuffleHand(cards);
+    fire.database().ref(this._getFirePrefix() + '/hands/' + handInd + '/cards').set(shuffledCards);
+  }
+
+  executeModeratorActions(moderatorActions) {
+    moderatorActions.forEach(action =>
+    {
+      switch (action.moderatorActionType) {
+        case 20:
+          this.executeMoveCards(
+            DECK_INDEX + action.target[0],
+            DECK_INDEX + action.target[1],
+            action.numCards);
+          break;
+        case 21:
+          this.executeShuffleHand(DECK_INDEX + action.target[0]);
+          break;
+        default:
+          console.log('ERROR. unrecognized moderator action type');
+      }
+    });
   }
 
   shouldShowStartGameButton() {
@@ -309,6 +344,12 @@ class Game extends Component {
 
   shouldShowNextStageButton() {
     return this._getCurrentStage() + 1 < this.gameType.getNumStages();
+  }
+
+  // if in a buffer or moderator stage, display a more accesible next stage button at the top
+  shouldShowUpperNextStageButton() {
+    const noPlayersToMove = !this._getPlayersToMove().some(val => val);
+    return this.shouldShowNextStageButton() && noPlayersToMove;
   }
 
   shouldShowEndGameButton() {
@@ -614,8 +655,7 @@ class Game extends Component {
         return;
       }
 
-      const newCards = this.popCardsFromHand(sourceInd, numCardsToMove);
-      this.appendCardsToHand(targetInd, newCards, false);
+      this.executeMoveCards(sourceInd, targetInd, numCardsToMove);
       this.setState({ secondPhaseAction: -1, numCardsToActOn: '' });
     }
   }
@@ -640,10 +680,7 @@ class Game extends Component {
         window.alert('must select a pile to shuffle.');
         return;
       }
-
-      const cards = this._getCardsFromHand(targetInd);
-      const shuffledCards = shuffleHand(cards);
-      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(shuffledCards);
+      this.executeShuffleHand(targetInd);
       this.setState({ secondPhaseAction: -1 });
     }
   }
@@ -791,13 +828,52 @@ class Game extends Component {
       return (
         <div>
           <div>Everyone has confirmed! See results of trade.</div>
-          <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
+          { this.renderNextStageButton() }
         </div>);
     } else if (this.haveConfirmedTrade()) {
       return (<div>{ 'Confirmed trade! Waiting for other players.' }</div>);
     } else {
       return;
     }
+  }
+
+  // NOTE: pileInd is 0-indexed starting from the deck
+  _getPileName(pileInd) {
+    return this.state.gameState.hands[DECK_INDEX + pileInd].name;
+  }
+
+  renderModeratorStageCompleted() {
+    const moderatorActions = this.gameType.getModeratorActionsInStage(this._getCurrentStage());
+    return (
+      <div>
+        Moderator actions performed:
+        <ul>
+        {
+          moderatorActions.map((action, ind) =>
+          {
+            switch (action.moderatorActionType) {
+              case 20:
+                return (
+                  <li key={ind}>
+                    Moved {action.numCards} cards from { this._getPileName(action.target[0]) }
+                    &nbsp;to { this._getPileName(action.target[1]) }
+                  </li>
+                );
+              case 21:
+                return (
+                  <li key={ind}>
+                    Shuffled { this._getPileName(action.target[0]) }
+                  </li>
+                );
+              default:
+                console.log('ERROR. unrecognized moderator action type');
+                return null;
+            }
+          })
+        }
+        </ul>
+      </div>
+    );
   }
 
   renderTrumpSuitOption(option, displayName) {
@@ -914,21 +990,25 @@ class Game extends Component {
     );
   }
 
+  renderNextStageButton() {
+    return <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>;
+  }
+
   renderGameInPlay() {
     return (
       <div>
         { this.renderStageName() }
         { this.renderTradeConfirmed() }
+        { this.gameType.getIsModeratorStage(this._getCurrentStage()) ? this.renderModeratorStageCompleted() : null }
         { this.shouldShowTrumpSuitQuery() ? this.renderTrumpSuitQuery() : null }
+        { this.shouldShowUpperNextStageButton() ? this.renderNextStageButton() : null }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { this.renderPlayer(this.props.playerIndex) }
         { this.shouldShowNonPlayerHands() ? this.renderNonPlayerHands() : null }
         { this.renderRecentlyPlayed() }
         { this.renderOtherPlayers() }
         { this.renderModeratorActions() }
-        { this.shouldShowNextStageButton()
-          ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
-          : null }
+        { this.shouldShowNextStageButton() ? this.renderNextStageButton() : null }
         { this.shouldShowEndGameButton()
           ? <button onClick={ this.endGameClicked.bind(this) }>End game</button>
           : null }
