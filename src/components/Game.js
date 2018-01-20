@@ -428,14 +428,24 @@ class Game extends Component {
       const passIndex = this.state.selectedTargets[0];
 
       const selectedCards = this.removeSelectedCardsFromHand();
+      selectedCards.forEach(card => { card['newlyObtained'] = true; });
 
-      const cardsToBePassed = this.state.gameState.cardsToBePassed;
-      const newCardsToBePassed = cardsToBePassed[passIndex]
-        ? cardsToBePassed[passIndex].concat(selectedCards)
-        : selectedCards;
-      fire.database()
-        .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
-        .set(newCardsToBePassed);
+      switch (this.gameType.getStageType(this._getCurrentStage())) {
+        case 'trade':
+          const cardsToBePassed = this.state.gameState.cardsToBePassed;
+          const newCardsToBePassed = cardsToBePassed[passIndex]
+            ? cardsToBePassed[passIndex].concat(selectedCards)
+            : selectedCards;
+          fire.database()
+            .ref(this._getFirePrefix() + '/cardsToBePassed/' + passIndex)
+            .set(newCardsToBePassed);
+          break;
+        case 'play':
+          this.appendCardsToHand(passIndex, selectedCards, true);
+          break;
+        default:
+          console.log('ERROR. pass cards action encountered an unexpected stage type');
+      }
 
       this.setState({ secondPhaseAction: -1 });
     }
@@ -855,7 +865,7 @@ class Game extends Component {
               case 20:
                 return (
                   <li key={ind}>
-                    Moved {action.numCards} cards from { this._getPileName(action.target[0]) }
+                    Moved {action.numCards} card(s) from { this._getPileName(action.target[0]) }
                     &nbsp;to { this._getPileName(action.target[1]) }
                   </li>
                 );
