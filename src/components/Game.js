@@ -5,12 +5,17 @@ import { range } from 'lodash';
 import Deck from './Deck';
 import Hand from './Hand';
 import PlayerActions from './PlayerActions';
+import ModeratorActions from './ModeratorActions';
 import GameType from '../utils/GameType';
+import { shuffleHand } from '../utils/hand';
 import {
-  ACTION_MAP,
+  PLAYER_ACTION_MAP,
+  MODERATOR_ACTION_MAP,
   PASS_CARDS_INDEX,
   DRAW_CARDS_INDEX,
-  DISCARD_CARDS_INDEX
+  DISCARD_CARDS_INDEX,
+  MOVE_CARDS_INDEX,
+  SHUFFLE_HAND_INDEX
 } from '../utils/stage';
 import {
   RECENTLY_PLAYED_INDEX,
@@ -34,7 +39,8 @@ class Game extends Component {
       },
       cardsSelected: [], // booleans, one for each card in this player's hand
       secondPhaseAction: -1,   // actionIndex corresponding to action awaiting confirmation; else -1
-      selectedTarget: -1,   // index of player selected to pass cards to, or index of pile to draw from; -1 if none
+      selectedTargets: {},   // contains target(s) such as index of player selected to pass cards to,
+                             // or index of pile to draw from; -1 if none
       numCardsToActOn: '',  // string input for second phase of user input when drawing cards
       minPlayers: 10000, // prevents "Start Game" from being shown too early
     };
@@ -84,7 +90,7 @@ class Game extends Component {
     return this.state.gameState.playersToMove;
   }
 
-  _getValidPileIndsToDrawFrom() {
+  _getNonEmptyPileInds() {
     // can only draw from nonempty table piles
     return Object.keys(this.state.gameState.hands)
             .filter(i => i >= DECK_INDEX && this._getNumCardsInHand(i) > 0)
@@ -312,7 +318,11 @@ class Game extends Component {
   }
 
   playerActionTaken(actionInd) {
-    this[ACTION_MAP[actionInd].name + 'Clicked']();
+    this[PLAYER_ACTION_MAP[actionInd].name + 'Clicked']();
+  }
+
+  moderatorActionTaken(actionInd) {
+    this[MODERATOR_ACTION_MAP[actionInd].name + 'Clicked']();
   }
 
   playCardsClicked() {
@@ -346,18 +356,18 @@ class Game extends Component {
         const updatedState = { secondPhaseAction: PASS_CARDS_INDEX };
         if (numPlayers === 2) {
           // only one other player to pass to, so set the choice by default
-          updatedState['selectedTarget'] = 1 - this.props.playerIndex;
+          updatedState['selectedTargets'] = {0: 1 - this.props.playerIndex};
         }
         this.setState(updatedState);
       }
     } else {
       console.assert(this.state.secondPhaseAction === PASS_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      const passIndex = this.state.selectedTarget;
-      if (passIndex === -1) {
+      if (!this.state.selectedTargets[0]) {
         window.alert('must select player to pass to.');
         return;
       }
+      const passIndex = this.state.selectedTargets[0];
 
       const selectedCards = this.removeSelectedCardsFromHand();
       selectedCards.forEach(card => {
@@ -378,14 +388,14 @@ class Game extends Component {
 
   drawCardsClicked() {
     if (this.state.secondPhaseAction === -1) {
-      const validPilesForDraw = this._getValidPileIndsToDrawFrom();
+      const validPilesForDraw = this._getNonEmptyPileInds();
       if (validPilesForDraw.length === 0) {
-        window.alert('no piles to draw from.');
+        window.alert('no (nonempty) piles to draw from.');
         return;
       }
       const updatedState = { secondPhaseAction: DRAW_CARDS_INDEX };
       if (validPilesForDraw.length === 1) {
-        updatedState['selectedTarget'] = validPilesForDraw[0];
+        updatedState['selectedTargets'] = {0: validPilesForDraw[0]};
       }
       this.setState(updatedState);
     } else {
@@ -396,7 +406,7 @@ class Game extends Component {
         window.alert('cannot draw fewer than 1 card.');
         return;
       }
-      const targetInd = this.state.selectedTarget;
+      const targetInd = this.state.selectedTargets[0];
       if (!(this.state.gameState.hands[targetInd])) {
         window.alert('must select somewhere to draw from.');
         return;
@@ -425,7 +435,7 @@ class Game extends Component {
     } else {
       console.assert(this.state.secondPhaseAction === DISCARD_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
-      const targetInd = this.state.selectedTarget;
+      const targetInd = this.state.selectedTargets[0];
       if (!(this.state.gameState.hands[targetInd])) {
         window.alert('must select somewhere to discard to.');
         return;
@@ -524,6 +534,78 @@ class Game extends Component {
       .set(visibility);
   }
 
+  moveCardsClicked() {
+    if (this.state.secondPhaseAction === -1) {
+      const nonEmptyPiles = this._getNonEmptyPileInds();
+      if (nonEmptyPiles.length === 0) {
+        window.alert('no (nonempty) piles to move cards from.');
+        return;
+      }
+      const updatedState = { secondPhaseAction: MOVE_CARDS_INDEX };
+      if (nonEmptyPiles.length === 1) {
+        const { selectedTargets } = this.state;
+        selectedTargets[0] = nonEmptyPiles[0];
+        updatedState['selectedTargets'] = selectedTargets;
+      }
+      this.setState(updatedState);
+    } else {
+      console.assert(this.state.secondPhaseAction === MOVE_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
+
+      const sourceInd = this.state.selectedTargets[0];
+      if (!(this.state.gameState.hands[sourceInd])) {
+        window.alert('must select a pile to move cards from.');
+        return;
+      }
+      const targetInd = this.state.selectedTargets[1];
+      if (!(this.state.gameState.hands[targetInd])) {
+        window.alert('must select a pile to move cards to.');
+        return;
+      }
+
+      const numCardsToMove = parseInt(this.state.numCardsToActOn === '' ? 1 : this.state.numCardsToActOn, 10);
+      if (numCardsToMove < 1) {
+        window.alert('cannot move fewer than 1 card.');
+        return;
+      }
+      if (this._getNumCardsInHand(sourceInd) < numCardsToMove) {
+        window.alert('cannot execute move -- source pile has too few cards.');
+        return;
+      }
+
+      const newCards = this.popCardsFromHand(sourceInd, numCardsToMove);
+      this.appendCardsToHand(targetInd, newCards, false);
+      this.setState({ secondPhaseAction: -1, numCardsToActOn: '' });
+    }
+  }
+
+  shuffleHandClicked() {
+    if (this.state.secondPhaseAction === -1) {
+      const nonEmptyPiles = this._getNonEmptyPileInds();
+      if (nonEmptyPiles.length === 0) {
+        window.alert('no (nonempty) piles to shuffle.');
+        return;
+      }
+      const updatedState = { secondPhaseAction: SHUFFLE_HAND_INDEX };
+      if (nonEmptyPiles.length === 1) {
+        updatedState['selectedTargets'] = {0: nonEmptyPiles[0]};
+      }
+      this.setState(updatedState);
+    } else {
+      console.assert(this.state.secondPhaseAction === SHUFFLE_HAND_INDEX, 'invalid state entered with secondPhaseAction.');
+
+      const targetInd = this.state.selectedTargets[0];
+      if (!(this.state.gameState.hands[targetInd])) {
+        window.alert('must select a pile to shuffle.');
+        return;
+      }
+
+      const cards = this._getCardsFromHand(targetInd);
+      const shuffledCards = shuffleHand(cards);
+      fire.database().ref(this._getFirePrefix() + '/hands/' + targetInd + '/cards').set(shuffledCards);
+      this.setState({ secondPhaseAction: -1 });
+    }
+  }
+
   cancelActionClicked() {
     this.setState({ secondPhaseAction: -1 });
   }
@@ -540,8 +622,10 @@ class Game extends Component {
     }
   }
 
-  recordTargetSelection(targetInd) {
-    this.setState({ selectedTarget: targetInd });
+  recordTargetSelection(targetInd, targetValue) {
+    const { selectedTargets } = this.state;
+    selectedTargets[targetInd] = targetValue;
+    this.setState({ selectedTargets });
   }
 
   updateNumCardsToActOn(e) {
@@ -670,15 +754,35 @@ class Game extends Component {
       gameType={ this.gameType }
       playerIndex={ this.props.playerIndex }
       secondPhaseAction={ this.state.secondPhaseAction }
-      selectedTarget={ this.state.selectedTarget }
+      selectedTargets={ this.state.selectedTargets }
       numCardsToActOn={ this.state.numCardsToActOn }
-      validPileIndsToDrawFrom={ this._getValidPileIndsToDrawFrom() }
+      validPileIndsToDrawFrom={ this._getNonEmptyPileInds() }
       recordTargetSelection={ this.recordTargetSelection.bind(this) }
       updateNumCardsToActOn={ this.updateNumCardsToActOn.bind(this) }
       onCancelAction={ this.cancelActionClicked.bind(this) }
       enterPressed={ this.enterPressed.bind(this) }
       onPlayerAction={ this.playerActionTaken.bind(this) }
     />;
+  }
+
+  renderModeratorActions() {
+    return (
+      <div>
+        Moderator actions:
+        <ModeratorActions
+          gameState={ this.state.gameState }
+          gameType={ this.gameType }
+          secondPhaseAction={ this.state.secondPhaseAction }
+          selectedTargets={ this.state.selectedTargets }
+          numCardsToActOn={ this.state.numCardsToActOn }
+          nonEmptyPileInds={ this._getNonEmptyPileInds() }
+          recordTargetSelection={ this.recordTargetSelection.bind(this) }
+          updateNumCardsToActOn={ this.updateNumCardsToActOn.bind(this) }
+          onCancelAction={ this.cancelActionClicked.bind(this) }
+          onModeratorAction={ this.moderatorActionTaken.bind(this) }
+        />
+      </div>
+    );
   }
 
   renderNonPlayerHands() {
@@ -742,6 +846,7 @@ class Game extends Component {
         { this.renderRecentlyPlayed() }
         { this.shouldShowNonPlayerHands() ? this.renderNonPlayerHands() : null }
         { this.renderOtherPlayers() }
+        { this.renderModeratorActions() }
         { this.shouldShowNextStageButton()
           ? <button onClick={ this.nextStageClicked.bind(this) }>Next stage</button>
           : null }

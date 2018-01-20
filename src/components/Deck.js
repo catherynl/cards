@@ -3,7 +3,7 @@ import { range } from 'lodash';
 
 import Card from './Card';
 import { DECK_INDEX } from '../utils/magic_numbers';
-import { DECK_NAME } from '../utils/hand';
+import { shuffleHand, DECK_NAME } from '../utils/hand';
 
 class Deck extends Component {
 
@@ -14,14 +14,7 @@ class Deck extends Component {
   }
 
   _shuffle() {
-    const { cards } = this.props;
-    for (var i = cards.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var temp = cards[i];
-      cards[i] = cards[j];
-      cards[j] = temp;
-    }
-    return cards;
+    return shuffleHand(this.props.cards);
   }
 
   // deal out all cards into <numPlayers> unsorted hands.

@@ -1,4 +1,4 @@
-export const ACTION_MAP = {
+export const PLAYER_ACTION_MAP = {
   0: {
     name: 'playCards',
     displayName: 'Play cards'
@@ -42,6 +42,21 @@ export const PASS_CARDS_INDEX = 2;
 export const END_TURN_INDEX = 3;
 export const UNDO_PLAY_INDEX = 7;
 export const DISCARD_CARDS_INDEX = 8;
+
+export const MODERATOR_ACTION_INDEX = 20;
+// indices should not overlap with indices of player actions
+export const MODERATOR_ACTION_MAP = {
+  20: {
+    name: 'moveCards',
+    displayName: 'Move cards'
+  },
+  21: {
+    name: 'shuffleHand',
+    displayName: 'Shuffle pile'
+  }
+}
+export const MOVE_CARDS_INDEX = 20;
+export const SHUFFLE_HAND_INDEX = 21;
 
 export const STAGES = {
   0: {

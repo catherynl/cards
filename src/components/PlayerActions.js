@@ -3,7 +3,7 @@ import KeyHandler from 'react-key-handler';
 import { range } from 'lodash';
 
 import {
-  ACTION_MAP,
+  PLAYER_ACTION_MAP,
   PASS_CARDS_INDEX,
   DRAW_CARDS_INDEX,
   UNDO_PLAY_INDEX,
@@ -18,7 +18,7 @@ class PlayerActions extends Component {
 
   // props:
   // gameState, gameType, playerIndex
-  // secondPhaseAction, selectedTarget, numCardsToActOn, validPileIndsToDrawFrom
+  // secondPhaseAction, selectedTargets, numCardsToActOn, validPileIndsToDrawFrom
   // recordTargetSelection, updateNumCardsToActOn, onCancelAction, enterPressed (callbacks)
   // onPlayerAction (callback, takes actionInd)
 
@@ -52,11 +52,11 @@ class PlayerActions extends Component {
                   return (
                     <div key={i}>
                       Player {i + 1} (Press { keyBinding }) &nbsp;
-                      { this.props.selectedTarget === i ? <span>Selected!</span> : null }
+                      { this.props.selectedTargets[0] === i ? <span>Selected!</span> : null }
                       <KeyHandler
                         keyEventName="keydown"
                         keyValue={ keyBinding.toString() }
-                        onKeyHandle={ () => this.props.recordTargetSelection(i) } />
+                        onKeyHandle={ () => this.props.recordTargetSelection(0, i) } />
                     </div>
                   );
                 })
@@ -73,7 +73,7 @@ class PlayerActions extends Component {
                   return (<div key={ i }>
                     { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
                     (Press { i } to select) &nbsp;
-                    { this.props.selectedTarget === handInd ? <span>Selected!</span> : null }
+                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
                     <KeyHandler
                       keyEventName="keydown"
                       keyValue={ i.toString() }
@@ -84,7 +84,7 @@ class PlayerActions extends Component {
             How many cards would you like to draw? &nbsp;
             <input
               type="text"
-              value={ this.propsnumCardsToActOn }
+              value={ this.props.numCardsToActOn }
               onChange={ this.props.updateNumCardsToActOn.bind(this) }
               placeholder="1" />
           </div>
@@ -100,7 +100,7 @@ class PlayerActions extends Component {
                   return (<div key={ i }>
                     { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
                     (Press { i } to select) &nbsp;
-                    { this.props.selectedTarget === handInd ? <span>Selected!</span> : null }
+                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
                     <KeyHandler
                       keyEventName="keydown"
                       keyValue={ i.toString() }
@@ -125,10 +125,10 @@ class PlayerActions extends Component {
     return (
       <div className='player-actions'>
         {
-          range(Object.keys(ACTION_MAP).length)    // forces i to be a Number, not a string
+          range(Object.keys(PLAYER_ACTION_MAP).length)    // forces i to be a Number, not a string
             .filter(i => this.props.gameType.getActionInStage(this._getCurrentStage(), i))
             .map(i => {
-              const action = ACTION_MAP[i];
+              const action = PLAYER_ACTION_MAP[i];
               const {displayName} = action;
               const onClick = () => this.props.onPlayerAction(i);
               if (this.props.secondPhaseAction === -1) {

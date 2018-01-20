@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { range } from 'lodash';
 
-import { ACTION_MAP, STAGES, HANDLE_REMAINING, NEXT_PLAYER } from '../../utils/stage';
+import { PLAYER_ACTION_MAP, STAGES, HANDLE_REMAINING, NEXT_PLAYER } from '../../utils/stage';
 
 class CreateStages extends Component {
 
@@ -141,10 +141,10 @@ class CreateStages extends Component {
               <div key={ key }>
                 <input
                   type="checkbox"
-                  value={ ACTION_MAP[key].displayName }
+                  value={ PLAYER_ACTION_MAP[key].displayName }
                   checked={ this.state.availableActions[stageInd][key] }
                   onChange={ () => this.toggleAvailableAction(stageInd, key) } />
-                { ACTION_MAP[key].displayName }
+                { PLAYER_ACTION_MAP[key].displayName }
               </div>
             )
           }
