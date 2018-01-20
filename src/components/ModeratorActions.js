@@ -23,42 +23,46 @@ class ModeratorActions extends Component {
   // recordTargetSelection, updateNumCardsToActOn, onCancelAction (callbacks)
   // onModeratorAction (callback, takes actionInd)
 
+  renderPileChoices(pileInds, selectedValue, keybindingFunc, onKeyHandle) {
+    return (
+      <div>
+        {
+          pileInds
+            .map((handInd, i) => {
+              return (<div key={ i }>
+                { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
+                (Press { keybindingFunc(i) } to select) &nbsp;
+                { selectedValue === handInd ? <span>Selected!</span> : null }
+                <KeyHandler
+                  keyEventName="keydown"
+                  keyValue={ keybindingFunc(i) }
+                  onKeyHandle={ () => onKeyHandle(handInd) } />
+              </div>);
+            })
+        }
+      </div>
+    );
+  }
+
   renderSecondPhaseAction(actionInd) {
     switch (actionInd) {
       case MOVE_CARDS_INDEX:
         return (
           <div>
             Pile to move from:
-            {
-              this.props.nonEmptyPileInds
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.props.recordTargetSelection(0, handInd) } />
-                  </div>);
-                })
-            }
+            { this.renderPileChoices(
+                this.props.nonEmptyPileInds,
+                this.props.selectedTargets[0],
+                (i) => i.toString(),
+                (handInd) => this.props.recordTargetSelection(0, handInd)
+            )}
             Pile to move to:
-            {
-              Object.keys(this.props.gameState.hands)
-                .filter(i => i >= DECK_INDEX)
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { KEYS[i] } to select) &nbsp;
-                    { this.props.selectedTargets[1] === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ KEYS[i] }
-                      onKeyHandle={ () => this.props.recordTargetSelection(1, handInd) } />
-                  </div>);
-                })
-            }
+            { this.renderPileChoices(
+                Object.keys(this.props.gameState.hands).filter(i => i >= DECK_INDEX),
+                this.props.selectedTargets[1],
+                (i) => KEYS[i],
+                (handInd) => this.props.recordTargetSelection(1, handInd)
+            )}
             How many cards would you like to move? &nbsp;
             <input
               type="text"
@@ -71,20 +75,12 @@ class ModeratorActions extends Component {
         return (
           <div>
             Which pile would you like to shuffle?
-            {
-              this.props.nonEmptyPileInds
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.props.recordTargetSelection(0, handInd) } />
-                  </div>);
-                })
-            }
+            { this.renderPileChoices(
+                this.props.nonEmptyPileInds,
+                this.props.selectedTargets[0],
+                (i) => i.toString(),
+                (handInd) => this.props.recordTargetSelection(0, handInd)
+            )}
           </div>
         );
       default:

@@ -38,6 +38,27 @@ class PlayerActions extends Component {
     }
   }
 
+  renderPileChoices(pileInds) {
+    return (
+      <div>
+        {
+          pileInds
+            .map((handInd, i) => {
+              return (<div key={ i }>
+                { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
+                (Press { i } to select) &nbsp;
+                { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
+                <KeyHandler
+                  keyEventName="keydown"
+                  keyValue={ i.toString() }
+                  onKeyHandle={ () => this.props.recordTargetSelection(0, handInd) } />
+              </div>);
+            })
+        }
+      </div>
+    );
+  }
+
   renderSecondPhaseAction(actionInd) {
     switch (actionInd) {
       case PASS_CARDS_INDEX:
@@ -67,20 +88,7 @@ class PlayerActions extends Component {
         return (
           <div>
             Which pile are you drawing from?
-            {
-              this.props.validPileIndsToDrawFrom
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.props.recordTargetSelection(handInd) } />
-                  </div>);
-                })
-            }
+            { this.renderPileChoices(this.props.validPileIndsToDrawFrom) }
             How many cards would you like to draw? &nbsp;
             <input
               type="text"
@@ -93,21 +101,9 @@ class PlayerActions extends Component {
         return (
           <div>
             Which pile are you discarding to?
-            {
-              Object.keys(this.props.gameState.hands)
-                .filter(i => i >= DECK_INDEX)
-                .map((handInd, i) => {
-                  return (<div key={ i }>
-                    { this.props.gameState.hands[handInd].name } (Stack id: { handInd }) &nbsp;
-                    (Press { i } to select) &nbsp;
-                    { this.props.selectedTargets[0] === handInd ? <span>Selected!</span> : null }
-                    <KeyHandler
-                      keyEventName="keydown"
-                      keyValue={ i.toString() }
-                      onKeyHandle={ () => this.props.recordTargetSelection(handInd) } />
-                  </div>);
-                })
-            }
+            { this.renderPileChoices(
+                Object.keys(this.props.gameState.hands)
+                  .filter(i => i >= DECK_INDEX)) }
           </div>
         );
       default:
