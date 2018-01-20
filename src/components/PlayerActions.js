@@ -7,7 +7,8 @@ import {
   PASS_CARDS_INDEX,
   DRAW_CARDS_INDEX,
   UNDO_PLAY_INDEX,
-  DISCARD_CARDS_INDEX
+  DISCARD_CARDS_INDEX,
+  REVEAL_HAND_INDEX
 } from '../utils/stage';
 import {
   DECK_INDEX,
@@ -28,6 +29,11 @@ class PlayerActions extends Component {
 
   _getCurrentStage() {
     return this.props.gameState.currentStage;
+  }
+
+  _getHandIsVisibleToOtherPlayers() {
+    const handVisibility = this.props.gameState.hands[this.props.playerIndex].visibility;
+    return handVisibility.every(val => val);
   }
 
   _haveRecentlyPlayed() {
@@ -121,7 +127,10 @@ class PlayerActions extends Component {
             .filter(i => this.props.gameType.getActionInStage(this._getCurrentStage(), i))
             .map(i => {
               const action = PLAYER_ACTION_MAP[i];
-              const {displayName} = action;
+              let displayName = action.displayName;
+              if (i === REVEAL_HAND_INDEX && this._getHandIsVisibleToOtherPlayers()) {
+                displayName = 'Unreveal hand';
+              }
               const onClick = () => this.props.onPlayerAction(i);
               if (this.props.secondPhaseAction === -1) {
                 if (i === UNDO_PLAY_INDEX && !this._haveRecentlyPlayed()) {

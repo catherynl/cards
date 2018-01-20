@@ -99,6 +99,11 @@ class Game extends Component {
             .filter(i => i >= DECK_INDEX && this._getNumCardsInHand(i) > 0)
   }
 
+  _getHandIsVisibleToOtherPlayers() {
+    const handVisibility = this.state.gameState.hands[this.props.playerIndex].visibility;
+    return handVisibility.every(val => val);
+  }
+
   getFirstStagePlayersToMove() {
     const stageType = this.gameType.getStageType(0);
     switch (stageType) {
@@ -560,11 +565,15 @@ class Game extends Component {
       .set([]);
   }
 
+  // toggles visibility (to other players) of this player's hand
   revealHandClicked() {
-    const visibility = Array(this._getNumPlayers()).fill(true);
+    const currentlyVisible = this._getHandIsVisibleToOtherPlayers();
+    const newVisibility = currentlyVisible
+                          ? range(this._getNumPlayers()).map(i => i === this.props.playerIndex)
+                          : Array(this._getNumPlayers()).fill(true);
     fire.database()
       .ref(this._getFirePrefix() + '/hands/' + this.props.playerIndex + '/visibility')
-      .set(visibility);
+      .set(newVisibility);
   }
 
   moveCardsClicked() {
