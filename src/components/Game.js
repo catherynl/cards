@@ -402,8 +402,8 @@ class Game extends Component {
       console.assert(this.state.secondPhaseAction === DRAW_CARDS_INDEX, 'invalid state entered with secondPhaseAction.');
 
       const numCardsToDraw = parseInt(this.state.numCardsToActOn === '' ? 1 : this.state.numCardsToActOn, 10);
-      if (numCardsToDraw < 1) {
-        window.alert('cannot draw fewer than 1 card.');
+      if (Number.isNaN(numCardsToDraw) || numCardsToDraw < 1) {
+        window.alert('not a valid number of cards to draw.');
         return;
       }
       const targetInd = this.state.selectedTargets[0];
@@ -563,8 +563,8 @@ class Game extends Component {
       }
 
       const numCardsToMove = parseInt(this.state.numCardsToActOn === '' ? 1 : this.state.numCardsToActOn, 10);
-      if (numCardsToMove < 1) {
-        window.alert('cannot move fewer than 1 card.');
+      if (Number.isNaN(numCardsToMove) || numCardsToMove < 1) {
+        window.alert('not a valid number of cards to move.');
         return;
       }
       if (this._getNumCardsInHand(sourceInd) < numCardsToMove) {
