@@ -90,9 +90,11 @@ class GameType {
   }
 
   getShouldShowNonPlayerHands() {
-    return this.stages
+    const drawCardsAvailable = this.stages
       .filter(stage => stage.availableActions[DRAW_CARDS_INDEX])
       .length > 0;
+    const deckIsOnlyPile = this.additionalHands.length === 1;
+    return drawCardsAvailable || !deckIsOnlyPile;
   }
 
   _getNextPlayerRulesInStage(stageIndex) {

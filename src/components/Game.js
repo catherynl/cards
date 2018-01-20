@@ -906,8 +906,8 @@ class Game extends Component {
         { this.shouldShowTrumpSuitQuery() ? this.renderTrumpSuitQuery() : null }
         { this.shouldShowPlayerActions() ? this.renderPlayerActions() : null }
         { this.renderPlayer(this.props.playerIndex) }
-        { this.renderRecentlyPlayed() }
         { this.shouldShowNonPlayerHands() ? this.renderNonPlayerHands() : null }
+        { this.renderRecentlyPlayed() }
         { this.renderOtherPlayers() }
         { this.renderModeratorActions() }
         { this.shouldShowNextStageButton()
