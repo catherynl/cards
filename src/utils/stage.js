@@ -12,8 +12,8 @@ export const PLAYER_ACTION_MAP = {
     displayName: 'Pass cards'
   },
   3: {
-    name: 'endTurn',
-    displayName: 'End turn'
+    name: 'discardCards',
+    displayName: 'Discard cards'
   },
   4: {
     name: 'dealCards',
@@ -32,17 +32,17 @@ export const PLAYER_ACTION_MAP = {
     displayName: 'Undo play'
   },
   8: {
-    name: 'discardCards',
-    displayName: 'Discard cards'
-  }
+    name: 'endTurn',
+    displayName: 'End turn'
+  },
 };
 export const PLAY_CARDS_INDEX = 0;
 export const DRAW_CARDS_INDEX = 1;
 export const PASS_CARDS_INDEX = 2;
-export const END_TURN_INDEX = 3;
+export const END_TURN_INDEX = 8;
 export const REVEAL_HAND_INDEX = 6;
 export const UNDO_PLAY_INDEX = 7;
-export const DISCARD_CARDS_INDEX = 8;
+export const DISCARD_CARDS_INDEX = 3;
 
 export const MODERATOR_ACTION_INDEX = 20;
 // indices should not overlap with indices of player actions
@@ -69,14 +69,14 @@ export const STAGES = {
   1: {
     name: 'play',
     displayName: 'Play stage',
-    defaultActions: [true, false, false, true, false, false, false, true, false],
+    defaultActions: [true, false, false, false, false, false, false, true, true],
     availableActions: [0, 1, 2, 3, 6, 8]
   },
   2: {
     name: 'trade',
     displayName: 'Trade stage',
     defaultActions: [false, false, true, false, false, true, false, false, false],
-    availableActions: [2, 6]
+    availableActions: [2, 3, 6]
   },
   3: {
     name: 'buffer',
