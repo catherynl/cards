@@ -124,6 +124,9 @@ ul {
 .player {
     margin-top: 10px;
     flex: 1;
+    border: 1px solid lightgray;
+    margin: 10px 15px 5px 0px;
+    padding: 5px 5px 10px 15px;
 }
 
 .player-name {
@@ -133,6 +136,12 @@ ul {
 
 .player-actions {
     margin-bottom: 10px;
+}
+
+.recently-played {
+    border: 1px solid lightgray;
+    margin: 10px 15px 5px 0px;
+    padding: 5px 5px 15px 15px;
 }
 
 .recently-played-hands {
@@ -153,7 +162,9 @@ ul {
 
 .non-player-hands {
     display: flex;
-    margin-top: 5px;
+    border: 1px solid lightgray;
+    margin: 10px 15px 5px 0px;
+    padding: 5px 5px 15px 15px;
 }
 
 .non-player-hand {
