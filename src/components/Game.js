@@ -761,14 +761,6 @@ class Game extends Component {
   renderStartGameButton() {
     return (
       <div>
-        Players so far:
-        {
-          this.state.gameState.players.map((player, ind) => {
-            return (
-              <div key={ ind }>&nbsp; { player } (Player { ind + 1 })</div>
-            );
-          })
-        }
         <button onClick={ this.startGameClicked.bind(this) }>Start Game!</button>
       </div>
     );
@@ -1037,15 +1029,32 @@ class Game extends Component {
     );
   }
 
+  renderPreGameHeader() {
+    return (
+      <div>
+        { !this.state.gameState.started
+          ? <span>Give this id to your friends so they can join your game!</span>
+          : null }
+        <br/>
+        Players so far:
+        {
+          this.state.gameState.players.map((player, ind) => {
+            return (
+              <div key={ ind }>&nbsp; { player } (Player { ind + 1 })</div>
+            );
+          })
+        }
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className='game'>
         <div className='game-id'>
           Game ID: {this.props.gameId }
         </div>
-        { !this.state.gameState.started
-          ? <span>Give this id to your friends so they can join your game!</span>
-          : null }
+        { !this.state.gameState.started ? this.renderPreGameHeader() : null }
         { this.shouldShowStartGameButton() ? this.renderStartGameButton() : null }
         { this.shouldShowGameInPlay() ? this.renderGameInPlay() : null }
         { this.shouldShowGameFinished() ? this.renderGameFinished() : null }
