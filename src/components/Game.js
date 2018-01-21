@@ -992,9 +992,10 @@ class Game extends Component {
       default:
         text = '';
     }
+    const name = this.gameType.getStage(stageIndex).name;
     return (
       <div>
-        Stage {stageIndex + 1}: {this.gameType.getStage(stageIndex).name}
+        Stage {stageIndex + 1} {name ? ': ' + name : null}
         <span className='turn-indicator'> {text}</span>
       </div>
     );
