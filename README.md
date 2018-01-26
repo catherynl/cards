@@ -2,6 +2,8 @@
 
 Play arbitrary multiplayer card games online with your friends!
 
+## How To Use
+
 To use Viceroy ([live app](https://cards-vc.firebaseapp.com/)), start a card game and have your friends join by sending them the generated game code. You can choose games from a fixed set of common games, or create your own by specifying the cards in the deck, how they should be dealt, and the available actions during the game. In this way, Viceroy is a "card game engine" that allows friends to play together online, no matter how obscure or specialized the game they want to play. Viceroy can also be a helpful platform for anyone interested in developing new card games and sharing them with others.
 
 Viceroy does not currently implement scoring for any games, but includes game-specific chat and “shared notes” interfaces for players to communicate and keep a public ledger containing the score.
